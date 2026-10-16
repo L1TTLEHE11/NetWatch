@@ -25,13 +25,15 @@ object PortInfo {
         443 to "HTTPS", 445 to "SMB (общие папки)", 554 to "RTSP (IP-камера)", 631 to "IPP (принтер)",
         993 to "IMAPS", 1723 to "PPTP VPN", 1883 to "MQTT", 1900 to "UPnP", 3306 to "MySQL",
         3389 to "RDP (удалённый рабочий стол)", 5000 to "UPnP / Synology", 5060 to "SIP (IP-телефония)",
-        5432 to "PostgreSQL", 5555 to "ADB (Android)", 5900 to "VNC", 6466 to "Android TV (пульт)", 6467 to "Android TV (пульт)", 7000 to "AirPlay", 8000 to "HTTP (камеры/NVR)",
+        5432 to "PostgreSQL", 5555 to "ADB (Android)", 5900 to "VNC", 6466 to "Android TV (пульт)", 6467 to "Android TV (пульт)", 7000 to "AirPlay",
+        8001 to "Samsung Smart TV", 8002 to "Samsung Smart TV", 3000 to "LG webOS TV", 3001 to "LG webOS TV",
+        1925 to "Philips TV", 1926 to "Philips TV", 6095 to "Xiaomi Mi TV", 50001 to "Sony BRAVIA", 8060 to "Roku", 8000 to "HTTP (камеры/NVR)",
         8008 to "HTTP (Chromecast)", 8009 to "Chromecast", 8080 to "HTTP-альт / прокси", 8291 to "Winbox (MikroTik)",
         8443 to "HTTPS-альт", 8728 to "MikroTik API", 8729 to "MikroTik API-SSL", 9100 to "Печать RAW (принтер)",
         34567 to "XMeye (камера/DVR)", 37777 to "Dahua (камера/NVR)", 62078 to "iPhone / iPad",
     )
     /** Быстрый набор для сканера сети. */
-    val quick = listOf(22, 53, 80, 139, 443, 445, 554, 631, 3389, 5555, 6466, 7000, 8000, 8008, 8009, 8080, 8291, 8443, 8728, 9100, 34567, 37777, 62078)
+    val quick = listOf(22, 53, 80, 139, 443, 445, 554, 631, 1925, 3000, 3389, 5555, 6095, 6466, 7000, 8000, 8001, 8002, 8008, 8009, 8060, 8080, 8291, 8443, 8728, 9100, 34567, 37777, 50001, 62078)
     val popular: List<Int> get() = labels.keys.sorted()
     fun label(p: Int) = labels[p] ?: ""
 
@@ -43,6 +45,12 @@ object PortInfo {
         554 in ports || 37777 in ports || 34567 in ports -> "IP-камера / регистратор"
         9100 in ports || 631 in ports -> "Принтер"
         6466 in ports || 6467 in ports -> "Android TV"
+        8001 in ports || 8002 in ports -> "Samsung Smart TV"
+        3000 in ports || 3001 in ports -> "LG webOS TV"
+        1925 in ports || 1926 in ports -> "Philips TV"
+        6095 in ports -> "Xiaomi Mi TV"
+        50001 in ports -> "Sony BRAVIA"
+        8060 in ports -> "Roku"
         8009 in ports || 8008 in ports -> "Chromecast / Smart TV"
         62078 in ports -> "iPhone / iPad"
         5555 in ports -> "Android-устройство"
@@ -173,11 +181,17 @@ object NetBios {
 
 object LanScanner {
     /** Порты для проверки «есть ли кто-то»: обычные + Android TV / Chromecast / iPhone / камеры. */
-    val aliveProbe = intArrayOf(80, 443, 445, 22, 554, 8080, 8008, 8009, 8443, 6466, 5555, 62078, 7000, 139)
+    val aliveProbe = intArrayOf(80, 443, 445, 22, 554, 8080, 8008, 8009, 8443, 6466, 5555, 62078, 7000, 139,
+        // Smart TV: Samsung, LG webOS, Philips, Xiaomi, Sony, Roku
+        8001, 8002, 3000, 3001, 1925, 1926, 6095, 50001, 8060, 9080)
 
+    /**
+     * Три пакета за 2 секунды, а не один: телевизоры и другие устройства с энергосбережением Wi-Fi
+     * «спят» и пропускают первый пакет или отвечают на него с задержкой больше секунды.
+     */
     private fun icmp(ip: String): Double? = try {
-        val p = ProcessBuilder("/system/bin/ping", "-c", "1", "-W", "1", ip).redirectErrorStream(true).start()
-        if (!p.waitFor(1600, TimeUnit.MILLISECONDS)) { p.destroy(); null }
+        val p = ProcessBuilder("/system/bin/ping", "-c", "3", "-i", "0.3", "-w", "2", "-W", "2", ip).redirectErrorStream(true).start()
+        if (!p.waitFor(3000, TimeUnit.MILLISECONDS)) { p.destroy(); null }
         else Regex("""time[=<]\s*([\d.,]+)""").find(p.inputStream.bufferedReader().readText())?.groupValues?.get(1)?.replace(",", ".")?.toDoubleOrNull()
     } catch (_: Exception) { null }
 

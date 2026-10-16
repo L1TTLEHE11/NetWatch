@@ -1,14 +1,12 @@
 {
-  "versionCode": 13,
-  "versionName": "2.4",
-  "apk": "apk/NetWatch-2.4-universal.apk",
-  "sha256": "ced17169089f854a2bedb6033175e42bd8d8c000926946517fba5e050f4f4b67",
+  "versionCode": 14,
+  "versionName": "2.4.1",
+  "apk": "apk/NetWatch-2.4.1-universal.apk",
+  "sha256": "aa07607403b7c9299544f27fc3823cb7e7ed692e187c838d5ce67b869e011fb1",
   "size": 1163716,
   "date": "16.10.2026",
   "notes": [
-    "Сканер находит Android TV, Chromecast и Smart TV, даже если они не отвечают на ping",
-    "Устройства сами сообщают имя и модель (mDNS и UPnP) — видно «Гостиная TV», а не просто IP",
-    "Быстрее и точнее проверка портов: все порты сразу, добавлены порты Android TV",
-    "Если обновление не скачалось, приложение само перечитает данные и попробует снова"
+    "Сканер находит устройства с энергосбережением Wi-Fi (телевизоры): 3 пакета ping вместо одного",
+    "Добавлены порты Smart TV: Samsung, LG, Philips, Xiaomi, Sony, Roku — с определением марки"
   ]
 }
