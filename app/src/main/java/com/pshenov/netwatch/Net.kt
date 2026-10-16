@@ -141,6 +141,18 @@ object NetInfo {
         return RadioState(RadioStatus.OFFLINE)
     }
 
+    /** Короткое имя текущей сети для истории: SSID, оператор или шлюз. */
+    fun networkLabel(ctx: Context): String {
+        val r = readRadio(ctx)
+        return when (r.status) {
+            RadioStatus.WIFI_OK -> r.ssid?.takeIf { !it.startsWith("Wi-Fi (") } ?: "Wi-Fi ${gateway(ctx)}"
+            RadioStatus.WIFI_NO_PERMISSION, RadioStatus.WIFI_LOCATION_OFF -> "Wi-Fi ${gateway(ctx)}"
+            RadioStatus.CELLULAR -> "Мобильная" + (r.operator?.let { ": $it" } ?: "")
+            RadioStatus.ETHERNET -> "Ethernet ${gateway(ctx)}"
+            RadioStatus.OFFLINE -> "Нет сети"
+        }
+    }
+
     @Suppress("DEPRECATION")
     fun gateway(ctx: Context): String {
         val cm = cm(ctx)

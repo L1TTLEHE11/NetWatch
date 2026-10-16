@@ -84,6 +84,7 @@ fun ScanTab(vm: NetVm) {
         if (s.running) CpButton("[ ⏹ ОСТАНОВИТЬ ]", Cp.red, modifier = Modifier.fillMaxWidth()) { s.stop() }
         else CpButton(if (s.hosts.isEmpty()) "[ ▶ СКАНИРОВАТЬ СЕТЬ ]" else "[ 🔄 ПЕРЕСКАНИРОВАТЬ ]", Cp.green, modifier = Modifier.fillMaxWidth()) { s.start() }
         s.error?.let { T(it, Cp.red, 11.sp, modifier = Modifier.padding(top = 6.dp)) }
+        if (s.restored && !s.running) s.finishedAt?.let { T("Показан сохранённый результат от ${History.dayLabel(it).lowercase()} ${hhmmss.format(Date(it)).take(5)} — нажмите «Пересканировать», чтобы обновить", Cp.yellow, 10.sp, modifier = Modifier.padding(top = 6.dp)) }
         if (s.running || s.total > 0) {
             Progress(s.done, s.total)
             T("Проверено ${s.done} из ${s.total} · найдено ${s.hosts.size}" + if (s.running) " · идёт сканирование…" else "", Cp.cyan, 10.sp, bold = true)
@@ -94,19 +95,36 @@ fun ScanTab(vm: NetVm) {
         Card(Cp.dim) {
             CardTitle("ИТОГО: ${s.hosts.size} УСТРОЙСТВ")
             T(kinds.joinToString("  ·  ") { "${it.key}: ${it.value}" }, Cp.text, 10.sp)
+            val fresh = s.hosts.count { s.isNew(it) }
+            if (fresh > 0) T("★ Новых с прошлого скана: $fresh", Cp.yellow, 11.sp, bold = true, modifier = Modifier.padding(top = 4.dp))
         }
     }
-    s.hosts.forEach { h -> HostCard(h, vm) }
+    if (!s.running && s.missing.isNotEmpty()) Card(Cp.dim) {
+        CardTitle("НЕ НАЙДЕНЫ В ЭТОТ РАЗ: ${s.missing.size}")
+        Hint("Были в этой сети раньше — сейчас выключены, спят или ушли из сети.")
+        s.missing.take(15).forEach { d ->
+            Row(Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
+                T(d.ip, Cp.muted, 11.sp, bold = true, modifier = Modifier.width(118.dp))
+                Column(Modifier.weight(1f)) {
+                    T(listOfNotNull(d.name, d.kind).joinToString(" · "), Cp.text, 10.sp, maxLines = 1)
+                    T("последний раз: ${History.dayLabel(d.lastSeen).lowercase()} ${hhmmss.format(Date(d.lastSeen)).take(5)}", Cp.muted, 9.sp)
+                }
+            }
+        }
+    }
+    s.hosts.forEach { h -> HostCard(h, vm, s.isNew(h)) }
     if (!s.running && s.dropped > 0) Hint("Отброшено ${s.dropped} ложных адресов: роутер отвечал за них отказом соединения, хотя устройств там нет.")
     if (!s.running && s.finishedAt != null) Hint("Android 10+ не отдаёт приложениям MAC-адреса чужих устройств. Они видны для компьютеров Windows (через NetBIOS) и для всех устройств, если подключить MikroTik на вкладке [09].")
 }
 
 @Composable
-private fun HostCard(h: LanHost, vm: NetVm) {
+private fun HostCard(h: LanHost, vm: NetVm, isNew: Boolean = false) {
     val c = when { h.isSelf -> Cp.yellow; h.isGateway -> Cp.red; h.kind.contains("камера") -> Cp.green; else -> Cp.cyan }
     Card(if (h.isGateway || h.isSelf) c else Cp.dim) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            T(h.ip, c, 15.sp, bold = true, modifier = Modifier.weight(1f))
+            T(h.ip, c, 15.sp, bold = true)
+            if (isNew) Box(Modifier.padding(start = 8.dp).background(Cp.yellow).padding(horizontal = 5.dp, vertical = 1.dp)) { T("НОВОЕ", Cp.dark, 9.sp, bold = true) }
+            Spacer(Modifier.weight(1f))
             T(h.rtt?.let { if (h.isSelf) "это вы" else "%.0f мс".format(it) } ?: "", Cp.muted, 10.sp)
         }
         T(h.kind, Cp.text, 11.sp, bold = true)
@@ -114,7 +132,7 @@ private fun HostCard(h: LanHost, vm: NetVm) {
         h.mac?.let { T("MAC $it", Cp.muted, 10.sp) }
         if (h.ports.isNotEmpty()) T("Порты: " + h.ports.joinToString(", ") { p -> PortInfo.label(p).ifEmpty { "$p" }.let { "$p ${it.substringBefore(' ')}" } }, Cp.yellow, 10.sp)
         if (!h.isSelf) Row(Modifier.padding(top = 6.dp)) {
-            CpButton("ПИНГ", Color(0xFF240B15), Cp.text) { vm.custom.host = h.ip; vm.custom.reset(); vm.selectTab(TAB_LOCAL) }
+            CpButton("ПИНГ", Color(0xFF240B15), Cp.text) { vm.custom.host = h.ip; vm.custom.reset(); vm.customManual = true; vm.selectTab(TAB_LOCAL) }
             Spacer(Modifier.width(6.dp))
             CpButton("ПОРТЫ", Color(0xFF240B15), Cp.text) { vm.diag.portHost = h.ip; vm.selectTab(TAB_DIAG) }
             if (8291 in h.ports || 8728 in h.ports) {
@@ -240,6 +258,17 @@ fun SurveyTab(vm: NetVm) {
         }
         CpButton(if (s.busy) "⏳ Замер: ${s.stage}" else "[ ⚡ ЗАМЕРИТЬ ТОЧКУ ]", Cp.green, modifier = Modifier.fillMaxWidth(), enabled = !s.busy) {
             s.measure(name.trim()); name = ""
+        }
+        if (s.points.isNotEmpty()) {
+            var obj by remember { mutableStateOf("") }
+            Spacer(Modifier.height(10.dp))
+            T("Закончили объект? Сохраните обход в историю и начните новый:", Cp.muted, 10.sp)
+            Row(Modifier.padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                CpField(obj, { obj = it }, Modifier.weight(1f), color = Cp.yellow)
+                Spacer(Modifier.width(6.dp))
+                CpButton("📦 В АРХИВ", Cp.yellow) { s.archive(obj.trim()); obj = "" }
+            }
+            T("название объекта, например «Корпус А, 2 этаж»", Cp.muted, 9.sp)
         }
         if (s.points.isNotEmpty()) Row(Modifier.padding(top = 8.dp)) {
             CpButton("📤 CSV / EXCEL", Cp.cyan, modifier = Modifier.weight(1f)) { Report.shareCsv(ctx, "NetWatch_обход", s.csv()) }

@@ -36,7 +36,7 @@ class PingCard(initialHost: String) {
 }
 
 const val TAB_DASH = 0; const val TAB_SPEED = 1; const val TAB_SCAN = 2; const val TAB_WIFI = 3; const val TAB_SURVEY = 4
-const val TAB_DIAG = 5; const val TAB_LOCAL = 6; const val TAB_MONITOR = 7; const val TAB_MIKROTIK = 8
+const val TAB_DIAG = 5; const val TAB_LOCAL = 6; const val TAB_MONITOR = 7; const val TAB_MIKROTIK = 8; const val TAB_HISTORY = 9
 
 class NetVm(app: Application) : AndroidViewModel(app) {
     private val ctx get() = getApplication<Application>()
@@ -67,6 +67,7 @@ class NetVm(app: Application) : AndroidViewModel(app) {
     private var testJob: Job? = null
 
     // новые модули
+    init { History.init(ctx) }
     val mt = MtCtl(viewModelScope, ctx)
     val scan = ScanCtl(viewModelScope, ctx) { mt.known() }
     val wifi = WifiCtl(viewModelScope, ctx)
@@ -76,8 +77,46 @@ class NetVm(app: Application) : AndroidViewModel(app) {
 
     /** Текущая вкладка — чтобы фоновые опросы работали только там, где их смотрят. */
     var tab by mutableStateOf(0)
-    fun selectTab(i: Int) { tab = i; syncActive() }
-    fun onAppVisible(v: Boolean) { foreground = v; syncActive() }
+    fun selectTab(i: Int) { tab = i; syncActive(); saveInputs() }
+    fun onAppVisible(v: Boolean) { foreground = v; syncActive(); if (!v) saveInputs() }
+
+    /* ---------- запоминание введённых значений ---------- */
+    private fun restoreInputs() {
+        uiPrefs.getString("inet", null)?.let { inet.host = it }
+        uiPrefs.getString("custom", null)?.let { custom.host = it }
+        uiPrefs.getString("trace", null)?.let { diag.traceHost = it }
+        uiPrefs.getString("portHost", null)?.let { diag.portHost = it }
+        uiPrefs.getString("portSpec", null)?.let { diag.portSpec = it }
+        survey.withSpeed = uiPrefs.getBoolean("surveySpeed", false)
+        wifi.band = uiPrefs.getInt("band", 24)
+        tab = uiPrefs.getInt("tab", 0).coerceIn(0, TAB_HISTORY)
+        customManual = uiPrefs.getBoolean("customManual", false)
+    }
+
+    fun saveInputs() {
+        uiPrefs.edit().putString("inet", inet.host).putString("custom", custom.host).putString("trace", diag.traceHost)
+            .putString("portHost", diag.portHost).putString("portSpec", diag.portSpec).putBoolean("surveySpeed", survey.withSpeed)
+            .putInt("band", wifi.band).putInt("tab", tab).putBoolean("customManual", customManual).apply()
+    }
+
+
+    private fun saveSpeed(d: Double, u: Double) {
+        val net = NetInfo.networkLabel(ctx)
+        History.add(HItem(History.nextId(), System.currentTimeMillis(), HKind.SPEED, net,
+            "↓ %.1f  ↑ %.1f Мбит/с".format(d, u),
+            "пинг ${pingMs?.let { "%.0f".format(it) } ?: "—"} мс · джиттер ${jitterMs?.let { "%.1f".format(it) } ?: "—"} мс · $server",
+            "Сеть: $net\nСервер: $server\nПинг: ${pingMs?.let { "%.1f мс".format(it) } ?: "—"}\nДжиттер: ${jitterMs?.let { "%.1f мс".format(it) } ?: "—"}\n" +
+                "Скачивание: %.2f Мбит/с (8 потоков)\nОтдача: %.2f Мбит/с (6 потоков)".format(d, u),
+            num1 = d, num2 = u, num3 = pingMs))
+    }
+
+    /** Сессия мониторинга, оборванная убийством процесса, помечается как прерванная. */
+    private fun markInterruptedMonitor() {
+        if (Monitor.state.value.running) return
+        History.items.value.filter { it.kind == HKind.MONITOR && it.title.startsWith("● ") }.forEach {
+            History.upsert(it.copy(title = it.title.removePrefix("● ").replace("идёт", "прервана")))
+        }
+    }
     private fun syncActive() {
         wifi.active = foreground && tab == TAB_WIFI
         mt.active = foreground && tab == TAB_MIKROTIK
@@ -87,7 +126,17 @@ class NetVm(app: Application) : AndroidViewModel(app) {
     var localLog by mutableStateOf("Live-Пинг запущен автоматически! Введите любой IP в поле выше, чтобы видеть график отклика до устройства в реальном времени.\n")
     var localBusy by mutableStateOf(false)
 
+    private val uiPrefs = ctx.getSharedPreferences("ui", android.content.Context.MODE_PRIVATE)
+    /** Пользователь сам вписал адрес в Live-пинг — не перетирать его автоопределённым шлюзом. */
+    var customManual = false
+
     init {
+        History.init(ctx)
+        restoreInputs()
+        // последние замеры скорости — из истории, чтобы не пропадали после перезапуска
+        results = History.items.value.filter { it.kind == HKind.SPEED }.take(10)
+            .map { SpeedResult(it.time, it.num3, it.num1 ?: 0.0, it.num2 ?: 0.0) }
+        markInterruptedMonitor()
         viewModelScope.launch(Dispatchers.IO) { detectGateway(); refreshReport() }
         loop(600) {
             val r = NetInfo.readRadio(ctx)
@@ -111,7 +160,7 @@ class NetVm(app: Application) : AndroidViewModel(app) {
 
     private suspend fun detectGateway() {
         val g = NetInfo.gateway(ctx)
-        if (g.isNotEmpty()) ui { gw.host = g; custom.host = g; gw.reset(); custom.reset() }
+        if (g.isNotEmpty()) ui { gw.host = g; gw.reset(); if (!customManual) { custom.host = g; custom.reset() } }
     }
 
     fun autoGateway() = viewModelScope.launch(Dispatchers.IO) { detectGateway() }
@@ -158,6 +207,7 @@ class NetVm(app: Application) : AndroidViewModel(app) {
             ui {
                 ul = u; live = 0.0; progress = 1f; phase = Phase.DONE
                 results = (listOf(SpeedResult(System.currentTimeMillis(), pingMs, d, u)) + results).take(10)
+                saveSpeed(d, u)
             }
         }
         // прервали (кнопкой или ушли в фон) — вернуть шкалу в покой
@@ -193,6 +243,13 @@ class NetVm(app: Application) : AndroidViewModel(app) {
         if (results.isNotEmpty()) {
             append("\n== ЗАМЕРЫ СКОРОСТИ ==\n")
             results.forEach { x -> append("%s  пинг %s мс  ↓ %.1f Мбит/с  ↑ %.1f Мбит/с\n".format(f.format(java.util.Date(x.time)), x.ping?.let { "%.0f".format(it) } ?: "—", x.dl, x.ul)) }
+        }
+        val sp = History.items.value.filter { it.kind == HKind.SPEED && it.time > System.currentTimeMillis() - 30 * 86_400_000L }
+        if (sp.size > 1) {
+            val d = sp.mapNotNull { it.num1 }; val u = sp.mapNotNull { it.num2 }
+            append("\n== СКОРОСТЬ ЗА 30 ДНЕЙ (${sp.size} замеров) ==\n")
+            append("Скачивание: средн. %.1f, мин %.1f, макс %.1f Мбит/с\n".format(d.average(), d.min(), d.max()))
+            append("Отдача:     средн. %.1f, мин %.1f, макс %.1f Мбит/с\n".format(u.average(), u.min(), u.max()))
         }
         if (scan.hosts.isNotEmpty()) { append("\n== УСТРОЙСТВА В СЕТИ ==\n"); append(scan.text()) }
         if (wifi.aps.isNotEmpty()) { append("\n== WI-FI ЭФИР ==\n"); append(wifi.text()) }

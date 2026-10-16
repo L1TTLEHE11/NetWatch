@@ -87,6 +87,8 @@ class MonitorService : Service() {
     }
 
     @Volatile private var running = false
+    private var sessionId = 0L
+    private var network = ""
     private var worker: Thread? = null
     private var wake: PowerManager.WakeLock? = null
     private val fmt = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
@@ -102,6 +104,8 @@ class MonitorService : Service() {
             if (Build.VERSION.SDK_INT >= 34) ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE else 0)
         if (!running) {
             running = true
+            History.init(this)
+            sessionId = History.nextId(); network = NetInfo.networkLabel(this)
             Monitor.reset(gw, inet)
             Monitor.update { it.copy(events = listOf(MonEvent(System.currentTimeMillis(), "Мониторинг запущен: роутер $gw, интернет $inet", false))) }
             wake = (getSystemService(POWER_SERVICE) as PowerManager).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "NetWatch:monitor").apply { acquire(24 * 3600_000L) }
@@ -129,9 +133,11 @@ class MonitorService : Service() {
                     }
                 }
                 add(ge, "Роутер", g); add(ne, "Интернет", n)
+                if (ge != null || ne != null) pendingSave = true
                 s.copy(gw = g, inet = n, gwHist = (s.gwHist + (a?.toFloat() ?: 0f)).takeLast(150),
                     inetHist = (s.inetHist + (b?.toFloat() ?: 0f)).takeLast(150), events = ev.take(200))
             }
+            if (pendingSave || tick % 30 == 0) { pendingSave = false; checkpoint(final = false) }
             if (tick++ % 5 == 0) {
                 val s = Monitor.state.value
                 getSystemService(NotificationManager::class.java).notify(ID_RUN, runNotification(
@@ -143,7 +149,29 @@ class MonitorService : Service() {
         }
     }
 
+    @Volatile private var pendingSave = false
+
+    /** Сохранить сессию в историю: раз в минуту, при каждом обрыве и при остановке. */
+    private fun checkpoint(final: Boolean) {
+        val s = Monitor.state.value
+        if (s.startedAt == 0L || sessionId == 0L) return
+        val now = System.currentTimeMillis()
+        val f = SimpleDateFormat("dd.MM HH:mm:ss", Locale.getDefault())
+        val outages = s.gw.outages + s.inet.outages
+        val downSec = s.inet.currentDownMs(now) / 1000.0
+        History.upsert(HItem(
+            id = sessionId, time = s.startedAt, kind = HKind.MONITOR, network = network,
+            title = (if (final) "" else "● ") + "Мониторинг ${Monitor.fmtDur(now - s.startedAt)}" + (if (final) "" else " · идёт"),
+            summary = "обрывов $outages · без интернета ${Monitor.fmtDur(s.inet.currentDownMs(now))} · потери %.1f%%".format(s.inet.lossPct),
+            details = Monitor.summary(s, now) + "\n\nСобытия:\n" + s.events.reversed().joinToString("\n") { "${f.format(Date(it.time))}  ${it.text}" },
+            num1 = s.inet.lossPct, num2 = outages.toDouble(), num3 = downSec,
+            csv = "Время;Событие\n" + s.events.reversed().joinToString("\n") { "${f.format(Date(it.time))};${Report.csvCell(it.text)}" },
+            endTime = now,
+        ))
+    }
+
     private fun shutdown() {
+        if (running) checkpoint(final = true)
         running = false
         worker?.interrupt()
         try { wake?.release() } catch (_: Exception) { }
@@ -152,7 +180,7 @@ class MonitorService : Service() {
         stopSelf()
     }
 
-    override fun onDestroy() { running = false; try { wake?.release() } catch (_: Exception) { }; super.onDestroy() }
+    override fun onDestroy() { if (running) checkpoint(final = true); running = false; try { wake?.release() } catch (_: Exception) { }; super.onDestroy() }
 
     private fun channels() {
         val nm = getSystemService(NotificationManager::class.java)

@@ -32,7 +32,26 @@ class ScanCtl(private val scope: CoroutineScope, private val ctx: Context, priva
     var error by mutableStateOf<String?>(null)
     var finishedAt by mutableStateOf<Long?>(null)
     var dropped by mutableStateOf(0)
+    /** Ключи устройств, которых раньше в этой сети не было. */
+    var newKeys by mutableStateOf(setOf<String>())
+    /** Известные устройства, не найденные в этот раз. */
+    var missing by mutableStateOf(listOf<KnownDevice>())
+    var network by mutableStateOf("")
+    /** Показан сохранённый результат, а не свежий скан. */
+    var restored by mutableStateOf(false)
     private var job: Job? = null
+
+    init { restoreLast() }
+
+    /** Подгрузить последний скан этой сети из истории — чтобы список был виден сразу после запуска. */
+    fun restoreLast() {
+        val net = try { NetInfo.networkLabel(ctx) } catch (_: Exception) { return }
+        val last = History.items.value.firstOrNull { it.kind == HKind.SCAN && it.network == net && it.csv != null } ?: return
+        try {
+            hosts = hostsFromJson(last.csv!!); network = net; finishedAt = last.time; restored = true
+            subnet = last.summary.substringBefore(" · ")
+        } catch (_: Exception) { }
+    }
 
     fun start() {
         if (running) return
@@ -44,6 +63,7 @@ class ScanCtl(private val scope: CoroutineScope, private val ctx: Context, priva
         val (list, _) = Ip.hostsOf(self, la.prefixLength)
         val gw = NetInfo.gateway(ctx)
         error = null; hosts = emptyList(); done = 0; total = list.size; running = true; finishedAt = null
+        restored = false; newKeys = emptySet(); missing = emptyList(); network = NetInfo.networkLabel(ctx)
         subnet = "$self/${la.prefixLength}" + if (la.prefixLength < 22) " (сканируется /22 вокруг вашего адреса)" else ""
         val k = known()
         job = scope.launch(Dispatchers.IO) {
@@ -57,6 +77,7 @@ class ScanCtl(private val scope: CoroutineScope, private val ctx: Context, priva
                 val weak = hosts.count { it.weak }
                 if (weak >= 8 && weak * 2 > hosts.size) { hosts = hosts.filter { !it.weak }; dropped = weak } else dropped = 0
                 running = false; done = total; finishedAt = System.currentTimeMillis()
+                save()
             }
         }
         job?.invokeOnCompletion { scope.post { running = false } }
@@ -64,13 +85,45 @@ class ScanCtl(private val scope: CoroutineScope, private val ctx: Context, priva
 
     fun stop() { job?.cancel(); running = false }
 
+    private fun save() {
+        val net = network
+        val before = History.knownDevices(net)
+        val fresh = History.rememberDevices(net, hosts)
+        val seen = hosts.map { History.deviceKey(it) }.toSet()
+        newKeys = fresh
+        missing = before.values.filter { it.key !in seen }.sortedByDescending { it.lastSeen }
+        History.add(HItem(History.nextId(), System.currentTimeMillis(), HKind.SCAN, net,
+            "${hosts.size} устройств" + if (fresh.isNotEmpty()) " · новых ${fresh.size}" else "",
+            "$subnet · " + hosts.groupingBy { it.kind }.eachCount().entries.sortedByDescending { it.value }.take(4).joinToString(", ") { "${it.key}: ${it.value}" },
+            text(), num1 = hosts.size.toDouble(), num2 = fresh.size.toDouble(), csv = hostsToJson(hosts)))
+    }
+
+    fun isNew(h: LanHost) = History.deviceKey(h) in newKeys
+
     fun text(): String = buildString {
         append("Подсеть: $subnet · найдено устройств: ${hosts.size}\n")
         for (h in hosts) {
-            append("%-15s  %-26s %s\n".format(h.ip, h.kind, listOfNotNull(h.name, h.title).joinToString(" · ")))
+            append("%-15s  %-26s %s%s\n".format(h.ip, h.kind, listOfNotNull(h.name, h.title).joinToString(" · "), if (isNew(h)) "  [НОВОЕ]" else ""))
             if (h.mac != null || h.ports.isNotEmpty())
                 append("                 ${h.mac ?: ""}  порты: ${h.ports.joinToString(", ") { "$it ${PortInfo.label(it)}".trim() }}\n")
         }
+    }
+}
+
+fun hostsToJson(hosts: List<LanHost>): String = org.json.JSONArray().apply {
+    hosts.forEach { h -> put(org.json.JSONObject().apply {
+        put("ip", h.ip); h.rtt?.let { put("rtt", it) }; put("ports", org.json.JSONArray(h.ports)); h.name?.let { put("name", it) }
+        h.title?.let { put("title", it) }; h.mac?.let { put("mac", it) }; put("kind", h.kind); put("gw", h.isGateway); put("self", h.isSelf)
+    }) }
+}.toString()
+
+fun hostsFromJson(s: String): List<LanHost> {
+    val a = org.json.JSONArray(s)
+    return (0 until a.length()).map { i ->
+        val o = a.getJSONObject(i); val ps = o.getJSONArray("ports")
+        LanHost(o.getString("ip"), if (o.has("rtt")) o.getDouble("rtt") else null, (0 until ps.length()).map { ps.getInt(it) },
+            if (o.has("name")) o.getString("name") else null, if (o.has("title")) o.getString("title") else null,
+            if (o.has("mac")) o.getString("mac") else null, o.getString("kind"), o.getBoolean("gw"), o.getBoolean("self"))
     }
 }
 
@@ -149,6 +202,17 @@ class SurveyCtl(private val scope: CoroutineScope, private val ctx: Context) {
     }
 
     fun remove(p: SurveyPoint) { points = points - p; save() }
+
+    /** Сохранить обход в историю под названием объекта и начать новый. */
+    fun archive(objectName: String) {
+        if (points.isEmpty()) return
+        val bad = points.count { it.bad }
+        History.add(HItem(History.nextId(), points.first().time, HKind.SURVEY, points.firstNotNullOfOrNull { it.ssid } ?: "—",
+            objectName.ifBlank { "Обход ${SimpleDateFormat("dd.MM HH:mm", Locale.getDefault()).format(Date(points.first().time))}" },
+            "${points.size} точек · проблемных $bad · точек доступа ${points.mapNotNull { it.bssid }.distinct().size}",
+            text(), num1 = points.size.toDouble(), num2 = bad.toDouble(), csv = csv(), endTime = points.last().time))
+        clear()
+    }
     fun clear() { points = emptyList(); save() }
 
     private fun save() = try {
@@ -213,7 +277,12 @@ class DiagCtl(private val scope: CoroutineScope, private val ctx: Context) {
         traceJob = scope.launch(Dispatchers.IO) {
             val me = coroutineContext[Job]!!
             val msg = Traceroute.run(traceHost.trim(), { me.isActive }, { h -> scope.post { hops = hops + h } })
-            onMain { traceMsg = msg; traceRunning = false }
+            onMain {
+                traceMsg = msg; traceRunning = false
+                if (hops.isNotEmpty()) History.add(HItem(History.nextId(), System.currentTimeMillis(), HKind.TRACE, NetInfo.networkLabel(ctx),
+                    "до $traceHost · ${hops.size} прыжков", if (hops.lastOrNull()?.final == true) "цель достигнута" + (hops.last().ms?.let { ", %.0f мс".format(it) } ?: "") else (msg ?: "прервано"),
+                    text().substringAfter("■ Трассировка").let { "■ Трассировка$it" }.substringBefore("■ Скорость DNS"), num1 = hops.size.toDouble(), num3 = hops.lastOrNull()?.ms))
+            }
         }
     }
 
@@ -227,7 +296,15 @@ class DiagCtl(private val scope: CoroutineScope, private val ctx: Context) {
             val all = (own + DnsBench.publicServers).distinctBy { it.first }
             val res = all.map { (s, l) -> scope.launch(Dispatchers.IO) { val r = DnsBench.bench(s, l) { true }; scope.post { dns = (dns + r).sortedBy { it.avgMs ?: 1e9 } } } }
             res.forEach { it.join() }
-            onMain { dnsRunning = false }
+            onMain {
+                dnsRunning = false
+                val best = dns.firstOrNull { it.avgMs != null }
+                if (dns.isNotEmpty()) History.add(HItem(History.nextId(), System.currentTimeMillis(), HKind.DNS, NetInfo.networkLabel(ctx),
+                    "лучший: ${best?.label ?: "—"}" + (best?.avgMs?.let { " · %.0f мс".format(it) } ?: ""),
+                    dns.take(4).joinToString(" · ") { "${it.label.substringBefore(' ')} ${it.avgMs?.let { v -> "%.0f".format(v) } ?: "✖"}" },
+                    dns.joinToString("\n") { d -> "%-15s %-20s %s  ответов %d/%d".format(d.server, d.label, d.avgMs?.let { "%.0f мс".format(it) } ?: "нет ответа", d.ok, d.total) },
+                    num3 = best?.avgMs))
+            }
         }
     }
 
@@ -242,7 +319,13 @@ class DiagCtl(private val scope: CoroutineScope, private val ctx: Context) {
                 val n = PortScanner.scan(host, list, { me.isActive },
                     onOpen = { p, ms -> scope.post { openPorts = (openPorts + (p to ms)).sortedBy { it.first } } },
                     onProgress = { d -> if (d % 20 == 0 || d == list.size) scope.post { portDone = d } })
-                onMain { portMsg = "Готово: открыто $n из ${list.size}" }
+                onMain {
+                    portMsg = "Готово: открыто $n из ${list.size}"
+                    History.add(HItem(History.nextId(), System.currentTimeMillis(), HKind.PORTS, NetInfo.networkLabel(ctx),
+                        "$host · открыто $n", "проверено ${list.size} портов (${portSpec.trim()})",
+                        if (openPorts.isEmpty()) "Открытых портов не найдено" else openPorts.joinToString("\n") { (p, _) -> "%5d  %s".format(p, PortInfo.label(p)) },
+                        num1 = n.toDouble()))
+                }
             } catch (e: Exception) { onMain { portMsg = "Ошибка: ${e.message}" } }
             onMain { portRunning = false }
         }

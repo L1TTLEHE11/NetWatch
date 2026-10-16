@@ -205,12 +205,14 @@ fun NetWatchScreen(vm: NetVm) {
                 T("NETWORK SCANNER", Cp.yellow, 10.sp, bold = true)
                 T("LIVE-МОНИТОРИНГ", Cp.cyan, 8.sp)
             }
+            CpButton("📜", if (tab == TAB_HISTORY) Cp.yellow else Color(0xFF1F0810), if (tab == TAB_HISTORY) Cp.dark else Cp.yellow) { vm.selectTab(TAB_HISTORY) }
+            Spacer(Modifier.width(6.dp))
             CpButton("📤 ОТЧЁТ", Color(0xFF1F0810), Cp.cyan) { showReport = true }
         }
         // вкладки
         Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 14.dp)) {
             listOf("[01] ДАШБОРД", "[02] СКОРОСТЬ", "[03] СКАНЕР СЕТИ", "[04] WI-FI ЭФИР", "[05] ОБХОД",
-                "[06] ДИАГНОСТИКА", "[07] ЛОКАЛЬНАЯ СЕТЬ", "[08] МОНИТОРИНГ", "[09] MIKROTIK").forEachIndexed { i, s ->
+                "[06] ДИАГНОСТИКА", "[07] ЛОКАЛЬНАЯ СЕТЬ", "[08] МОНИТОРИНГ", "[09] MIKROTIK", "[10] ИСТОРИЯ").forEachIndexed { i, s ->
                 val sel = tab == i
                 Box(
                     Modifier.padding(end = 6.dp).background(if (sel) Cp.red else Color(0xFF1A070E)).border(1.dp, Cp.red)
@@ -229,7 +231,8 @@ fun NetWatchScreen(vm: NetVm) {
                     TAB_DIAG -> DiagTab(vm)
                     TAB_LOCAL -> LocalTab(vm)
                     TAB_MONITOR -> MonitorTab(vm)
-                    else -> MikrotikTab(vm)
+                    TAB_MIKROTIK -> MikrotikTab(vm)
+                    else -> HistoryTab(vm)
                 }
             }
         }
@@ -475,7 +478,7 @@ fun LocalTab(vm: NetVm) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             T("Целевой IP:", Cp.cyan, 11.sp, bold = true)
             Spacer(Modifier.width(8.dp))
-            CpField(c.host, { c.host = it; c.reset() }, Modifier.weight(1f), color = Cp.yellow)
+            CpField(c.host, { c.host = it; c.reset(); vm.customManual = true }, Modifier.weight(1f), color = Cp.yellow)
         }
         Spacer(Modifier.height(8.dp))
         Row {
