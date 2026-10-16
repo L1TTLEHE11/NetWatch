@@ -133,4 +133,4 @@ app/src/main/java/com/pshenov/netwatch/
 
 ---
 
-**NetWatch Diagnostic Suite** · Created by **Pshenov Aleksandr**
+**NetWatch Diagnostic Suite** · Created by **L1TTLEHE11**
