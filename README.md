@@ -1,4 +1,6 @@
-# NETWATCH // TOOL — Android
+# NetWatch: Network Scanner
+
+`NETWATCH // TOOL` для Android.
 
 Сетевой диагностический инструмент в стиле Cyberpunk 2077: live-мониторинг Wi-Fi, пинги, замер скорости интернета и тесты локальной сети. Это Android-порт десктопной версии NetWatch (Python / Tkinter).
 
