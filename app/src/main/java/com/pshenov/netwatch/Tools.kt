@@ -25,13 +25,13 @@ object PortInfo {
         443 to "HTTPS", 445 to "SMB (общие папки)", 554 to "RTSP (IP-камера)", 631 to "IPP (принтер)",
         993 to "IMAPS", 1723 to "PPTP VPN", 1883 to "MQTT", 1900 to "UPnP", 3306 to "MySQL",
         3389 to "RDP (удалённый рабочий стол)", 5000 to "UPnP / Synology", 5060 to "SIP (IP-телефония)",
-        5432 to "PostgreSQL", 5555 to "ADB (Android)", 5900 to "VNC", 8000 to "HTTP (камеры/NVR)",
+        5432 to "PostgreSQL", 5555 to "ADB (Android)", 5900 to "VNC", 6466 to "Android TV (пульт)", 6467 to "Android TV (пульт)", 7000 to "AirPlay", 8000 to "HTTP (камеры/NVR)",
         8008 to "HTTP (Chromecast)", 8009 to "Chromecast", 8080 to "HTTP-альт / прокси", 8291 to "Winbox (MikroTik)",
         8443 to "HTTPS-альт", 8728 to "MikroTik API", 8729 to "MikroTik API-SSL", 9100 to "Печать RAW (принтер)",
         34567 to "XMeye (камера/DVR)", 37777 to "Dahua (камера/NVR)", 62078 to "iPhone / iPad",
     )
     /** Быстрый набор для сканера сети. */
-    val quick = listOf(22, 53, 80, 139, 443, 445, 554, 631, 3389, 5555, 8000, 8008, 8009, 8080, 8291, 8728, 9100, 34567, 37777, 62078)
+    val quick = listOf(22, 53, 80, 139, 443, 445, 554, 631, 3389, 5555, 6466, 7000, 8000, 8008, 8009, 8080, 8291, 8443, 8728, 9100, 34567, 37777, 62078)
     val popular: List<Int> get() = labels.keys.sorted()
     fun label(p: Int) = labels[p] ?: ""
 
@@ -42,6 +42,7 @@ object PortInfo {
         8291 in ports || 8728 in ports -> "MikroTik"
         554 in ports || 37777 in ports || 34567 in ports -> "IP-камера / регистратор"
         9100 in ports || 631 in ports -> "Принтер"
+        6466 in ports || 6467 in ports -> "Android TV"
         8009 in ports || 8008 in ports -> "Chromecast / Smart TV"
         62078 in ports -> "iPhone / iPad"
         5555 in ports -> "Android-устройство"
@@ -171,7 +172,8 @@ object NetBios {
 }
 
 object LanScanner {
-    private val aliveProbe = intArrayOf(80, 443, 445, 62078, 554, 22, 8080)
+    /** Порты для проверки «есть ли кто-то»: обычные + Android TV / Chromecast / iPhone / камеры. */
+    val aliveProbe = intArrayOf(80, 443, 445, 22, 554, 8080, 8008, 8009, 8443, 6466, 5555, 62078, 7000, 139)
 
     private fun icmp(ip: String): Double? = try {
         val p = ProcessBuilder("/system/bin/ping", "-c", "1", "-W", "1", ip).redirectErrorStream(true).start()
@@ -179,18 +181,61 @@ object LanScanner {
         else Regex("""time[=<]\s*([\d.,]+)""").find(p.inputStream.bufferedReader().readText())?.groupValues?.get(1)?.replace(",", ".")?.toDoubleOrNull()
     } catch (_: Exception) { null }
 
-    /** Живой ли хост: ICMP, а если ping молчит (iPhone, Windows-фаервол) — быстрые TCP-пробы. Второе значение — «только отказ». */
+    /**
+     * Неблокирующая проверка сразу всех портов (один поток, NIO).
+     * Возвращает время первого ответа, открытые порты и признак «только отказы».
+     */
+    data class Probe(val ms: Double?, val open: List<Int>, val refusedOnly: Boolean)
+
+    fun tcpProbe(addr: InetAddress, ports: IntArray, timeoutMs: Long, stopOnFirst: Boolean): Probe {
+        val t0 = System.nanoTime()
+        val open = mutableListOf<Int>(); var firstMs: Double? = null; var refusedMs: Double? = null
+        val sel = java.nio.channels.Selector.open()
+        val chans = mutableListOf<java.nio.channels.SocketChannel>()
+        try {
+            for (p in ports) {
+                val ch = java.nio.channels.SocketChannel.open()
+                chans += ch
+                ch.configureBlocking(false)
+                try {
+                    if (ch.connect(InetSocketAddress(addr, p))) { open += p; firstMs = firstMs ?: ((System.nanoTime() - t0) / 1e6) }
+                    else ch.register(sel, java.nio.channels.SelectionKey.OP_CONNECT, p)
+                } catch (e: ConnectException) { if (isRefused(e)) refusedMs = refusedMs ?: ((System.nanoTime() - t0) / 1e6) }
+                catch (_: Exception) { }
+            }
+            val deadline = t0 + timeoutMs * 1_000_000
+            while (sel.keys().isNotEmpty() && !(stopOnFirst && open.isNotEmpty())) {
+                val left = (deadline - System.nanoTime()) / 1_000_000
+                if (left <= 0) break
+                sel.select(left)
+                val it = sel.selectedKeys().iterator()
+                while (it.hasNext()) {
+                    val k = it.next(); it.remove()
+                    val ch = k.channel() as java.nio.channels.SocketChannel
+                    val ms = (System.nanoTime() - t0) / 1e6
+                    try { if (ch.finishConnect()) { open += k.attachment() as Int; firstMs = firstMs ?: ms } }
+                    catch (e: ConnectException) { if (isRefused(e)) refusedMs = refusedMs ?: ms }
+                    catch (_: Exception) { }
+                    k.cancel()
+                }
+            }
+        } finally {
+            chans.forEach { try { it.close() } catch (_: Exception) { } }
+            try { sel.close() } catch (_: Exception) { }
+        }
+        return when {
+            firstMs != null -> Probe(firstMs, open.sorted(), false)
+            refusedMs != null -> Probe(refusedMs, emptyList(), true)
+            else -> Probe(null, emptyList(), false)
+        }
+    }
+
+    /** Живой ли хост: ICMP, а если ping молчит (Android TV, iPhone, Windows-фаервол) — TCP-пробы. Второе значение — «только отказ». */
     fun alive(ip: String): Pair<Double, Boolean>? {
         icmp(ip)?.let { return it to false }
         val addr = try { InetAddress.getByName(ip) } catch (_: Exception) { return null }
-        var refusedMs: Double? = null
-        for (p in aliveProbe) {
-            val t0 = System.nanoTime()
-            try { Socket().use { it.connect(InetSocketAddress(addr, p), 280) }; return (System.nanoTime() - t0) / 1e6 to false }
-            catch (e: ConnectException) { if (isRefused(e) && refusedMs == null) refusedMs = (System.nanoTime() - t0) / 1e6 } // RST = хост, скорее всего, живой
-            catch (_: Exception) { }
-        }
-        return refusedMs?.let { it to true }
+        val p = tcpProbe(addr, aliveProbe, 450, stopOnFirst = true)
+        return p.ms?.let { it to p.refusedOnly }
     }
 
     private fun httpTitle(ip: String, port: Int): String? = try {
@@ -213,24 +258,26 @@ object LanScanner {
         InetAddress.getByName(ip).canonicalHostName.takeIf { it != ip && !it.matches(Regex("""[\d.]+""")) }
     } catch (_: Exception) { null }
 
-    fun details(ip: String, rtt: Double, gateway: String, self: String, known: Map<String, Pair<String?, String?>>, weakAlive: Boolean = false): LanHost {
-        val pool = Executors.newFixedThreadPool(PortInfo.quick.size)
-        val open = try {
-            pool.invokeAll(PortInfo.quick.map { p ->
-                Callable {
-                    try { Socket().use { it.connect(InetSocketAddress(ip, p), 350) }; p } catch (_: Exception) { null }
-                }
-            }, 3, TimeUnit.SECONDS).mapNotNull { f -> try { f.get() } catch (_: Exception) { null } }
-        } finally { pool.shutdownNow() }
+    private val genericKinds = setOf("Устройство", "Устройство с веб-интерфейсом", "Компьютер / NAS", "Linux / сервер", "Android-устройство")
+
+    /** Тип по портам, уточнённый тем, что устройство само сообщило о себе (mDNS/UPnP). */
+    fun kindOf(ports: Collection<Int>, gw: Boolean, self: Boolean, d: Discovered?): String {
+        val byPorts = PortInfo.guessKind(ports, gw, self)
+        return if (!gw && !self && d?.kind != null && (byPorts in genericKinds || byPorts.startsWith("Chromecast"))) d.kind else byPorts
+    }
+
+    fun details(ip: String, rtt: Double?, gateway: String, self: String, known: Map<String, Pair<String?, String?>>,
+                weakAlive: Boolean = false, disc: Discovered? = null): LanHost {
+        val open = try { tcpProbe(InetAddress.getByName(ip), PortInfo.quick.toIntArray(), 700, stopOnFirst = false).open } catch (_: Exception) { emptyList() }
         val nb = if (139 in open || 445 in open) NetBios.query(ip) else NetBios.query(ip, 300)
-        val title = open.firstOrNull { it in listOf(80, 8080, 8000) }?.let { httpTitle(ip, it) }
+        val title = open.firstOrNull { it in listOf(80, 8080, 8000) }?.let { httpTitle(ip, it) } ?: disc?.model
         val k = known[ip]
-        val name = k?.second?.takeIf { it.isNotBlank() } ?: nb?.first ?: rdns(ip)
+        val name = k?.second?.takeIf { it.isNotBlank() } ?: disc?.name ?: nb?.first ?: rdns(ip)
         return LanHost(
             ip = ip, rtt = rtt, ports = open.sorted(), name = name, title = title,
             mac = k?.first ?: nb?.second, isGateway = ip == gateway, isSelf = ip == self,
-            kind = PortInfo.guessKind(open, ip == gateway, ip == self),
-            weak = weakAlive && open.isEmpty() && name == null && title == null && k == null && ip != gateway && ip != self,
+            kind = kindOf(open, ip == gateway, ip == self, disc),
+            weak = disc == null && weakAlive && open.isEmpty() && name == null && title == null && k == null && ip != gateway && ip != self,
         )
     }
 
@@ -238,28 +285,33 @@ object LanScanner {
      * Сканирует подсеть: 64 потока прозванивают адреса, найденные хосты сразу уходят в onFound
      * (сначала без деталей), затем дополняются портами, именем и заголовком веб-интерфейса.
      * known: ip → (mac, hostname) — например, из DHCP/ARP MikroTik.
+     * discovered: устройства, сами ответившие по mDNS/UPnP, — попадают в список, даже если
+     * не отвечают ни на ping, ни на TCP (так ведут себя многие Android TV).
      */
     fun scan(
         hosts: List<String>, gateway: String, self: String, known: Map<String, Pair<String?, String?>>,
         running: () -> Boolean, onFound: (LanHost) -> Unit, onProgress: (Int) -> Unit,
+        discovered: Map<String, Discovered> = emptyMap(),
     ) {
         val pool = Executors.newFixedThreadPool(64)
         val detailPool = Executors.newFixedThreadPool(12)
         val done = AtomicInteger(0)
+        val all = (discovered.keys.filter { it !in hosts } + hosts)
         try {
-            hosts.forEach { ip ->
+            all.forEach { ip ->
                 pool.execute {
                     if (running()) {
+                        val d = discovered[ip]
                         val a = if (ip == self) 0.0 to false else alive(ip)
-                        if (a != null) {
-                            val (rtt, weakAlive) = a
+                        if (a != null || d != null) {
+                            val rtt = a?.first; val weakAlive = a?.second ?: false
                             val k = known[ip]
-                            onFound(LanHost(ip, rtt, emptyList(), k?.second, null, k?.first, PortInfo.guessKind(emptyList(), ip == gateway, ip == self), ip == gateway, ip == self,
-                                weak = weakAlive && k == null && ip != gateway))
-                            detailPool.execute { if (running()) try { onFound(details(ip, rtt, gateway, self, known, weakAlive)) } catch (_: Exception) { } }
+                            onFound(LanHost(ip, rtt, emptyList(), k?.second ?: d?.name, d?.model, k?.first, kindOf(emptyList(), ip == gateway, ip == self, d),
+                                ip == gateway, ip == self, weak = d == null && weakAlive && k == null && ip != gateway))
+                            detailPool.execute { if (running()) try { onFound(details(ip, rtt, gateway, self, known, weakAlive, d)) } catch (_: Exception) { } }
                         }
                     }
-                    onProgress(done.incrementAndGet())
+                    onProgress(done.incrementAndGet().coerceAtMost(hosts.size))
                 }
             }
             pool.shutdown(); pool.awaitTermination(10, TimeUnit.MINUTES)

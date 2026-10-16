@@ -87,7 +87,9 @@ fun ScanTab(vm: NetVm) {
         if (s.restored && !s.running) s.finishedAt?.let { T("Показан сохранённый результат от ${History.dayLabel(it).lowercase()} ${hhmmss.format(Date(it)).take(5)} — нажмите «Пересканировать», чтобы обновить", Cp.yellow, 10.sp, modifier = Modifier.padding(top = 6.dp)) }
         if (s.running || s.total > 0) {
             Progress(s.done, s.total)
-            T("Проверено ${s.done} из ${s.total} · найдено ${s.hosts.size}" + if (s.running) " · идёт сканирование…" else "", Cp.cyan, 10.sp, bold = true)
+            T(if (s.running && s.done == 0 && s.stage.isNotEmpty()) s.stage
+              else "Проверено ${s.done} из ${s.total} · найдено ${s.hosts.size}" + if (s.running) " · идёт сканирование…" else "", Cp.cyan, 10.sp, bold = true)
+            if (s.discovered > 0) T("Сами отозвались (mDNS/UPnP): ${s.discovered}", Cp.muted2, 10.sp)
         }
     }
     if (s.hosts.isNotEmpty()) {

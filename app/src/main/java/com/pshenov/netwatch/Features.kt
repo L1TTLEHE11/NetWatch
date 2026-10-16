@@ -32,6 +32,9 @@ class ScanCtl(private val scope: CoroutineScope, private val ctx: Context, priva
     var error by mutableStateOf<String?>(null)
     var finishedAt by mutableStateOf<Long?>(null)
     var dropped by mutableStateOf(0)
+    /** Сколько устройств ответили на запросы обнаружения (mDNS/UPnP). */
+    var discovered by mutableStateOf(0)
+    var stage by mutableStateOf("")
     /** Ключи устройств, которых раньше в этой сети не было. */
     var newKeys by mutableStateOf(setOf<String>())
     /** Известные устройства, не найденные в этот раз. */
@@ -66,17 +69,23 @@ class ScanCtl(private val scope: CoroutineScope, private val ctx: Context, priva
         restored = false; newKeys = emptySet(); missing = emptyList(); network = NetInfo.networkLabel(ctx)
         subnet = "$self/${la.prefixLength}" + if (la.prefixLength < 22) " (сканируется /22 вокруг вашего адреса)" else ""
         val k = known()
+        stage = "Опрос устройств (mDNS, UPnP)…"
         job = scope.launch(Dispatchers.IO) {
             val me = coroutineContext[Job]!!
+            // Сначала спрашиваем сеть «кто здесь?»: телевизоры, Chromecast, принтеры отвечают сами,
+            // даже если молчат на ping и закрывают порты.
+            val disc = try { Discovery.all(2500).filterKeys { it in list || it == self } } catch (_: Exception) { emptyMap() }
+            onMain { discovered = disc.size; stage = "Проверка адресов…" }
             LanScanner.scan(list, gw, self, k, { me.isActive },
                 onFound = { h -> scope.post { hosts = (hosts.filter { it.ip != h.ip } + h).sortedBy { Ip.sortKey(it.ip) } } },
-                onProgress = { n -> if (n % 4 == 0 || n == list.size) scope.post { done = n } })
+                onProgress = { n -> if (n % 4 == 0 || n == list.size) scope.post { done = n } },
+                discovered = disc)
             onMain {
                 // Защита от роутеров, отвечающих отказом за любой адрес: если «слабых» находок
                 // подозрительно много, это не устройства, а сам роутер — убираем их.
                 val weak = hosts.count { it.weak }
                 if (weak >= 8 && weak * 2 > hosts.size) { hosts = hosts.filter { !it.weak }; dropped = weak } else dropped = 0
-                running = false; done = total; finishedAt = System.currentTimeMillis()
+                running = false; done = total; finishedAt = System.currentTimeMillis(); stage = ""
                 save()
             }
         }

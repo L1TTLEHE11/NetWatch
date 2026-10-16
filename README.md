@@ -4,9 +4,9 @@
 
 Сетевой диагностический инструмент в стиле Cyberpunk 2077: сканер локальной сети, анализатор Wi-Fi эфира, обход объекта с замерами, фоновый мониторинг обрывов, traceroute, DNS-тест, сканер портов, Wake-on-LAN, подключение к MikroTik, PDF-отчёты и виджет. Изначально — Android-порт десктопной версии NetWatch (Python / Tkinter).
 
-> ### 📥 [Скачать NetWatch-2.3.2-universal.apk](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.3.2-universal.apk)
+> ### 📥 [Скачать NetWatch-2.4-universal.apk](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.4-universal.apk)
 > Universal APK для любых устройств на Android 8.0+ (arm64-v8a, armeabi-v7a, x86, x86_64).
-> SHA-256: `af060840d21d053e26e152c091fa241b720be3d4ac59634d1df9385db2ea906a`
+> SHA-256: `ced17169089f854a2bedb6033175e42bd8d8c000926946517fba5e050f4f4b67`
 
 ---
 
@@ -40,7 +40,8 @@
 - Есть график скорости по ходу замера и история последних 10 замеров.
 
 ### [03] Сканер сети
-- Находит все устройства в подсети за 10–30 секунд: ICMP + TCP-пробы (видит и iPhone, и компьютеры с закрытым ping).
+- Находит все устройства в подсети за 10–30 секунд: ICMP + параллельные TCP-пробы (видит и iPhone, и компьютеры с закрытым ping).
+- **Обнаружение по mDNS и UPnP/SSDP**: Android TV, Chromecast, Smart TV, принтеры, NAS, AirPlay отвечают сами — с именем («Гостиная TV») и моделью, даже если молчат на ping и закрыли порты.
 - Для каждого устройства: IP, отклик, открытые порты, имя (NetBIOS / DNS), заголовок веб-интерфейса и **тип устройства** — роутер, MikroTik, IP-камера, принтер, Smart TV, iPhone, компьютер Windows, NAS.
 - С подключённым MikroTik добавляет MAC-адреса и имена из DHCP/ARP роутера.
 - Из карточки устройства — сразу в пинг, сканер портов или MikroTik.
@@ -97,7 +98,7 @@
 
 ## Установка
 
-1. Скачайте [`NetWatch-2.3.2-universal.apk`](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.3.2-universal.apk) (все версии лежат в папке [`apk/`](apk/)).
+1. Скачайте [`NetWatch-2.4-universal.apk`](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.4-universal.apk) (все версии лежат в папке [`apk/`](apk/)).
 2. Откройте файл на телефоне и разрешите установку из этого источника.
 3. При первом запуске нажмите **«🔓 РАЗБЛОКИРОВАТЬ»** в карточке Wi-Fi. Android показывает имя сети (SSID) только приложениям с доступом к геолокации. Сами координаты приложение не получает и никуда не отправляет.
 
