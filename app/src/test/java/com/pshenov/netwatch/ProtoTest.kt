@@ -106,4 +106,12 @@ class ProtoTest {
         for (v in listOf(1.0, null, null, null, 2.0)) { val r = s.push(v, System.currentTimeMillis()); s = r.first; if (r.second != null) ev = (ev ?: "") + r.second }
         assertEquals("DOWNUP", ev); assertEquals(1, s.outages); assertEquals(3, s.lost); assertFalse(s.down)
     }
+
+    @Test fun refusedVsUnreachable() {
+        // так Android (libcore) формулирует ошибки connect()
+        assertTrue(isRefused(java.net.ConnectException("failed to connect to /192.168.1.5 (port 80) from /192.168.1.20 (port 41234) after 280ms: isConnected failed: ECONNREFUSED (Connection refused)")))
+        assertFalse(isRefused(java.net.ConnectException("failed to connect to /192.168.1.77 (port 80) from /192.168.1.20 (port 40112) after 12ms: isConnected failed: EHOSTUNREACH (No route to host)")))
+        assertFalse(isRefused(java.net.ConnectException("failed to connect to /10.0.0.1 (port 443): connect failed: ENETUNREACH (Network is unreachable)")))
+        assertTrue(isRefused(java.net.ConnectException("Connection refused")))
+    }
 }

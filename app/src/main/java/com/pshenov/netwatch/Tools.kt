@@ -107,6 +107,8 @@ data class LanHost(
     val kind: String,
     val isGateway: Boolean,
     val isSelf: Boolean,
+    /** Найден только по TCP-отказу (без ping, портов и имени) — слабое доказательство. */
+    val weak: Boolean = false,
 )
 
 object Ip {
@@ -177,17 +179,18 @@ object LanScanner {
         else Regex("""time[=<]\s*([\d.,]+)""").find(p.inputStream.bufferedReader().readText())?.groupValues?.get(1)?.replace(",", ".")?.toDoubleOrNull()
     } catch (_: Exception) { null }
 
-    /** Живой ли хост: ICMP, а если ping молчит (iPhone, Windows-фаервол) — быстрые TCP-пробы. */
-    fun alive(ip: String): Double? {
-        icmp(ip)?.let { return it }
+    /** Живой ли хост: ICMP, а если ping молчит (iPhone, Windows-фаервол) — быстрые TCP-пробы. Второе значение — «только отказ». */
+    fun alive(ip: String): Pair<Double, Boolean>? {
+        icmp(ip)?.let { return it to false }
         val addr = try { InetAddress.getByName(ip) } catch (_: Exception) { return null }
+        var refusedMs: Double? = null
         for (p in aliveProbe) {
             val t0 = System.nanoTime()
-            try { Socket().use { it.connect(InetSocketAddress(addr, p), 280) }; return (System.nanoTime() - t0) / 1e6 }
-            catch (_: ConnectException) { return (System.nanoTime() - t0) / 1e6 } // RST = хост живой
+            try { Socket().use { it.connect(InetSocketAddress(addr, p), 280) }; return (System.nanoTime() - t0) / 1e6 to false }
+            catch (e: ConnectException) { if (isRefused(e) && refusedMs == null) refusedMs = (System.nanoTime() - t0) / 1e6 } // RST = хост, скорее всего, живой
             catch (_: Exception) { }
         }
-        return null
+        return refusedMs?.let { it to true }
     }
 
     private fun httpTitle(ip: String, port: Int): String? = try {
@@ -210,7 +213,7 @@ object LanScanner {
         InetAddress.getByName(ip).canonicalHostName.takeIf { it != ip && !it.matches(Regex("""[\d.]+""")) }
     } catch (_: Exception) { null }
 
-    fun details(ip: String, rtt: Double, gateway: String, self: String, known: Map<String, Pair<String?, String?>>): LanHost {
+    fun details(ip: String, rtt: Double, gateway: String, self: String, known: Map<String, Pair<String?, String?>>, weakAlive: Boolean = false): LanHost {
         val pool = Executors.newFixedThreadPool(PortInfo.quick.size)
         val open = try {
             pool.invokeAll(PortInfo.quick.map { p ->
@@ -227,6 +230,7 @@ object LanScanner {
             ip = ip, rtt = rtt, ports = open.sorted(), name = name, title = title,
             mac = k?.first ?: nb?.second, isGateway = ip == gateway, isSelf = ip == self,
             kind = PortInfo.guessKind(open, ip == gateway, ip == self),
+            weak = weakAlive && open.isEmpty() && name == null && title == null && k == null && ip != gateway && ip != self,
         )
     }
 
@@ -246,11 +250,13 @@ object LanScanner {
             hosts.forEach { ip ->
                 pool.execute {
                     if (running()) {
-                        val rtt = if (ip == self) 0.0 else alive(ip)
-                        if (rtt != null) {
+                        val a = if (ip == self) 0.0 to false else alive(ip)
+                        if (a != null) {
+                            val (rtt, weakAlive) = a
                             val k = known[ip]
-                            onFound(LanHost(ip, rtt, emptyList(), k?.second, null, k?.first, PortInfo.guessKind(emptyList(), ip == gateway, ip == self), ip == gateway, ip == self))
-                            detailPool.execute { if (running()) try { onFound(details(ip, rtt, gateway, self, known)) } catch (_: Exception) { } }
+                            onFound(LanHost(ip, rtt, emptyList(), k?.second, null, k?.first, PortInfo.guessKind(emptyList(), ip == gateway, ip == self), ip == gateway, ip == self,
+                                weak = weakAlive && k == null && ip != gateway))
+                            detailPool.execute { if (running()) try { onFound(details(ip, rtt, gateway, self, known, weakAlive)) } catch (_: Exception) { } }
                         }
                     }
                     onProgress(done.incrementAndGet())
@@ -380,3 +386,14 @@ object WakeOnLan {
 }
 
 fun isIpv4(a: InetAddress) = a is Inet4Address
+
+/**
+ * Настоящий отказ в соединении (TCP RST) — значит, устройство существует.
+ * На Android под ConnectException попадают и EHOSTUNREACH / ENETUNREACH («нет такого узла»),
+ * поэтому смотрим именно на код ошибки.
+ */
+fun isRefused(e: Exception): Boolean {
+    val m = (e.message ?: "") + " " + (e.cause?.message ?: "")
+    if (m.contains("UNREACH", true) || m.contains("No route", true) || m.contains("unreachable", true)) return false
+    return m.contains("ECONNREFUSED") || m.contains("refused", true)
+}

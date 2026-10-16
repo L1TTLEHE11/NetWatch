@@ -31,6 +31,7 @@ class ScanCtl(private val scope: CoroutineScope, private val ctx: Context, priva
     var subnet by mutableStateOf("")
     var error by mutableStateOf<String?>(null)
     var finishedAt by mutableStateOf<Long?>(null)
+    var dropped by mutableStateOf(0)
     private var job: Job? = null
 
     fun start() {
@@ -50,7 +51,13 @@ class ScanCtl(private val scope: CoroutineScope, private val ctx: Context, priva
             LanScanner.scan(list, gw, self, k, { me.isActive },
                 onFound = { h -> scope.post { hosts = (hosts.filter { it.ip != h.ip } + h).sortedBy { Ip.sortKey(it.ip) } } },
                 onProgress = { n -> if (n % 4 == 0 || n == list.size) scope.post { done = n } })
-            onMain { running = false; done = total; finishedAt = System.currentTimeMillis() }
+            onMain {
+                // Защита от роутеров, отвечающих отказом за любой адрес: если «слабых» находок
+                // подозрительно много, это не устройства, а сам роутер — убираем их.
+                val weak = hosts.count { it.weak }
+                if (weak >= 8 && weak * 2 > hosts.size) { hosts = hosts.filter { !it.weak }; dropped = weak } else dropped = 0
+                running = false; done = total; finishedAt = System.currentTimeMillis()
+            }
         }
         job?.invokeOnCompletion { scope.post { running = false } }
     }
@@ -377,6 +384,7 @@ class MtCtl(private val scope: CoroutineScope, ctx: Context) {
     }
 
     private fun humanError(e: Exception): String = when {
+        e is java.net.ConnectException && !isRefused(e) -> "Адрес недоступен — проверьте IP роутера и что телефон в той же сети"
         e is java.net.ConnectException -> "Роутер не принимает соединение на порту API. Включите: IP → Services → api (8728)"
         e is java.net.SocketTimeoutException -> "Роутер не отвечает (таймаут). Проверьте адрес и доступ к сервису api"
         e.message?.contains("invalid user", true) == true || e.message?.contains("cannot log in", true) == true -> "Неверный логин или пароль"

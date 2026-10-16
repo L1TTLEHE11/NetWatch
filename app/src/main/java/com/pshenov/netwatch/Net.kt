@@ -69,9 +69,9 @@ object Pinger {
             try {
                 Socket().use { it.connect(InetSocketAddress(addr, port), 900) }
                 return (System.nanoTime() - t0) / 1e6
-            } catch (_: ConnectException) {
+            } catch (e: ConnectException) {
                 val ms = (System.nanoTime() - t0) / 1e6
-                if (ms < 900) return ms
+                if (isRefused(e) && ms < 900) return ms
             } catch (_: Exception) { }
         }
         return null

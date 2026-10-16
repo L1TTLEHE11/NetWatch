@@ -97,6 +97,7 @@ fun ScanTab(vm: NetVm) {
         }
     }
     s.hosts.forEach { h -> HostCard(h, vm) }
+    if (!s.running && s.dropped > 0) Hint("Отброшено ${s.dropped} ложных адресов: роутер отвечал за них отказом соединения, хотя устройств там нет.")
     if (!s.running && s.finishedAt != null) Hint("Android 10+ не отдаёт приложениям MAC-адреса чужих устройств. Они видны для компьютеров Windows (через NetBIOS) и для всех устройств, если подключить MikroTik на вкладке [09].")
 }
 
