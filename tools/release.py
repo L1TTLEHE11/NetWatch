@@ -45,3 +45,6 @@ txt = re.sub(r"(SHA-256: `)[0-9a-f]{64}(`)", rf"\g<1>{sha}\g<2>", txt)
 readme.write_text(txt, encoding="utf-8")
 
 print(f"✓ {dst.name}  ({len(data) / 1048576:.2f} МБ)\n  versionCode {code}, SHA-256 {sha}\n  update.json и README обновлены")
+
+print("После git push сбросьте кэш зеркала jsDelivr (иначе оно отдаёт старый update.json до 12 часов):")
+print("  curl -s https://purge.jsdelivr.net/gh/L1TTLEHE11/NetWatch@main/update.json")

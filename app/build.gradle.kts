@@ -21,8 +21,8 @@ android {
         applicationId = "com.pshenov.netwatch"
         minSdk = 26
         targetSdk = 35
-        versionCode = 11
-        versionName = "2.3.1"
+        versionCode = 12
+        versionName = "2.3.2"
         // universal: в APK попадают нативные библиотеки под все архитектуры
         ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64") }
     }

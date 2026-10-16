@@ -51,19 +51,27 @@ object Updater {
         setRequestProperty("Cache-Control", "no-cache")
     }
 
-    /** Прочитать update.json с первого ответившего зеркала. */
+    /**
+     * Прочитать update.json со всех зеркал параллельно и взять самую новую версию:
+     * кэши CDN обновляются не одновременно, и одно зеркало может отдавать устаревший файл.
+     */
     fun fetch(bases: List<String> = mirrors): UpdateInfo {
-        var last: Exception? = null
-        for (b in bases) {
-            try {
-                val c = open(b + "update.json?t=" + System.currentTimeMillis() / 60_000, 6000)
+        val results = java.util.Collections.synchronizedList(mutableListOf<UpdateInfo>())
+        val errors = java.util.Collections.synchronizedList(mutableListOf<String>())
+        val ts = bases.map { b ->
+            kotlin.concurrent.thread(isDaemon = true) {
                 try {
-                    if (c.responseCode != 200) throw UpdateException("HTTP ${c.responseCode}")
-                    return UpdateInfo.parse(c.inputStream.bufferedReader().readText())
-                } finally { c.disconnect() }
-            } catch (e: Exception) { last = e }
+                    val c = open(b + "update.json?t=" + System.currentTimeMillis() / 60_000, 6000)
+                    try {
+                        if (c.responseCode != 200) throw UpdateException("HTTP ${c.responseCode}")
+                        results += UpdateInfo.parse(c.inputStream.bufferedReader().readText())
+                    } finally { c.disconnect() }
+                } catch (e: Exception) { errors += (e.message ?: e.toString()) }
+            }
         }
-        throw UpdateException("Сервер обновлений недоступен" + (last?.message?.let { ": $it" } ?: ""))
+        ts.forEach { it.join(8000) }
+        return results.maxByOrNull { it.versionCode }
+            ?: throw UpdateException("Сервер обновлений недоступен" + (errors.firstOrNull()?.let { ": $it" } ?: ""))
     }
 
     fun currentVersionCode(ctx: Context): Long {

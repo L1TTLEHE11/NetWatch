@@ -63,6 +63,22 @@ class UpdaterTest {
         assertTrue("после ошибки не остаётся apk", dir.listFiles()!!.none { it.name.endsWith(".apk") })
     }
 
+    @Test fun picksNewestAcrossMirrors() {
+        // второй сервер «отстаёт» и отдаёт старую версию
+        val stale = ServerSocket(0, 50, java.net.InetAddress.getByName("127.0.0.1"))
+        thread(isDaemon = true) {
+            val c = stale.accept()
+            c.use { sock ->
+                sock.getInputStream().bufferedReader().readLine()
+                val body = json.replace("\"versionCode\":10", "\"versionCode\":9").toByteArray()
+                sock.getOutputStream().write("HTTP/1.1 200 OK\r\nContent-Length: ${body.size}\r\nConnection: close\r\n\r\n".toByteArray() + body)
+            }
+        }
+        val i = Updater.fetch(listOf("http://127.0.0.1:${stale.localPort}/", live))
+        assertEquals(10L, i.versionCode)
+        stale.close()
+    }
+
     @Test fun allMirrorsDown() {
         try { Updater.fetch(listOf(dead)); fail() } catch (e: UpdateException) { assertTrue(e.message!!.startsWith("Сервер обновлений недоступен")) }
     }

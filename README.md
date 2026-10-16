@@ -4,9 +4,9 @@
 
 Сетевой диагностический инструмент в стиле Cyberpunk 2077: сканер локальной сети, анализатор Wi-Fi эфира, обход объекта с замерами, фоновый мониторинг обрывов, traceroute, DNS-тест, сканер портов, Wake-on-LAN, подключение к MikroTik, PDF-отчёты и виджет. Изначально — Android-порт десктопной версии NetWatch (Python / Tkinter).
 
-> ### 📥 [Скачать NetWatch-2.3.1-universal.apk](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.3.1-universal.apk)
+> ### 📥 [Скачать NetWatch-2.3.2-universal.apk](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.3.2-universal.apk)
 > Universal APK для любых устройств на Android 8.0+ (arm64-v8a, armeabi-v7a, x86, x86_64).
-> SHA-256: `2b3c8fd872738f06b349e56a5c1c295d92ce3fe167b5982a1dad9c8aab2575d5`
+> SHA-256: `af060840d21d053e26e152c091fa241b720be3d4ac59634d1df9385db2ea906a`
 
 ---
 
@@ -97,7 +97,7 @@
 
 ## Установка
 
-1. Скачайте [`NetWatch-2.3.1-universal.apk`](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.3.1-universal.apk) (все версии лежат в папке [`apk/`](apk/)).
+1. Скачайте [`NetWatch-2.3.2-universal.apk`](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.3.2-universal.apk) (все версии лежат в папке [`apk/`](apk/)).
 2. Откройте файл на телефоне и разрешите установку из этого источника.
 3. При первом запуске нажмите **«🔓 РАЗБЛОКИРОВАТЬ»** в карточке Wi-Fi. Android показывает имя сети (SSID) только приложениям с доступом к геолокации. Сами координаты приложение не получает и никуда не отправляет.
 
@@ -143,6 +143,7 @@ Release подписывается ключом из `keystore.properties` → `
 2. `./gradlew assembleRelease`
 3. `python3 tools/release.py "что нового 1" "что нового 2"` — кладёт APK в `apk/`, пишет `update.json`, обновляет README.
 4. `git add -A && git commit -m "…" && git push` — установленные приложения увидят обновление.
+5. `curl -s https://purge.jsdelivr.net/gh/L1TTLEHE11/NetWatch@main/update.json` — сбросить кэш зеркала (приложение и так берёт самую новую версию со всех зеркал, но так обновление дойдёт быстрее).
 
 Для Google Play разрешение `REQUEST_INSTALL_PACKAGES` и встроенное обновление нужно убрать: Play обновляет приложения сам.
 
