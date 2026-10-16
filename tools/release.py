@@ -6,7 +6,8 @@
 
 1. берёт versionCode / versionName из app/build.gradle.kts;
 2. копирует собранный app-release.apk в apk/NetWatch-<версия>-universal.apk
-   (старые APK из apk/ удаляет — в репозитории лежит только актуальный);
+   (оставляет 3 последние версии: пока кэши зеркал обновляются, приложения
+   могут ещё скачивать предыдущую — её файл не должен пропасть);
 3. пишет update.json (версия, путь, SHA-256, размер, дата, список изменений);
 4. обновляет ссылку и SHA-256 в README.md.
 Дальше: git add -A && git commit && git push — приложения увидят обновление.
@@ -23,9 +24,13 @@ if not src.exists():
     sys.exit("Сначала соберите: ./gradlew assembleRelease")
 
 apk_dir = root / "apk"; apk_dir.mkdir(exist_ok=True)
-for old in apk_dir.glob("*.apk"):
-    old.unlink()
 dst = apk_dir / f"NetWatch-{name}-universal.apk"
+def ver_key(p):
+    return [int(x) for x in re.findall(r"\d+", p.name)]
+keep = 3
+others = sorted((p for p in apk_dir.glob("NetWatch-*-universal.apk") if p.name != dst.name), key=ver_key)
+for old in others[: max(0, len(others) - (keep - 1))]:
+    old.unlink()
 shutil.copyfile(src, dst)
 data = dst.read_bytes()
 sha = hashlib.sha256(data).hexdigest()

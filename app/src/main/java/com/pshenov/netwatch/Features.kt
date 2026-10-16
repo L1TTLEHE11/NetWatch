@@ -542,7 +542,18 @@ class UpdateCtl(private val scope: CoroutineScope, private val ctx: Context) {
         job = scope.launch(Dispatchers.IO) {
             val me = coroutineContext[Job]!!
             try {
-                val f = Updater.download(i, File(ctx.cacheDir, "updates"), { p -> scope.launch(Dispatchers.Main) { progress = p } }, { me.isActive })
+                val dir = File(ctx.cacheDir, "updates")
+                val f = try {
+                    Updater.download(i, dir, { p -> scope.launch(Dispatchers.Main) { progress = p } }, { me.isActive })
+                } catch (e: UpdateException) {
+                    if (!me.isActive) throw e
+                    // Описание могло устареть (вышла ещё более новая версия, а старый файл убран) —
+                    // перечитываем update.json и пробуем ещё раз с актуальными данными.
+                    val fresh = Updater.fetch()
+                    if (fresh.versionCode <= current || (fresh.versionCode == i.versionCode && fresh.sha256 == i.sha256)) throw e
+                    onMain { info = fresh; progress = 0f }
+                    Updater.download(fresh, dir, { p -> scope.launch(Dispatchers.Main) { progress = p } }, { me.isActive })
+                }
                 onMain { apk = f; phase = UpdPhase.READY; install() }
             } catch (e: Exception) {
                 onMain { phase = if (me.isActive) UpdPhase.ERROR else UpdPhase.AVAILABLE; error = if (me.isActive) e.message else null }
