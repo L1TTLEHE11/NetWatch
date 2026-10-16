@@ -410,10 +410,18 @@ fun MonitorTab(vm: NetVm) {
         }
         if (m.running) T("● идёт ${Monitor.fmtDur(now - m.startedAt)}", Cp.green, 11.sp, bold = true, modifier = Modifier.padding(top = 6.dp))
         Spacer(Modifier.height(4.dp))
-        CpButton("⚙ Разрешить работу в фоне (энергосбережение)", Color(0xFF240B15), Cp.text, modifier = Modifier.fillMaxWidth()) {
-            try { ctx.startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) } catch (_: Exception) { }
+        // Проверяем при каждом возврате на экран: пользователь мог только что разрешить в настройках
+        fun exemptNow() = ctx.getSystemService(android.os.PowerManager::class.java).isIgnoringBatteryOptimizations(ctx.packageName)
+        var exempt by remember { mutableStateOf(exemptNow()) }
+        androidx.lifecycle.compose.LifecycleResumeEffect(Unit) { exempt = exemptNow(); onPauseOrDispose { } }
+        if (exempt) {
+            T("✓ Работа в фоне разрешена", Cp.green, 10.sp, modifier = Modifier.padding(top = 2.dp))
+        } else {
+            CpButton("⚙ Разрешить работу в фоне (энергосбережение)", Color(0xFF240B15), Cp.text, modifier = Modifier.fillMaxWidth()) {
+                try { ctx.startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) } catch (_: Exception) { }
+            }
+            Hint("Найдите NetWatch в списке и выберите «Не ограничивать». Без этого Xiaomi, Huawei и Samsung могут усыплять мониторинг.")
         }
-        Hint("На Xiaomi, Huawei, Samsung система может усыплять фоновые приложения — добавьте NetWatch в исключения энергосбережения.")
     }
     if (m.startedAt > 0) {
         for ((title, st, hist, line) in listOf(
