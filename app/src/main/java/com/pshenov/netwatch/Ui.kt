@@ -96,6 +96,19 @@ fun CpField(value: String, onChange: (String) -> Unit, modifier: Modifier = Modi
 }
 
 @Composable
+fun PasswordField(value: String, onChange: (String) -> Unit) {
+    BasicTextField(
+        value, onChange,
+        modifier = Modifier.fillMaxWidth().border(1.dp, Cp.red).background(Cp.inner).padding(horizontal = 8.dp, vertical = 7.dp),
+        singleLine = true,
+        textStyle = TextStyle(color = Cp.cyan, fontFamily = Cp.mono, fontWeight = FontWeight.Bold, fontSize = 14.sp),
+        cursorBrush = SolidColor(Cp.yellow),
+        visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+    )
+}
+
+@Composable
 fun Card(borderColor: Color = Cp.border, content: @Composable ColumnScope.() -> Unit) {
     Column(
         Modifier.fillMaxWidth().padding(bottom = 10.dp)
@@ -180,7 +193,9 @@ fun SpeedChart(dl: List<Float>, ul: List<Float>) {
 
 @Composable
 fun NetWatchScreen(vm: NetVm) {
-    var tab by rememberSaveable { mutableIntStateOf(0) }
+    val tab = vm.tab
+    var showReport by remember { mutableStateOf(false) }
+    if (showReport) ReportDialog(vm) { showReport = false }
     Column(Modifier.fillMaxSize().background(Cp.bg).windowInsetsPadding(WindowInsets.safeDrawing)) {
         Box(Modifier.fillMaxWidth().height(3.dp).background(Cp.red))
         // шапка
@@ -190,24 +205,31 @@ fun NetWatchScreen(vm: NetVm) {
                 T("NETWORK SCANNER", Cp.yellow, 10.sp, bold = true)
                 T("LIVE-МОНИТОРИНГ", Cp.cyan, 8.sp)
             }
-            T("SYS.ARCHITECT:\nPSHENOV A. //", Color(0xFF5A2D3D), 8.sp)
+            CpButton("📤 ОТЧЁТ", Color(0xFF1F0810), Cp.cyan) { showReport = true }
         }
         // вкладки
         Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 14.dp)) {
-            listOf("[01] ДАШБОРД", "[02] СКОРОСТЬ", "[03] ЛОКАЛЬНАЯ СЕТЬ").forEachIndexed { i, s ->
+            listOf("[01] ДАШБОРД", "[02] СКОРОСТЬ", "[03] СКАНЕР СЕТИ", "[04] WI-FI ЭФИР", "[05] ОБХОД",
+                "[06] ДИАГНОСТИКА", "[07] ЛОКАЛЬНАЯ СЕТЬ", "[08] МОНИТОРИНГ", "[09] MIKROTIK").forEachIndexed { i, s ->
                 val sel = tab == i
                 Box(
                     Modifier.padding(end = 6.dp).background(if (sel) Cp.red else Color(0xFF1A070E)).border(1.dp, Cp.red)
-                        .clickable { tab = i }.padding(horizontal = 14.dp, vertical = 9.dp)
+                        .clickable { vm.selectTab(i) }.padding(horizontal = 14.dp, vertical = 9.dp)
                 ) { T(s, if (sel) Cp.dark else Cp.red, 12.sp, bold = true) }
             }
         }
         Box(Modifier.weight(1f).fillMaxWidth()) {
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 14.dp, vertical = 10.dp)) {
                 when (tab) {
-                    0 -> DashboardTab(vm)
-                    1 -> SpeedTab(vm)
-                    else -> LocalTab(vm)
+                    TAB_DASH -> DashboardTab(vm)
+                    TAB_SPEED -> SpeedTab(vm)
+                    TAB_SCAN -> ScanTab(vm)
+                    TAB_WIFI -> WifiTab(vm)
+                    TAB_SURVEY -> SurveyTab(vm)
+                    TAB_DIAG -> DiagTab(vm)
+                    TAB_LOCAL -> LocalTab(vm)
+                    TAB_MONITOR -> MonitorTab(vm)
+                    else -> MikrotikTab(vm)
                 }
             }
         }
@@ -488,4 +510,5 @@ fun LocalTab(vm: NetVm) {
             SelectionContainer { T(vm.localLog, Cp.green, 11.sp) }
         }
     }
+    WolCard(vm)
 }

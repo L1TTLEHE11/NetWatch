@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/w_root"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:padding="10dp"
+    android:background="@drawable/widget_bg">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="NETWATCH" android:textColor="#050204" android:background="#FF003C"
+            android:paddingStart="5dp" android:paddingEnd="5dp" android:textSize="11sp" android:textStyle="bold" android:fontFamily="monospace" />
+        <TextView android:id="@+id/w_ssid" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+            android:paddingStart="8dp" android:text="—" android:textColor="#00F0FF" android:textSize="11sp" android:fontFamily="monospace"
+            android:singleLine="true" android:ellipsize="end" />
+        <TextView android:id="@+id/w_refresh" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="⟳" android:textColor="#FCEE0A" android:textSize="18sp" android:paddingStart="8dp" android:paddingEnd="2dp" />
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="4dp">
+        <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="РОУТЕР, мс" android:textColor="#7A5260" android:textSize="9sp" android:fontFamily="monospace" />
+            <TextView android:id="@+id/w_gw" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--" android:textColor="#00FF66" android:textSize="20sp" android:textStyle="bold" android:fontFamily="monospace" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ИНТЕРНЕТ, мс" android:textColor="#7A5260" android:textSize="9sp" android:fontFamily="monospace" />
+            <TextView android:id="@+id/w_inet" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--" android:textColor="#00F0FF" android:textSize="20sp" android:textStyle="bold" android:fontFamily="monospace" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="СИГНАЛ, dBm" android:textColor="#7A5260" android:textSize="9sp" android:fontFamily="monospace" />
+            <TextView android:id="@+id/w_sig" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--" android:textColor="#FCEE0A" android:textSize="20sp" android:textStyle="bold" android:fontFamily="monospace" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView android:id="@+id/w_time" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="нажмите ⟳" android:textColor="#5A2D3D" android:textSize="8sp" android:fontFamily="monospace" />
+</LinearLayout>

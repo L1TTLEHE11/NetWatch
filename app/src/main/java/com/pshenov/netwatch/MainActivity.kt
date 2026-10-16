@@ -37,6 +37,6 @@ class MainActivity : ComponentActivity() {
     }
 
     // в фоне все замеры замирают — не жрём батарею и трафик
-    override fun onStart() { super.onStart(); vm.foreground = true; vm.refreshReport() }
-    override fun onStop() { super.onStop(); vm.foreground = false }
+    override fun onStart() { super.onStart(); vm.onAppVisible(true); vm.refreshReport() }
+    override fun onStop() { super.onStop(); vm.onAppVisible(false) }
 }
