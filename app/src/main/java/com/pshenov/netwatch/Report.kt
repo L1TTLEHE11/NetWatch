@@ -44,7 +44,7 @@ object Report {
                 text.isFakeBoldText = l.startsWith("■") || l.startsWith("==")
                 c.drawText(l, margin, y, text); y += lh
             }
-            c.drawText("NetWatch: Network Scanner · Created by Pshenov Aleksandr · стр. ${i + 1}/${pages.size}", margin, h - margin / 2, foot)
+            c.drawText("NetWatch: Network Scanner · Created by L1TTLEHE11 · стр. ${i + 1}/${pages.size}", margin, h - margin / 2, foot)
             doc.finishPage(page)
         }
         val f = File(dir(ctx), "NetWatch_отчёт_${stamp()}.pdf")

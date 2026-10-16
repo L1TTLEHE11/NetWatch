@@ -201,10 +201,7 @@ fun NetWatchScreen(vm: NetVm) {
         // шапка
         Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.background(Cp.red).padding(horizontal = 8.dp, vertical = 3.dp)) { T("NETWATCH // TOOL", Cp.dark, 15.sp, bold = true) }
-            Column(Modifier.padding(start = 10.dp).weight(1f)) {
-                T("NETWORK SCANNER", Cp.yellow, 10.sp, bold = true)
-                T("LIVE-МОНИТОРИНГ", Cp.cyan, 8.sp)
-            }
+            Spacer(Modifier.weight(1f))
             CpButton("📜", if (tab == TAB_HISTORY) Cp.yellow else Color(0xFF1F0810), if (tab == TAB_HISTORY) Cp.dark else Cp.yellow) { vm.selectTab(TAB_HISTORY) }
             Spacer(Modifier.width(6.dp))
             CpButton("📤 ОТЧЁТ", Color(0xFF1F0810), Cp.cyan) { showReport = true }
@@ -237,9 +234,8 @@ fun NetWatchScreen(vm: NetVm) {
             }
         }
         Box(Modifier.fillMaxWidth().height(1.dp).background(Cp.dim))
-        Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 4.dp)) {
-            T("STATUS: ONLINE // BLACKWALL: 100%", Cp.muted, 8.sp, modifier = Modifier.weight(1f), maxLines = 1)
-            T("Created by Pshenov Aleksandr", Color(0xFF5A2D3D), 8.sp, maxLines = 1)
+        Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 4.dp), horizontalArrangement = Arrangement.End) {
+            T("Created by L1TTLEHE11", Color(0xFF5A2D3D), 8.sp, maxLines = 1)
         }
     }
 }
