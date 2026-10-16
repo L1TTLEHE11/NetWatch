@@ -4,9 +4,9 @@
 
 Сетевой диагностический инструмент в стиле Cyberpunk 2077: сканер локальной сети, анализатор Wi-Fi эфира, обход объекта с замерами, фоновый мониторинг обрывов, traceroute, DNS-тест, сканер портов, Wake-on-LAN, подключение к MikroTik, PDF-отчёты и виджет. Изначально — Android-порт десктопной версии NetWatch (Python / Tkinter).
 
-> ### 📥 [Скачать NetWatch-2.3-universal.apk](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.3-universal.apk)
+> ### 📥 [Скачать NetWatch-2.3.1-universal.apk](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.3.1-universal.apk)
 > Universal APK для любых устройств на Android 8.0+ (arm64-v8a, armeabi-v7a, x86, x86_64).
-> SHA-256: `447186f9e11a04e77384c87993b279e8b031345a7526305ac7ea106acaa37206`
+> SHA-256: `2b3c8fd872738f06b349e56a5c1c295d92ce3fe167b5982a1dad9c8aab2575d5`
 
 ---
 
@@ -97,7 +97,7 @@
 
 ## Установка
 
-1. Скачайте [`NetWatch-2.3-universal.apk`](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.3-universal.apk) (все версии лежат в папке [`apk/`](apk/)).
+1. Скачайте [`NetWatch-2.3.1-universal.apk`](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.3.1-universal.apk) (все версии лежат в папке [`apk/`](apk/)).
 2. Откройте файл на телефоне и разрешите установку из этого источника.
 3. При первом запуске нажмите **«🔓 РАЗБЛОКИРОВАТЬ»** в карточке Wi-Fi. Android показывает имя сети (SSID) только приложениям с доступом к геолокации. Сами координаты приложение не получает и никуда не отправляет.
 

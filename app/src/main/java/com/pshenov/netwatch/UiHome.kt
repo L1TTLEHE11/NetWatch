@@ -8,6 +8,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -174,7 +176,7 @@ fun MoreMenu(vm: NetVm, onReport: () -> Unit) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             SmallMenu(Ic.doc, Cp.cyan, "Отчёт", "PDF / TXT", Modifier.weight(1f)) { onReport() }
             SmallMenu(Ic.gear, if (vm.upd.hasUpdate) Cp.yellow else Cp.muted2, "Настройки",
-                if (vm.upd.hasUpdate) "⬆ версия ${vm.upd.info?.versionName}" else "шрифт · обновления", Modifier.weight(1f)) { vm.selectTab(TAB_SETTINGS) }
+                if (vm.upd.hasUpdate) "⬆ версия ${vm.upd.info?.versionName}" else "обновления", Modifier.weight(1f)) { vm.selectTab(TAB_SETTINGS) }
         }
 
         // --- История с превью последних событий ---
@@ -191,11 +193,15 @@ fun MoreMenu(vm: NetVm, onReport: () -> Unit) {
             }
             Box(Modifier.fillMaxWidth().height(1.dp).background(Color(0xFF2B0C18)))
             if (hist.isEmpty()) T("Пока пусто: замеры, сканы и сессии мониторинга появятся здесь сами.", Cp.muted2, 12.sp, modifier = Modifier.padding(14.dp))
-            else Box(Modifier.padding(start = 14.dp, end = 14.dp, top = 12.dp)) {
-                Box(Modifier.padding(start = 4.dp, top = 8.dp, bottom = 14.dp).width(1.dp).matchParentSize().background(Cp.dim).align(Alignment.TopStart))
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    hist.take(3).forEach { e -> TimelineItem(e) { vm.selectTab(TAB_HISTORY) } }
-                }
+            else Column(
+                Modifier.padding(start = 14.dp, end = 14.dp, top = 12.dp).fillMaxWidth().drawBehind {
+                    // тонкая линия таймлайна через центры ромбов
+                    val x = 4.5.dp.toPx()
+                    drawLine(Cp.dim, Offset(x, 10.dp.toPx()), Offset(x, size.height - 24.dp.toPx()), 1.dp.toPx())
+                },
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                hist.take(3).forEach { e -> TimelineItem(e) { vm.selectTab(TAB_HISTORY) } }
             }
             Box(
                 Modifier.padding(14.dp).fillMaxWidth().height(44.dp).clip(cutShape(22f)).border(1.dp, Cp.yellow, cutShape(22f))
@@ -217,7 +223,9 @@ private fun TimelineItem(e: HItem, onClick: () -> Unit) {
                 T(e.kind.label, Cp.text, 12.sp, bold = true, modifier = Modifier.weight(1f))
                 T(History.dayLabel(e.time).let { if (it == "Сегодня") "" else "$it ".lowercase() } + hmFmt.format(Date(e.time)), Cp.muted2, 11.sp)
             }
-            T(e.title.removePrefix("● "), if (e.kind == HKind.SPEED) Cp.cyan else Cp.muted2, 12.sp, maxLines = 1)
+            val line = if (e.kind == HKind.MONITOR) e.title.removePrefix("● ").removePrefix("Мониторинг ") + " · " + e.summary.substringBefore(" · без")
+                else e.title.removePrefix("● ")
+            T(line, if (e.kind == HKind.SPEED) Cp.cyan else Cp.muted2, 12.sp, maxLines = 1)
         }
     }
 }

@@ -48,6 +48,20 @@ class ScreenshotTest {
         rule.onRoot().captureRoboImage("build/shots/12_update.png")
     }
 
+    @Test fun moreWithHistory() {
+        val ctx = ApplicationProvider.getApplicationContext<Application>()
+        History.init(ctx)
+        val now = System.currentTimeMillis()
+        History.add(HItem(1, now - 3_600_000, HKind.DNS, "Wi-Fi", "лучший: Провайдер / роутер · 11 мс", "", ""))
+        History.add(HItem(2, now - 1_800_000, HKind.MONITOR, "Wi-Fi", "Мониторинг 31м 01с · прервана", "обрывов 0 · без интернета 0с · потери 0.0%", ""))
+        History.add(HItem(3, now - 60_000, HKind.SCAN, "Wi-Fi", "3 устройств", "", ""))
+        val vm = NetVm(ctx)
+        vm.selectTab(TAB_MORE)
+        rule.setContent { NetWatchScreen(vm) }
+        rule.waitForIdle()
+        rule.onRoot().captureRoboImage("build/shots/14_more_history.png")
+    }
+
     @Test fun homeBanner() {
         val vm = NetVm(ApplicationProvider.getApplicationContext<Application>())
         vm.upd.info = UpdateInfo(99, "2.3", "apk/x.apk", "00", 1_100_000, "16.10.2026", listOf("Обновление прямо из приложения"))
