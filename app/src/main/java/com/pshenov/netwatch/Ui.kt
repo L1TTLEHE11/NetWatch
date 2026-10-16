@@ -55,20 +55,31 @@ object Cp {
     val red = Color(0xFFFF003C)
     val green = Color(0xFF00FF66)
     val text = Color(0xFFF0F6FC)
-    val muted = Color(0xFF7A5260)
+    val muted = Color(0xFF9C7484)
+    val muted2 = Color(0xFFB08A98)
     val dark = Color(0xFF050204)
     val mono = FontFamily.Monospace
 }
 
 private val cut = CutCornerShape(topEnd = 12.dp, bottomStart = 6.dp)
 
+/** Масштаб текста во всём приложении: обычный или «крупный шрифт» из настроек. */
+val LocalUiScale = staticCompositionLocalOf { 1.12f }
+
+/**
+ * Текст приложения. Размеры масштабируются, а самые мелкие подписи
+ * подтягиваются до читаемых; fixed = true — для меню и бейджей фиксированной высоты.
+ */
 @Composable
-fun T(s: String, color: Color = Cp.text, size: TextUnit = 12.sp, bold: Boolean = false, modifier: Modifier = Modifier, maxLines: Int = Int.MAX_VALUE) =
+fun T(s: String, color: Color = Cp.text, size: TextUnit = 12.sp, bold: Boolean = false, modifier: Modifier = Modifier, maxLines: Int = Int.MAX_VALUE, fixed: Boolean = false) {
+    val k = LocalUiScale.current
+    val sz = if (fixed) size else (maxOf(size.value, 10.5f) * k).sp
     androidx.compose.foundation.text.BasicText(
         s, modifier,
-        style = TextStyle(color = color, fontSize = size, fontFamily = Cp.mono, fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal),
+        style = TextStyle(color = color, fontSize = sz, fontFamily = Cp.mono, fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal),
         maxLines = maxLines, overflow = TextOverflow.Ellipsis
     )
+}
 
 @Composable
 fun CpButton(text: String, bg: Color, fg: Color = Cp.dark, modifier: Modifier = Modifier, enabled: Boolean = true, onClick: () -> Unit) {
@@ -193,49 +204,41 @@ fun SpeedChart(dl: List<Float>, ul: List<Float>) {
 
 @Composable
 fun NetWatchScreen(vm: NetVm) {
-    val tab = vm.tab
     var showReport by remember { mutableStateOf(false) }
     if (showReport) ReportDialog(vm) { showReport = false }
-    Column(Modifier.fillMaxSize().background(Cp.bg).windowInsetsPadding(WindowInsets.safeDrawing)) {
-        Box(Modifier.fillMaxWidth().height(3.dp).background(Cp.red))
-        // шапка
-        Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.background(Cp.red).padding(horizontal = 8.dp, vertical = 3.dp)) { T("NETWATCH // TOOL", Cp.dark, 15.sp, bold = true) }
-            Spacer(Modifier.weight(1f))
-            CpButton("📜", if (tab == TAB_HISTORY) Cp.yellow else Color(0xFF1F0810), if (tab == TAB_HISTORY) Cp.dark else Cp.yellow) { vm.selectTab(TAB_HISTORY) }
-            Spacer(Modifier.width(6.dp))
-            CpButton("📤 ОТЧЁТ", Color(0xFF1F0810), Cp.cyan) { showReport = true }
-        }
-        // вкладки
-        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 14.dp)) {
-            listOf("[01] ДАШБОРД", "[02] СКОРОСТЬ", "[03] СКАНЕР СЕТИ", "[04] WI-FI ЭФИР", "[05] ОБХОД",
-                "[06] ДИАГНОСТИКА", "[07] ЛОКАЛЬНАЯ СЕТЬ", "[08] МОНИТОРИНГ", "[09] MIKROTIK", "[10] ИСТОРИЯ").forEachIndexed { i, s ->
-                val sel = tab == i
-                Box(
-                    Modifier.padding(end = 6.dp).background(if (sel) Cp.red else Color(0xFF1A070E)).border(1.dp, Cp.red)
-                        .clickable { vm.selectTab(i) }.padding(horizontal = 14.dp, vertical = 9.dp)
-                ) { T(s, if (sel) Cp.dark else Cp.red, 12.sp, bold = true) }
+    androidx.activity.compose.BackHandler(enabled = vm.tab != TAB_DASH) { vm.back() }
+    val tab = vm.tab
+    val sec = vm.section
+    CompositionLocalProvider(LocalUiScale provides if (vm.fontLarge) 1.3f else 1.12f) {
+        Column(Modifier.fillMaxSize().background(Cp.bg).windowInsetsPadding(WindowInsets.safeDrawing)) {
+            Box(Modifier.fillMaxWidth().height(3.dp).background(Cp.red))
+            Header(vm) { showReport = true }
+            when (sec) {
+                Section.NET -> SubTabs(listOf(TAB_SCAN to "Сканер", TAB_LOCAL to "Пинг · TCP", TAB_DIAG to "Диагностика"), tab) { vm.selectTab(it) }
+                Section.WIFI -> SubTabs(listOf(TAB_WIFI to "Эфир", TAB_SURVEY to "Обход объекта"), tab) { vm.selectTab(it) }
+                else -> {}
             }
-        }
-        Box(Modifier.weight(1f).fillMaxWidth()) {
-            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 14.dp, vertical = 10.dp)) {
-                when (tab) {
-                    TAB_DASH -> DashboardTab(vm)
-                    TAB_SPEED -> SpeedTab(vm)
-                    TAB_SCAN -> ScanTab(vm)
-                    TAB_WIFI -> WifiTab(vm)
-                    TAB_SURVEY -> SurveyTab(vm)
-                    TAB_DIAG -> DiagTab(vm)
-                    TAB_LOCAL -> LocalTab(vm)
-                    TAB_MONITOR -> MonitorTab(vm)
-                    TAB_MIKROTIK -> MikrotikTab(vm)
-                    else -> HistoryTab(vm)
+            // каждая вкладка со своей прокруткой, чтобы при переключении не прыгать в чужую позицию
+            val scroll = remember(tab) { androidx.compose.foundation.ScrollState(0) }
+            Box(Modifier.weight(1f).fillMaxWidth()) {
+                Column(Modifier.fillMaxSize().verticalScroll(scroll).padding(horizontal = 16.dp, vertical = 10.dp)) {
+                    when (tab) {
+                        TAB_DASH -> HomeTab(vm)
+                        TAB_SPEED -> SpeedTab(vm)
+                        TAB_SCAN -> ScanTab(vm)
+                        TAB_WIFI -> WifiTab(vm)
+                        TAB_SURVEY -> SurveyTab(vm)
+                        TAB_DIAG -> DiagTab(vm)
+                        TAB_LOCAL -> LocalTab(vm)
+                        TAB_MONITOR -> MonitorTab(vm)
+                        TAB_MIKROTIK -> MikrotikTab(vm)
+                        TAB_HISTORY -> HistoryTab(vm)
+                        TAB_SETTINGS -> SettingsTab(vm)
+                        else -> MoreMenu(vm) { showReport = true }
+                    }
                 }
             }
-        }
-        Box(Modifier.fillMaxWidth().height(1.dp).background(Cp.dim))
-        Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 4.dp), horizontalArrangement = Arrangement.End) {
-            T("Created by L1TTLEHE11", Color(0xFF5A2D3D), 8.sp, maxLines = 1)
+            BottomNav(sec) { vm.openSection(it) }
         }
     }
 }
@@ -505,7 +508,7 @@ fun LocalTab(vm: NetVm) {
             Box(Modifier.weight(1f)) { CardTitle("ЖУРНАЛ ДИАГНОСТИКИ") }
             CpButton("[ ОЧИСТИТЬ ]", Color(0xFF240B15), Cp.text) { vm.clearLog() }
         }
-        Box(Modifier.fillMaxWidth().heightIn(min = 160.dp).background(Cp.inner).border(1.dp, Cp.dim).padding(10.dp)) {
+        Box(Modifier.fillMaxWidth().heightIn(min = 90.dp).background(Cp.inner).border(1.dp, Cp.dim).padding(10.dp)) {
             SelectionContainer { T(vm.localLog, Cp.green, 11.sp) }
         }
     }

@@ -37,6 +37,17 @@ class PingCard(initialHost: String) {
 
 const val TAB_DASH = 0; const val TAB_SPEED = 1; const val TAB_SCAN = 2; const val TAB_WIFI = 3; const val TAB_SURVEY = 4
 const val TAB_DIAG = 5; const val TAB_LOCAL = 6; const val TAB_MONITOR = 7; const val TAB_MIKROTIK = 8; const val TAB_HISTORY = 9
+const val TAB_MORE = 10; const val TAB_SETTINGS = 11
+
+/** Пять разделов нижнего меню; внутри «Сети» и «Wi-Fi» — переключатель, внутри «Ещё» — свои экраны. */
+enum class Section(val idx: String, val label: String, val title: String, val root: Int, val tabs: List<Int>) {
+    HOME("01", "ГЛАВНАЯ", "Главная", TAB_DASH, listOf(TAB_DASH)),
+    SPEED("02", "СКОРОСТЬ", "Скорость", TAB_SPEED, listOf(TAB_SPEED)),
+    NET("03", "СЕТЬ", "Сеть", TAB_SCAN, listOf(TAB_SCAN, TAB_LOCAL, TAB_DIAG)),
+    WIFI("04", "WI-FI", "Wi-Fi", TAB_WIFI, listOf(TAB_WIFI, TAB_SURVEY)),
+    MORE("05", "ЕЩЁ", "Ещё", TAB_MORE, listOf(TAB_MORE, TAB_MONITOR, TAB_MIKROTIK, TAB_HISTORY, TAB_SETTINGS));
+    companion object { fun of(tab: Int) = entries.firstOrNull { tab in it.tabs } ?: HOME }
+}
 
 class NetVm(app: Application) : AndroidViewModel(app) {
     private val ctx get() = getApplication<Application>()
@@ -77,7 +88,25 @@ class NetVm(app: Application) : AndroidViewModel(app) {
 
     /** Текущая вкладка — чтобы фоновые опросы работали только там, где их смотрят. */
     var tab by mutableStateOf(0)
-    fun selectTab(i: Int) { tab = i; syncActive(); saveInputs() }
+    fun selectTab(i: Int) { tab = i; lastInSection[Section.of(i)] = i; syncActive(); saveInputs() }
+
+    private val lastInSection = mutableMapOf<Section, Int>()
+    val section get() = Section.of(tab)
+
+    /** Нажатие в нижнем меню: повторное — к началу раздела, иначе — туда, где были в этом разделе. */
+    fun openSection(s: Section) {
+        if (s == section) selectTab(if (s == Section.MORE) TAB_MORE else tab)
+        else selectTab(lastInSection[s]?.takeIf { s != Section.MORE } ?: s.root)
+    }
+
+    /** Системная «Назад»: из экрана внутри «Ещё» — в меню «Ещё», из любого раздела — на Главную. */
+    fun back(): Boolean = when {
+        section == Section.MORE && tab != TAB_MORE -> { selectTab(TAB_MORE); true }
+        tab != TAB_DASH -> { selectTab(TAB_DASH); true }
+        else -> false
+    }
+
+    var fontLarge by mutableStateOf(false)
     fun onAppVisible(v: Boolean) { foreground = v; syncActive(); if (!v) saveInputs() }
 
     /* ---------- запоминание введённых значений ---------- */
@@ -89,14 +118,17 @@ class NetVm(app: Application) : AndroidViewModel(app) {
         uiPrefs.getString("portSpec", null)?.let { diag.portSpec = it }
         survey.withSpeed = uiPrefs.getBoolean("surveySpeed", false)
         wifi.band = uiPrefs.getInt("band", 24)
-        tab = uiPrefs.getInt("tab", 0).coerceIn(0, TAB_HISTORY)
+        tab = uiPrefs.getInt("tab", 0).coerceIn(0, TAB_SETTINGS)
+        fontLarge = uiPrefs.getBoolean("fontLarge", false)
+        uiPrefs.getString("gwHost", null)?.let { gwManual = it }
         customManual = uiPrefs.getBoolean("customManual", false)
     }
 
     fun saveInputs() {
         uiPrefs.edit().putString("inet", inet.host).putString("custom", custom.host).putString("trace", diag.traceHost)
             .putString("portHost", diag.portHost).putString("portSpec", diag.portSpec).putBoolean("surveySpeed", survey.withSpeed)
-            .putInt("band", wifi.band).putInt("tab", tab).putBoolean("customManual", customManual).apply()
+            .putInt("band", wifi.band).putInt("tab", tab).putBoolean("customManual", customManual)
+            .putBoolean("fontLarge", fontLarge).putString("gwHost", gwManual).apply()
     }
 
 
@@ -127,6 +159,8 @@ class NetVm(app: Application) : AndroidViewModel(app) {
     var localBusy by mutableStateOf(false)
 
     private val uiPrefs = ctx.getSharedPreferences("ui", android.content.Context.MODE_PRIVATE)
+    /** Адрес роутера, заданный вручную в настройках; null — определять автоматически. */
+    var gwManual: String? = null
     /** Пользователь сам вписал адрес в Live-пинг — не перетирать его автоопределённым шлюзом. */
     var customManual = false
 
@@ -159,6 +193,7 @@ class NetVm(app: Application) : AndroidViewModel(app) {
     private suspend fun ui(block: () -> Unit) = withContext(Dispatchers.Main) { block() }
 
     private suspend fun detectGateway() {
+        gwManual?.takeIf { it.isNotBlank() }?.let { m -> ui { gw.host = m; gw.reset() }; return }
         val g = NetInfo.gateway(ctx)
         if (g.isNotEmpty()) ui { gw.host = g; gw.reset(); if (!customManual) { custom.host = g; custom.reset() } }
     }

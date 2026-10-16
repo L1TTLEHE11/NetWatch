@@ -113,6 +113,21 @@ fun ScanTab(vm: NetVm) {
         }
     }
     s.hosts.forEach { h -> HostCard(h, vm, s.isNew(h)) }
+    if (s.hosts.isEmpty() && !s.running) Card(Cp.dim) {
+        CardTitle("ЧТО ПОКАЖЕТ СКАНЕР")
+        listOf(
+            Ic.router to "Роутеры и MikroTik — с открытыми портами управления",
+            Ic.search to "IP-камеры, регистраторы, принтеры, Smart TV",
+            Ic.net to "Компьютеры Windows и NAS — с именем и MAC",
+            Ic.pulse to "Отклик каждого устройства и открытые порты",
+            Ic.history to "Новые устройства с прошлого скана — с меткой «НОВОЕ»",
+        ).forEach { (ic, txt) ->
+            Row(Modifier.padding(vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
+                NwIcon(ic, Cp.cyan, 20.dp); Spacer(Modifier.width(12.dp)); T(txt, Cp.text, 11.sp)
+            }
+        }
+        Hint("Сканирование занимает 10–30 секунд. Результат сохраняется в истории.")
+    }
     if (!s.running && s.dropped > 0) Hint("Отброшено ${s.dropped} ложных адресов: роутер отвечал за них отказом соединения, хотя устройств там нет.")
     if (!s.running && s.finishedAt != null) Hint("Android 10+ не отдаёт приложениям MAC-адреса чужих устройств. Они видны для компьютеров Windows (через NetBIOS) и для всех устройств, если подключить MikroTik на вкладке [09].")
 }
@@ -385,6 +400,14 @@ fun DiagTab(vm: NetVm) {
                 T("%.0f мс".format(ms), Cp.muted, 9.sp)
             }
         }
+    }
+
+    Card {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.weight(1f)) { CardTitle("СЕТЕВЫЕ ИНТЕРФЕЙСЫ И МАРШРУТЫ") }
+            CpButton("🔄 ОБНОВИТЬ", Cp.red) { vm.refreshReport() }
+        }
+        SelectableBlock(vm.report)
     }
 }
 
