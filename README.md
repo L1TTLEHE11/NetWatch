@@ -4,8 +4,9 @@
 
 Сетевой диагностический инструмент в стиле Cyberpunk 2077: live-мониторинг Wi-Fi, пинги, замер скорости интернета и тесты локальной сети. Это Android-порт десктопной версии NetWatch (Python / Tkinter).
 
-> **Скачать:** последний universal APK лежит в разделе [Releases](../../releases/latest).
-> Подходит для любых устройств на Android 8.0+ (arm64-v8a, armeabi-v7a, x86, x86_64).
+> ### 📥 [Скачать NetWatch-1.2-universal.apk](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-1.2-universal.apk)
+> Universal APK для любых устройств на Android 8.0+ (arm64-v8a, armeabi-v7a, x86, x86_64).
+> SHA-256: `2d0fe5389a90905f45e47f28f7f75a1805b0a655ff61e5ea7d248ea0f346d54b`
 
 ---
 
@@ -33,7 +34,7 @@
 
 ## Установка
 
-1. Скачайте `NetWatch-*-universal.apk` из [Releases](../../releases/latest).
+1. Скачайте [`NetWatch-1.2-universal.apk`](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-1.2-universal.apk) (все версии лежат в папке [`apk/`](apk/)).
 2. Откройте файл на телефоне и разрешите установку из этого источника.
 3. При первом запуске нажмите **«🔓 РАЗБЛОКИРОВАТЬ»** в карточке Wi-Fi. Android показывает имя сети (SSID) только приложениям с доступом к геолокации. Сами координаты приложение не получает и никуда не отправляет.
 
