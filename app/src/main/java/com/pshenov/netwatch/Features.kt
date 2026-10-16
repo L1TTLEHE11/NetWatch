@@ -493,3 +493,74 @@ class MtCtl(private val scope: CoroutineScope, ctx: Context) {
         fun bps(v: Double) = when { v >= 1e9 -> "%.2f Гбит/с".format(v / 1e9); v >= 1e6 -> "%.1f Мбит/с".format(v / 1e6); v >= 1e3 -> "%.0f Кбит/с".format(v / 1e3); else -> "%.0f бит/с".format(v) }
     }
 }
+
+/* ============================ обновления ============================ */
+
+enum class UpdPhase { IDLE, CHECKING, UP_TO_DATE, AVAILABLE, DOWNLOADING, READY, ERROR }
+
+class UpdateCtl(private val scope: CoroutineScope, private val ctx: Context) {
+    private val prefs = ctx.getSharedPreferences("update", Context.MODE_PRIVATE)
+    var phase by mutableStateOf(UpdPhase.IDLE)
+    var info by mutableStateOf<UpdateInfo?>(null)
+    var progress by mutableStateOf(0f)
+    var error by mutableStateOf<String?>(null)
+    var lastCheck by mutableStateOf(prefs.getLong("last", 0L))
+    var auto by mutableStateOf(prefs.getBoolean("auto", true))
+    /** Пользователь закрыл баннер этой версии на Главной. */
+    var dismissed by mutableStateOf(prefs.getLong("dismissed", 0L))
+    private var apk: File? = null
+    private var job: Job? = null
+    val current: Long = try { Updater.currentVersionCode(ctx) } catch (_: Exception) { 0 }
+    val currentName: String = BuildConfigCompat.version(ctx)
+
+    val hasUpdate get() = info?.let { it.versionCode > current } == true
+    val showBanner get() = hasUpdate && info?.versionCode != dismissed
+
+    /** Автопроверка при запуске — не чаще раза в 6 часов. */
+    fun autoCheck() { if (auto && System.currentTimeMillis() - lastCheck > 6 * 3600_000L) check(silent = true) }
+
+    fun check(silent: Boolean = false) {
+        if (phase == UpdPhase.CHECKING || phase == UpdPhase.DOWNLOADING) return
+        if (!silent) { phase = UpdPhase.CHECKING; error = null }
+        scope.launch(Dispatchers.IO) {
+            try {
+                val i = Updater.fetch()
+                onMain {
+                    info = i; lastCheck = System.currentTimeMillis(); prefs.edit().putLong("last", lastCheck).apply()
+                    phase = if (i.versionCode > current) UpdPhase.AVAILABLE else UpdPhase.UP_TO_DATE
+                }
+            } catch (e: Exception) {
+                onMain { if (!silent) { phase = UpdPhase.ERROR; error = e.message } }
+            }
+        }
+    }
+
+    fun download() {
+        val i = info ?: return
+        if (phase == UpdPhase.DOWNLOADING) return
+        phase = UpdPhase.DOWNLOADING; progress = 0f; error = null
+        job = scope.launch(Dispatchers.IO) {
+            val me = coroutineContext[Job]!!
+            try {
+                val f = Updater.download(i, File(ctx.cacheDir, "updates"), { p -> scope.launch(Dispatchers.Main) { progress = p } }, { me.isActive })
+                onMain { apk = f; phase = UpdPhase.READY; install() }
+            } catch (e: Exception) {
+                onMain { phase = if (me.isActive) UpdPhase.ERROR else UpdPhase.AVAILABLE; error = if (me.isActive) e.message else null }
+            }
+        }
+    }
+
+    fun cancel() { job?.cancel(); phase = UpdPhase.AVAILABLE }
+
+    /** Нужен ли сначала доступ «Установка неизвестных приложений». */
+    val needsPermission get() = !Updater.canInstall(ctx)
+
+    fun install() {
+        val f = apk ?: return
+        if (!Updater.canInstall(ctx)) { Updater.openInstallPermission(ctx); return }
+        try { Updater.install(ctx, f) } catch (e: Exception) { phase = UpdPhase.ERROR; error = "Не удалось открыть установщик: ${e.message}" }
+    }
+
+    fun setAutoCheck(v: Boolean) { auto = v; prefs.edit().putBoolean("auto", v).apply() }
+    fun dismiss() { info?.let { dismissed = it.versionCode; prefs.edit().putLong("dismissed", it.versionCode).apply() } }
+}

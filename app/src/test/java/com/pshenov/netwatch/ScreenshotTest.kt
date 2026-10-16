@@ -37,4 +37,23 @@ class ScreenshotTest {
     @Test fun monitor() = shot("09_monitor", TAB_MONITOR)
     @Test fun settings() = shot("10_settings", TAB_SETTINGS)
     @Test fun homeLarge() = shot("11_home_large", TAB_DASH, large = true)
+
+    @Test fun updateAvailable() {
+        val vm = NetVm(ApplicationProvider.getApplicationContext<Application>())
+        vm.upd.info = UpdateInfo(99, "2.3", "apk/x.apk", "00", 1_100_000, "16.10.2026", listOf("Обновление прямо из приложения", "Проверка файла по SHA-256", "Мелкие исправления"))
+        vm.upd.phase = UpdPhase.AVAILABLE
+        vm.selectTab(TAB_SETTINGS)
+        rule.setContent { NetWatchScreen(vm) }
+        rule.waitForIdle()
+        rule.onRoot().captureRoboImage("build/shots/12_update.png")
+    }
+
+    @Test fun homeBanner() {
+        val vm = NetVm(ApplicationProvider.getApplicationContext<Application>())
+        vm.upd.info = UpdateInfo(99, "2.3", "apk/x.apk", "00", 1_100_000, "16.10.2026", listOf("Обновление прямо из приложения"))
+        vm.selectTab(TAB_DASH)
+        rule.setContent { NetWatchScreen(vm) }
+        rule.waitForIdle()
+        rule.onRoot().captureRoboImage("build/shots/13_home_banner.png")
+    }
 }

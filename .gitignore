@@ -9,3 +9,5 @@ local.properties
 captures/
 *.keystore
 *.jks
+keystore.properties
+keys/

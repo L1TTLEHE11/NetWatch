@@ -85,6 +85,7 @@ class NetVm(app: Application) : AndroidViewModel(app) {
     val survey = SurveyCtl(viewModelScope, ctx)
     val diag = DiagCtl(viewModelScope, ctx)
     val wol = WolCtl(ctx)
+    val upd = UpdateCtl(viewModelScope, ctx)
 
     /** Текущая вкладка — чтобы фоновые опросы работали только там, где их смотрят. */
     var tab by mutableStateOf(0)
@@ -171,6 +172,7 @@ class NetVm(app: Application) : AndroidViewModel(app) {
         results = History.items.value.filter { it.kind == HKind.SPEED }.take(10)
             .map { SpeedResult(it.time, it.num3, it.num1 ?: 0.0, it.num2 ?: 0.0) }
         markInterruptedMonitor()
+        upd.autoCheck()
         viewModelScope.launch(Dispatchers.IO) { detectGateway(); refreshReport() }
         loop(600) {
             val r = NetInfo.readRadio(ctx)

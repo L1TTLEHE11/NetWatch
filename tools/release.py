@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+"""
+Выпуск новой версии NetWatch для обновления из приложения.
+
+    python3 tools/release.py "Что нового 1" "Что нового 2" ...
+
+1. берёт versionCode / versionName из app/build.gradle.kts;
+2. копирует собранный app-release.apk в apk/NetWatch-<версия>-universal.apk
+   (старые APK из apk/ удаляет — в репозитории лежит только актуальный);
+3. пишет update.json (версия, путь, SHA-256, размер, дата, список изменений);
+4. обновляет ссылку и SHA-256 в README.md.
+Дальше: git add -A && git commit && git push — приложения увидят обновление.
+"""
+import datetime, hashlib, json, pathlib, re, shutil, sys
+
+root = pathlib.Path(__file__).resolve().parent.parent
+gradle = (root / "app/build.gradle.kts").read_text(encoding="utf-8")
+code = int(re.search(r"versionCode\s*=\s*(\d+)", gradle).group(1))
+name = re.search(r'versionName\s*=\s*"([^"]+)"', gradle).group(1)
+
+src = root / "app/build/outputs/apk/release/app-release.apk"
+if not src.exists():
+    sys.exit("Сначала соберите: ./gradlew assembleRelease")
+
+apk_dir = root / "apk"; apk_dir.mkdir(exist_ok=True)
+for old in apk_dir.glob("*.apk"):
+    old.unlink()
+dst = apk_dir / f"NetWatch-{name}-universal.apk"
+shutil.copyfile(src, dst)
+data = dst.read_bytes()
+sha = hashlib.sha256(data).hexdigest()
+
+notes = sys.argv[1:] or ["Улучшения и исправления"]
+info = {
+    "versionCode": code, "versionName": name,
+    "apk": f"apk/{dst.name}", "sha256": sha, "size": len(data),
+    "date": datetime.date.today().strftime("%d.%m.%Y"), "notes": notes,
+}
+(root / "update.json").write_text(json.dumps(info, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+readme = root / "README.md"
+txt = readme.read_text(encoding="utf-8")
+txt = re.sub(r"NetWatch-[\d.]+-universal\.apk", dst.name, txt)
+txt = re.sub(r"(SHA-256: `)[0-9a-f]{64}(`)", rf"\g<1>{sha}\g<2>", txt)
+readme.write_text(txt, encoding="utf-8")
+
+print(f"✓ {dst.name}  ({len(data) / 1048576:.2f} МБ)\n  versionCode {code}, SHA-256 {sha}\n  update.json и README обновлены")

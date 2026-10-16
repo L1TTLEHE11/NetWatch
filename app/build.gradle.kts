@@ -1,7 +1,16 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+}
+
+// Ключ подписи берётся из keystore.properties (в git не попадает).
+// Обновления ставятся поверх только при подписи ТЕМ ЖЕ ключом — храните его.
+val ksProps = Properties().apply {
+    val f = rootProject.file("keystore.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
 }
 
 android {
@@ -12,10 +21,19 @@ android {
         applicationId = "com.pshenov.netwatch"
         minSdk = 26
         targetSdk = 35
-        versionCode = 9
-        versionName = "2.2"
+        versionCode = 10
+        versionName = "2.3"
         // universal: в APK попадают нативные библиотеки под все архитектуры
         ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64") }
+    }
+
+    signingConfigs {
+        if (ksProps.getProperty("storeFile") != null) create("release") {
+            storeFile = rootProject.file(ksProps.getProperty("storeFile"))
+            storePassword = ksProps.getProperty("storePassword")
+            keyAlias = ksProps.getProperty("keyAlias")
+            keyPassword = ksProps.getProperty("keyPassword")
+        }
     }
 
     buildTypes {
@@ -23,8 +41,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
-            // Подписано debug-ключом, чтобы APK сразу ставился на телефон
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
     compileOptions {

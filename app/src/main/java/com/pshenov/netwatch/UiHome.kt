@@ -28,6 +28,7 @@ fun HomeTab(vm: NetVm) {
     val hist by History.items.collectAsState()
     val mon by Monitor.state.collectAsState()
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        if (vm.upd.showBanner) UpdateBanner(vm)
         // --- сигнал ---
         Tile(border = Cp.red, onClick = { vm.selectTab(TAB_WIFI) }) {
             val cell = r.status == RadioStatus.CELLULAR
@@ -100,7 +101,7 @@ fun HomeTab(vm: NetVm) {
                 T("МОНИТОР", Cp.muted2, 11.sp, bold = true)
                 T(if (mon.running) Monitor.fmtDur(now - mon.startedAt) else "выкл.", if (mon.running) Cp.green else Cp.muted2, 22.sp, bold = true, maxLines = 1)
                 val outs = mon.gw.outages + mon.inet.outages
-                T(if (mon.running) "● $outs обрывов" else "включить — кнопка в шапке", if (mon.running) (if (outs == 0) Cp.green else Cp.red) else Cp.muted2, 11.sp, bold = mon.running, maxLines = 1)
+                T(if (mon.running) "● $outs обрывов" else "кнопка в шапке", if (mon.running) (if (outs == 0) Cp.green else Cp.red) else Cp.muted2, 11.sp, bold = mon.running, maxLines = 1)
             }
         }
     }
@@ -172,7 +173,8 @@ fun MoreMenu(vm: NetVm, onReport: () -> Unit) {
             subColor = if (t.connected) Cp.green else Cp.muted2) { vm.selectTab(TAB_MIKROTIK) }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             SmallMenu(Ic.doc, Cp.cyan, "Отчёт", "PDF / TXT", Modifier.weight(1f)) { onReport() }
-            SmallMenu(Ic.gear, Cp.muted2, "Настройки", "шрифт · адреса", Modifier.weight(1f)) { vm.selectTab(TAB_SETTINGS) }
+            SmallMenu(Ic.gear, if (vm.upd.hasUpdate) Cp.yellow else Cp.muted2, "Настройки",
+                if (vm.upd.hasUpdate) "⬆ версия ${vm.upd.info?.versionName}" else "шрифт · обновления", Modifier.weight(1f)) { vm.selectTab(TAB_SETTINGS) }
         }
 
         // --- История с превью последних событий ---
@@ -235,6 +237,69 @@ object BuildConfigCompat {
     fun version(ctx: android.content.Context): String = try { ctx.packageManager.getPackageInfo(ctx.packageName, 0).versionName ?: "" } catch (_: Exception) { "" }
 }
 
+/* ============================ обновления ============================ */
+
+private val dateFmt = SimpleDateFormat("dd.MM HH:mm", Locale.getDefault())
+
+@Composable
+private fun UpdateBanner(vm: NetVm) {
+    val u = vm.upd
+    val i = u.info ?: return
+    Row(
+        Modifier.fillMaxWidth().background(Color(0xFF1A1600)).border(1.dp, Cp.yellow).clickable { vm.selectTab(TAB_SETTINGS) }.padding(start = 14.dp, top = 10.dp, bottom = 10.dp, end = 6.dp),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        NwIcon(Ic.share, Cp.yellow, 24.dp)
+        Column(Modifier.weight(1f)) {
+            T("Доступна версия ${i.versionName}", Cp.yellow, 14.sp, bold = true)
+            T(i.notes.firstOrNull() ?: "Нажмите, чтобы обновить", Cp.muted2, 11.sp, maxLines = 1)
+        }
+        Box(Modifier.size(44.dp).clickable { u.dismiss() }, contentAlignment = Alignment.Center) { T("✕", Cp.muted2, 14.sp, fixed = true) }
+    }
+}
+
+@Composable
+fun UpdateTile(vm: NetVm) {
+    val u = vm.upd
+    val i = u.info
+    Tile(border = if (u.hasUpdate) Cp.yellow else Cp.dim) {
+        T("ОБНОВЛЕНИЯ", Cp.yellow, 12.sp, bold = true)
+        T("Установлена версия ${u.currentName}" + if (u.lastCheck > 0) " · проверено ${dateFmt.format(Date(u.lastCheck))}" else "", Cp.muted2, 11.sp)
+        when (u.phase) {
+            UpdPhase.CHECKING -> T("⏳ Проверяю…", Cp.cyan, 12.sp, modifier = Modifier.padding(top = 6.dp))
+            UpdPhase.UP_TO_DATE -> T("✓ У вас последняя версия", Cp.green, 12.sp, bold = true, modifier = Modifier.padding(top = 6.dp))
+            UpdPhase.ERROR -> T("⚠ ${u.error ?: "Ошибка"}", Cp.red, 12.sp, modifier = Modifier.padding(top = 6.dp))
+            else -> {}
+        }
+        if (i != null && u.hasUpdate) {
+            Spacer(Modifier.height(6.dp))
+            T("Новая версия ${i.versionName}" + (if (i.date.isNotBlank()) " · ${i.date}" else "") + (if (i.size > 0) " · %.1f МБ".format(i.size / 1048576.0) else ""), Cp.yellow, 14.sp, bold = true)
+            i.notes.take(8).forEach { n -> T("• $n", Cp.text, 11.sp, modifier = Modifier.padding(top = 2.dp)) }
+            Spacer(Modifier.height(8.dp))
+            when (u.phase) {
+                UpdPhase.DOWNLOADING -> {
+                    Progress((u.progress * 1000).toInt(), 1000, Cp.yellow)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        T("Загрузка %.0f%%".format(u.progress * 100), Cp.yellow, 12.sp, bold = true, modifier = Modifier.weight(1f))
+                        CpButton("ОТМЕНА", Color(0xFF240B15), Cp.text) { u.cancel() }
+                    }
+                }
+                UpdPhase.READY -> {
+                    CpButton("⬆ УСТАНОВИТЬ", Cp.yellow, modifier = Modifier.fillMaxWidth()) { u.install() }
+                    if (u.needsPermission) T("Разрешите NetWatch «Установку неизвестных приложений» в открывшихся настройках, вернитесь и нажмите ещё раз.", Cp.muted2, 11.sp, modifier = Modifier.padding(top = 4.dp))
+                }
+                else -> CpButton("⬆ СКАЧАТЬ И УСТАНОВИТЬ", Cp.yellow, modifier = Modifier.fillMaxWidth()) { u.download() }
+            }
+            T("Файл проверяется по контрольной сумме SHA-256. Данные и настройки сохранятся.", Cp.muted, 10.sp, modifier = Modifier.padding(top = 4.dp))
+        }
+        Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (u.phase != UpdPhase.DOWNLOADING) CpButton("🔄 ПРОВЕРИТЬ", Color(0xFF240B15), Cp.text) { u.check() }
+            Spacer(Modifier.width(8.dp))
+            Chip(if (u.auto) "✓ автопроверка" else "автопроверка", u.auto) { u.setAutoCheck(!u.auto) }
+        }
+    }
+}
+
 /* ============================ Настройки ============================ */
 
 @Composable
@@ -251,6 +316,7 @@ fun SettingsTab(vm: NetVm) {
             }
             T("Крупный — увеличивает весь текст примерно на 15%.", Cp.muted2, 11.sp)
         }
+        UpdateTile(vm)
         Tile {
             T("АДРЕС РОУТЕРА", Cp.yellow, 12.sp, bold = true)
             T("Пусто — определяется автоматически (сейчас ${vm.gw.host}).", Cp.muted2, 11.sp)
