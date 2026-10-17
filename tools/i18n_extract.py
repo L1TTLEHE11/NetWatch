@@ -13,7 +13,7 @@
 import json, pathlib, re, sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-SRC = ROOT / "app/src/main/java/com/pshenov/netwatch"
+SRC = ROOT / "app/src/main/java/com/l1ttlehe11/netwatch"
 RES = ROOT / "app/src/main/res"
 I18N = ROOT / "tools/i18n"
 CYR = re.compile(r"[А-Яа-яЁё]")

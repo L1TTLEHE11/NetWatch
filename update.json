@@ -1,23 +1,20 @@
 {
-  "versionCode": 16,
-  "versionName": "2.5",
-  "apk": "apk/NetWatch-2.5-universal.apk",
-  "sha256": "134a3c75f8ba4f9bd2405fd41f231d6ae312f0a10106d34b9df1202685e72b89",
-  "size": 1410448,
+  "versionCode": 17,
+  "versionName": "2.6",
+  "apk": "apk/NetWatch-2.6-universal.apk",
+  "sha256": "b7cc6a4abf332ca507ee4a3d0ef69fc20f170e26a09cd0bff4b42ade90bb2ced",
+  "size": 1410456,
   "date": "17.10.2026",
   "notes": [
-    "Английский язык интерфейса: как в системе или вручную — «Ещё → Настройки → Язык»",
-    "«Что нового» в обновлениях — на языке приложения",
-    "Сайт и README на английском и русском"
+    "Новый идентификатор приложения: ставится отдельным приложением. После установки удалите старый NetWatch (история не переносится)",
+    "Подсказка обхода: комната, коридор, этаж"
   ],
   "notes_en": [
-    "English interface: follows the system language, or choose it in More → Settings → Language",
-    "Update notes are shown in the app language",
-    "Website and README in English and Russian"
+    "New app ID: installs as a separate app. Afterwards delete the old NetWatch (history is not transferred)",
+    "Survey hint: room, corridor, floor"
   ],
   "notes_ru": [
-    "Английский язык интерфейса: как в системе или вручную — «Ещё → Настройки → Язык»",
-    "«Что нового» в обновлениях — на языке приложения",
-    "Сайт и README на английском и русском"
+    "Новый идентификатор приложения: ставится отдельным приложением. После установки удалите старый NetWatch (история не переносится)",
+    "Подсказка обхода: комната, коридор, этаж"
   ]
 }

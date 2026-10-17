@@ -14,15 +14,15 @@ val ksProps = Properties().apply {
 }
 
 android {
-    namespace = "com.pshenov.netwatch"
+    namespace = "com.l1ttlehe11.netwatch"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.pshenov.netwatch"
+        applicationId = "com.l1ttlehe11.netwatch"
         minSdk = 26
         targetSdk = 35
-        versionCode = 16
-        versionName = "2.5"
+        versionCode = 17
+        versionName = "2.6"
         // universal: в APK попадают нативные библиотеки под все архитектуры
         ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64") }
     }

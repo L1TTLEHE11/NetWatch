@@ -2,6 +2,10 @@
 
 **English** | [Русский](CHANGELOG.ru.md)
 
+## 2.6
+- New app ID: com.l1ttlehe11.netwatch. It installs as a separate app — delete the old NetWatch afterwards (history is not transferred).
+- Neutral sample data, survey hint “room, corridor, floor”.
+
 ## 2.5
 - English interface. The language follows the system or can be chosen in “More → Settings → Language”.
 - Update notes are shown in the app language.

@@ -1,0 +1,2 @@
+• New app ID: installs as a separate app. Afterwards delete the old NetWatch (history is not transferred)
+• Survey hint: room, corridor, floor
