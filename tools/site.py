@@ -31,6 +31,9 @@ LANGS = [("en", "", "EN", "en_US"), ("ru", "ru/", "RU", "ru_RU")]   # code, fold
 DIR = {c: d for c, d, _, _ in LANGS}
 SHOTS = ["1_home", "3_scan", "4_wifi", "2_speed", "5_monitor", "6_mikrotik", "7_history", "8_more"]
 MB = {"en": "MB", "ru": "МБ"}
+# style version: changes whenever site.css changes, so browsers never mix new pages with a cached old stylesheet
+import hashlib
+CSSV = hashlib.sha256((docs / "site.css").read_bytes()).hexdigest()[:8]
 
 VERIFY = json.loads((docs / "verify.json").read_text(encoding="utf-8")) if (docs / "verify.json").exists() else {}
 VMETA = "".join(f'<meta name="{n}" content="{html.escape(VERIFY[k])}">\n' for k, n in
@@ -104,7 +107,7 @@ def head(lang, page, title, desc, extra="", og_img="og.png", og_title=None):
 <link rel="icon" type="image/png" href="{up(lang)}favicon.png">
 <link rel="apple-touch-icon" href="{up(lang)}icon.png">
 <meta name="theme-color" content="#060204">
-{VMETA if not d and not page else ""}{og}{extra}<link rel="stylesheet" href="{up(lang)}site.css">
+{VMETA if not d and not page else ""}{og}{extra}<link rel="stylesheet" href="{up(lang)}site.css?v={CSSV}">
 </head>"""
 
 
