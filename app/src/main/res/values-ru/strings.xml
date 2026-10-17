@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="settings_sub">"язык, шрифт"</string>
     <string name="widget_desc">"Пинг до роутера и интернета, уровень сигнала"</string>
     <string name="widget_router">"РОУТЕР, мс"</string>
     <string name="widget_internet">"ИНТЕРНЕТ, мс"</string>

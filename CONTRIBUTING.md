@@ -21,7 +21,7 @@ To add a language (example: German, `de`):
 2. Keep placeholders exactly as they are: `%1$s`, `%2$s`, `%d`, `%%` and `\n`. Their order in the sentence may change.
 3. Keep strings short — many of them are buttons and labels on a phone screen.
 4. Add the language tag to `Lang.supported` in `app/src/main/java/com/l1ttlehe11/netwatch/Lang.kt`, to `app/src/main/res/xml/locales_config.xml`, and a chip to `LanguageTile()` in `UiHome.kt`.
-5. Run `./gradlew testDebugUnitTest --tests '*LangTest*'` — it checks that every key exists in every language and that placeholders match.
+5. Run `./gradlew testFullDebugUnitTest --tests '*LangTest*'` — it checks that every key exists in every language and that placeholders match.
 
 Not a developer? Just send the translated `strings.xml` in an issue, and it will be added.
 
@@ -29,5 +29,5 @@ Not a developer? Just send the translated `strings.xml` in an issue, and it will
 
 - Kotlin + Jetpack Compose, no third-party networking libraries.
 - Never hard-code UI text in Kotlin: add a key to both `strings.xml` files and use `tr(R.string.key)` (or `stringResource` in Compose).
-- Run `./gradlew testDebugUnitTest` before opening a pull request.
+- Run `./gradlew testFullDebugUnitTest` before opening a pull request.
 - By contributing you agree that your work is published under [GPL-3.0](LICENSE).

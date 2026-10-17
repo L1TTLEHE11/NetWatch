@@ -7,7 +7,8 @@
   "widget_tap": "tap ⟳",
   "lang_title": "LANGUAGE",
   "lang_system": "System",
-  "lang_hint": "“System” follows the phone language; English is used if it is not supported."
+  "lang_hint": "“System” follows the phone language; English is used if it is not supported.",
+  "settings_sub": "language, font"
  },
  "ru": {
   "widget_desc": "Пинг до роутера и интернета, уровень сигнала",
@@ -17,6 +18,7 @@
   "widget_tap": "нажмите ⟳",
   "lang_title": "ЯЗЫК",
   "lang_system": "Как в системе",
-  "lang_hint": "«Как в системе» — по языку телефона; если он не поддерживается, будет английский."
+  "lang_hint": "«Как в системе» — по языку телефона; если он не поддерживается, будет английский.",
+  "settings_sub": "язык, шрифт"
  }
 }

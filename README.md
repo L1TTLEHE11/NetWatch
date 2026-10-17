@@ -9,12 +9,12 @@
 **Free network scanner and Wi-Fi analyzer for Android**<br>
 LAN scanner · Wi-Fi channels · ping · speed test · outage monitor · traceroute · ports · MikroTik
 
-[![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FL1TTLEHE11%2FNetWatch%2Fmain%2Fupdate.json&query=%24.versionName&label=version&color=ff003c)](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.6-universal.apk)
+[![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FL1TTLEHE11%2FNetWatch%2Fmain%2Fupdate.json&query=%24.versionName&label=version&color=ff003c)](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.7-universal.apk)
 [![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-00f0ff)](#install)
 [![License GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-fcee0a)](LICENSE)
 [![No ads](https://img.shields.io/badge/ads-none-00ff66)](#privacy)
 
-### [📥 Download APK](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.6-universal.apk) · [Website](https://l1ttlehe11.github.io/NetWatch/)
+### [📥 Download APK](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.7-universal.apk) · [Website](https://l1ttlehe11.github.io/NetWatch/)
 
 </div>
 
@@ -56,13 +56,13 @@ Also: one-tap PDF report, home-screen widget, large font, in-app updates with SH
 
 ## Install
 
-1. Download [**NetWatch-2.6-universal.apk**](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.6-universal.apk). One file for every device on Android 8.0+ (arm64-v8a, armeabi-v7a, x86, x86_64).
+1. Download [**NetWatch-2.7-universal.apk**](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.7-universal.apk). One file for every device on Android 8.0+ (arm64-v8a, armeabi-v7a, x86, x86_64).
 2. Open it on the phone and allow installs from this source.
 3. Allow location access when asked: without it Android hides the Wi-Fi network name.
 
 After that the app updates itself: “More → Settings → Updates”.
 
-SHA-256: `b7cc6a4abf332ca507ee4a3d0ef69fc20f170e26a09cd0bff4b42ade90bb2ced`
+SHA-256: `46dac2f20847979e13fe2b85ff60bfebba8e5c0f7052385ae162ac4d59644f28`
 
 ## Privacy
 
@@ -91,8 +91,9 @@ Found a bug or have an idea? [Open an issue](https://github.com/L1TTLEHE11/NetWa
 ```bash
 # needs JDK 17+ and Android SDK (platform 35, build-tools 35)
 echo "sdk.dir=/path/to/Android/Sdk" > local.properties
-./gradlew assembleRelease          # APK: app/build/outputs/apk/release/
-./gradlew testDebugUnitTest        # protocol tests + screen screenshots (Robolectric + Roborazzi)
+./gradlew assembleFullRelease          # APK: app/build/outputs/apk/full/release/
+./gradlew assembleFdroidRelease        # F-Droid build: no in-app updater, no REQUEST_INSTALL_PACKAGES
+./gradlew testFullDebugUnitTest        # protocol tests + screen screenshots (Robolectric + Roborazzi)
 ```
 
 <details>
@@ -102,16 +103,18 @@ echo "sdk.dir=/path/to/Android/Sdk" > local.properties
 
 **Releasing a version.**
 1. Bump `versionCode` and `versionName` in `app/build.gradle.kts`.
-2. `./gradlew assembleRelease`
+2. `./gradlew assembleFullRelease`
 3. `python3 tools/release.py --en "What's new" … --ru "Что нового" …` — APK into `apk/` (the 3 latest are kept), `update.json`, links in the READMEs and on the site, changelogs for app catalogs.
 4. `git push`, then `curl -s https://purge.jsdelivr.net/gh/L1TTLEHE11/NetWatch@main/update.json`.
 
-**Screenshots for README and site:** `./gradlew testDebugUnitTest --tests '*DemoShots*'` (screens with sample data → `docs/screenshots/en/` and `docs/screenshots/ru/`), then `python3 tools/store_art.py .`
+**Screenshots for README and site:** `./gradlew testFullDebugUnitTest --tests '*DemoShots*'` (screens with sample data → `docs/screenshots/en/` and `docs/screenshots/ru/`), then `python3 tools/store_art.py .`
 
 ```
 update.json                — current version for in-app updates
 tools/release.py           — publishing a new version
 docs/                      — website (GitHub Pages): English at the root, Russian in docs/ru/
+tools/site.py, site_text.py — website generator and texts (EN / RU)
+tools/fdroid/              — metadata for the F-Droid repository
 fastlane/metadata/android/ — descriptions and images for app catalogs
 app/src/main/res/values*/strings.xml — UI texts (values — English, values-ru — Russian)
 app/src/main/java/com/l1ttlehe11/netwatch/

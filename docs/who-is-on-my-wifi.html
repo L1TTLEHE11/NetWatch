@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to see who is connected to your Wi-Fi (Android)</title>
+<script>
+(function(){try{var s=localStorage.getItem('nw_lang');var l=(navigator.languages&&navigator.languages[0])||navigator.language||'';
+if(s==='ru'||(!s&&/^ru\b/i.test(l))){location.replace('ru/'+location.pathname.split('/').pop()+location.hash)}}catch(e){}})();
+</script><meta name="description" content="Find every device on your Wi-Fi network from an Android phone in 30 seconds, spot unknown devices and lock out strangers. Free, no ads.">
+<link rel="canonical" href="https://l1ttlehe11.github.io/NetWatch/who-is-on-my-wifi.html">
+<link rel="alternate" hreflang="en" href="https://l1ttlehe11.github.io/NetWatch/who-is-on-my-wifi.html">
+<link rel="alternate" hreflang="ru" href="https://l1ttlehe11.github.io/NetWatch/ru/who-is-on-my-wifi.html">
+<link rel="alternate" hreflang="x-default" href="https://l1ttlehe11.github.io/NetWatch/who-is-on-my-wifi.html">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<meta name="theme-color" content="#060204">
+<meta property="og:type" content="article">
+<meta property="og:title" content="How to see who is connected to your Wi-Fi (Android)">
+<meta property="og:description" content="Find every device on your Wi-Fi network from an Android phone in 30 seconds, spot unknown devices and lock out strangers. Free, no ads.">
+<meta property="og:image" content="https://l1ttlehe11.github.io/NetWatch/og.png">
+<meta property="og:url" content="https://l1ttlehe11.github.io/NetWatch/who-is-on-my-wifi.html">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="ru_RU">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "Article",
+ "headline": "How to see who is connected to your Wi-Fi",
+ "description": "Find every device on your Wi-Fi network from an Android phone in 30 seconds, spot unknown devices and lock out strangers. Free, no ads.",
+ "inLanguage": "en",
+ "dateModified": "2026-10-17",
+ "image": "https://l1ttlehe11.github.io/NetWatch/screenshots/en/3_scan.png",
+ "author": {
+  "@type": "Person",
+  "name": "L1TTLEHE11",
+  "url": "https://github.com/L1TTLEHE11"
+ },
+ "mainEntityOfPage": "https://l1ttlehe11.github.io/NetWatch/who-is-on-my-wifi.html"
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+  {
+   "@type": "ListItem",
+   "position": 1,
+   "name": "NetWatch",
+   "item": "https://l1ttlehe11.github.io/NetWatch/"
+  },
+  {
+   "@type": "ListItem",
+   "position": 2,
+   "name": "Who is connected to my Wi-Fi",
+   "item": "https://l1ttlehe11.github.io/NetWatch/who-is-on-my-wifi.html"
+  }
+ ]
+}
+</script>
+<link rel="stylesheet" href="site.css">
+</head>
+<body class="doc">
+<div class="top"></div>
+<div class="wrap">
+<nav class="bar"><a class="mark" href="./">NETWATCH</a><span class="links"></span><span class="lang"><b aria-current="true">EN</b><span class="sep">|</span><a href="ru/who-is-on-my-wifi.html" hreflang="ru" lang="ru" data-lang="ru">RU</a></span></nav>
+<main class="article">
+  <p class="crumb"><a href="./">← NetWatch</a></p>
+  <h1>How to see who is connected to your Wi-Fi</h1>
+  <p class="lead">A neighbour using your Wi-Fi, a forgotten smart plug or an old phone — all of them slow your network down and some are a security risk. Here is how to list every device on your network from an Android phone.</p>
+  <figure class="shot"><img src="screenshots/en/3_scan.png" alt="How to see who is connected to your Wi-Fi" width="720" height="1558"></figure>
+
+<h2>1. Connect to the network you want to check</h2>
+<p>Your phone must be on the same Wi-Fi as the devices you are looking for. Install <a href="./">NetWatch</a> and allow location access when asked — Android needs it to show the network name.</p>
+
+<h2>2. Run the scanner</h2>
+<p>Open <b>Network → Scanner</b> and tap <b>Scan network</b>. NetWatch checks every address of your subnet in 10–30 seconds. It sends several pings and probes common ports, so it also finds devices that ignore a single ping, such as TVs in power-saving mode.</p>
+
+<h2>3. Read the list</h2>
+<ul>
+<li><b>Type</b> — router, MikroTik, phone, iPhone, Windows PC, printer, IP camera, Android TV, Smart TV, NAS.</li>
+<li><b>Name</b> — taken from NetBIOS, mDNS and UPnP, e.g. “Living Room TV” or “OFFICE-PC”.</li>
+<li><b>Open ports</b> — what services a device offers (web page, file sharing, remote desktop).</li>
+</ul>
+
+<h2>4. Find out what an unknown device is</h2>
+<ul>
+<li>Compare the list with the devices you own: phones, laptops, TV, consoles, smart speakers, cameras, the printer.</li>
+<li>Switch your own devices off one by one and scan again — whatever disappears was yours.</li>
+<li>Open the router’s page in a browser (the address is shown on the NetWatch home screen) and look at its list of connected clients or DHCP leases.</li>
+<li>Have a MikroTik? Connect it in <b>More → MikroTik</b>: the scanner then shows MAC addresses and names from the router.</li>
+</ul>
+
+<h2>5. Let NetWatch watch for new devices</h2>
+<p>The scanner remembers devices for each network. Next time, everything that wasn’t there before is marked <b>NEW</b>, so a stranger stands out immediately.</p>
+
+<h2>Found a stranger? Lock them out</h2>
+<ul>
+<li>Change the Wi-Fi password in the router settings — every device will have to reconnect.</li>
+<li>Use WPA2 or WPA3 security; never “open” or WEP (NetWatch shows the security type of every network in <b>Wi-Fi → Spectrum</b>).</li>
+<li>Turn off WPS and change the router’s admin password from the default.</li>
+</ul>
+
+<h2>Why some devices may be missing</h2>
+<p>Phones in deep sleep and devices with a strict firewall may not answer at all — scan again after a minute. Android does not let apps read other devices’ MAC addresses, so NetWatch identifies devices by their behaviour, names and ports instead.</p>
+
+  <div class="gcta">
+    <h2>Try it on your network</h2>
+    <p>NetWatch is free, has no ads and collects nothing.</p>
+    <div class="cta">
+      <a class="btn main" href="https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.7-universal.apk">⬇ DOWNLOAD APK</a>
+      <a class="btn alt" href="https://github.com/L1TTLEHE11/NetWatch">SOURCE CODE</a>
+    </div>
+    <div class="meta">Android 8.0+ · 1.3 MB · version 2.7</div>
+  </div>
+  <p class="mut">Updated: 2026-10-17</p>
+</main>
+<section>
+  <h2>More guides</h2>
+  <div class="guides">
+    <a class="guide" href="best-wifi-channel.html"><b>How to choose the best Wi-Fi channel</b><span>Slow Wi-Fi in an apartment building? See how crowded each Wi-Fi channel is and switch your router to the least busy one. Free Android Wi-Fi analyzer.</span></a>
+    <a class="guide" href="prove-internet-outages.html"><b>How to prove internet outages to your ISP</b><span>Internet keeps dropping but your ISP says everything is fine? Log every outage with an Android phone, see whether it’s your Wi-Fi or the provider, and send a PDF report.</span></a>
+    <a class="guide" href="mikrotik-monitoring-android.html"><b>Monitor a MikroTik router from your phone</b><span>See MikroTik CPU, memory, temperature, live interface traffic, CAPsMAN access points, Wi-Fi clients and DHCP leases from an Android phone via the RouterOS API. Free app.</span></a>
+  </div>
+</section>
+<footer>
+  <div class="fg"><b>Guides:</b> <a href="who-is-on-my-wifi.html">Who is connected to my Wi-Fi</a> · <a href="best-wifi-channel.html">Best Wi-Fi channel</a> · <a href="prove-internet-outages.html">Prove outages to your ISP</a> · <a href="mikrotik-monitoring-android.html">MikroTik monitoring from a phone</a></div>
+  <div class="fl">
+  <span>NetWatch · Created by <a href="https://github.com/L1TTLEHE11">L1TTLEHE11</a></span>
+  <span>Free software under the <a href="https://github.com/L1TTLEHE11/NetWatch/blob/main/LICENSE">GNU GPL v3</a></span>
+  <span><a href="https://github.com/L1TTLEHE11/NetWatch">Source code</a></span>
+  <span><a href="https://github.com/L1TTLEHE11/NetWatch/issues">Report a bug</a></span>
+  <span><a href="privacy.html">Privacy</a></span>
+  </div>
+</footer>
+</div>
+<script>
+document.addEventListener('click',function(e){var a=e.target.closest('a[data-lang]');if(a){try{localStorage.setItem('nw_lang',a.dataset.lang)}catch(_){}}});
+</script>
+</body>
+</html>

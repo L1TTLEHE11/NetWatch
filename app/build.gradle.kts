@@ -21,8 +21,8 @@ android {
         applicationId = "com.l1ttlehe11.netwatch"
         minSdk = 26
         targetSdk = 35
-        versionCode = 17
-        versionName = "2.6"
+        versionCode = 18
+        versionName = "2.7"
         // universal: в APK попадают нативные библиотеки под все архитектуры
         ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64") }
     }
@@ -35,6 +35,16 @@ android {
             keyPassword = ksProps.getProperty("keyPassword")
         }
     }
+
+    // full — GitHub / сайт, со встроенным обновлением; fdroid — для F-Droid: без обновления и без REQUEST_INSTALL_PACKAGES
+    flavorDimensions += "dist"
+    productFlavors {
+        create("full") { dimension = "dist"; buildConfigField("boolean", "UPDATER", "true") }
+        create("fdroid") { dimension = "dist"; buildConfigField("boolean", "UPDATER", "false") }
+    }
+
+    // F-Droid: без зашифрованного блока со списком зависимостей от Google
+    dependenciesInfo { includeInApk = false; includeInBundle = false }
 
     buildTypes {
         release {
@@ -49,7 +59,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions { jvmTarget = "17" }
-    buildFeatures { compose = true }
+    buildFeatures { compose = true; buildConfig = true }
     testOptions {
         unitTests {
             isIncludeAndroidResources = true

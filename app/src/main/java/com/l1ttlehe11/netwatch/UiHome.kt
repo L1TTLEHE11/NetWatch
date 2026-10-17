@@ -176,7 +176,7 @@ fun MoreMenu(vm: NetVm, onReport: () -> Unit) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             SmallMenu(Ic.doc, Cp.cyan, tr(R.string.report), "PDF / TXT", Modifier.weight(1f)) { onReport() }
             SmallMenu(Ic.gear, if (vm.upd.hasUpdate) Cp.yellow else Cp.muted2, tr(R.string.settings),
-                if (vm.upd.hasUpdate) tr(R.string.version, vm.upd.info?.versionName) else tr(R.string.updates_2), Modifier.weight(1f)) { vm.selectTab(TAB_SETTINGS) }
+                if (vm.upd.hasUpdate) tr(R.string.version, vm.upd.info?.versionName) else if (vm.upd.enabled) tr(R.string.updates_2) else tr(R.string.settings_sub), Modifier.weight(1f)) { vm.selectTab(TAB_SETTINGS) }
         }
 
         // --- История с превью последних событий ---
@@ -347,7 +347,7 @@ fun SettingsTab(vm: NetVm) {
             }
             T(tr(R.string.large_makes_all_text_about_15), Cp.muted2, 11.sp)
         }
-        UpdateTile(vm)
+        if (vm.upd.enabled) UpdateTile(vm)
         Tile {
             T(tr(R.string.router_address), Cp.yellow, 12.sp, bold = true)
             T(tr(R.string.empty_detected_automatically_now, vm.gw.host), Cp.muted2, 11.sp)

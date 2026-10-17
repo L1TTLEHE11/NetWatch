@@ -29,9 +29,9 @@ for a in sys.argv[1:]:
 notes["en"] = notes["en"] or ["Fixes and improvements"]
 notes["ru"] = notes["ru"] or ["Улучшения и исправления"]
 
-src = root / "app/build/outputs/apk/release/app-release.apk"
+src = root / "app/build/outputs/apk/full/release/app-full-release.apk"
 if not src.exists():
-    sys.exit("Build first: ./gradlew assembleRelease")
+    sys.exit("Build first: ./gradlew assembleFullRelease")
 
 apk_dir = root / "apk"; apk_dir.mkdir(exist_ok=True)
 dst = apk_dir / f"NetWatch-{name}-universal.apk"

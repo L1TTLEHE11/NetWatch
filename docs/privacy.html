@@ -7,7 +7,7 @@
 <script>
 (function(){try{var s=localStorage.getItem('nw_lang');var l=(navigator.languages&&navigator.languages[0])||navigator.language||'';
 if(s==='ru'||(!s&&/^ru\b/i.test(l))){location.replace('ru/'+location.pathname.split('/').pop()+location.hash)}}catch(e){}})();
-</script><meta name="description" content="NetWatch privacy policy: the app does not collect, store on servers or share personal data.">
+</script><meta name="description" content="NetWatch privacy policy: the app and the website collect no personal data and use no analytics.">
 <link rel="canonical" href="https://l1ttlehe11.github.io/NetWatch/privacy.html">
 <link rel="alternate" hreflang="en" href="https://l1ttlehe11.github.io/NetWatch/privacy.html">
 <link rel="alternate" hreflang="ru" href="https://l1ttlehe11.github.io/NetWatch/ru/privacy.html">
@@ -15,18 +15,27 @@ if(s==='ru'||(!s&&/^ru\b/i.test(l))){location.replace('ru/'+location.pathname.sp
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="icon.png">
 <meta name="theme-color" content="#060204">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Privacy policy — NetWatch">
+<meta property="og:description" content="NetWatch privacy policy: the app and the website collect no personal data and use no analytics.">
+<meta property="og:image" content="https://l1ttlehe11.github.io/NetWatch/og.png">
+<meta property="og:url" content="https://l1ttlehe11.github.io/NetWatch/privacy.html">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="ru_RU">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="site.css">
 </head>
 <body class="doc">
 <div class="top"></div>
-<main>
-<nav class="lang" aria-label="Language"><b aria-current="true">EN</b><span>|</span><a href="ru/privacy.html" hreflang="ru" lang="ru" data-lang="ru">RU</a></nav>
-<p><a href="./">← NetWatch</a></p>
+<div class="wrap">
+<nav class="bar"><a class="mark" href="./">NETWATCH</a><span class="links"></span><span class="lang"><b aria-current="true">EN</b><span class="sep">|</span><a href="ru/privacy.html" hreflang="ru" lang="ru" data-lang="ru">RU</a></span></nav>
+<main class="article">
+<p class="crumb"><a href="./">← NetWatch</a></p>
 <h1>NetWatch privacy policy</h1>
 <p class="mut">Effective from 17 October 2026 · developer: L1TTLEHE11</p>
 
 <h2>In short</h2>
-<p>NetWatch does not collect, sell or share your data. The app has no ads, no analytics, no accounts and no developer servers.</p>
+<p>NetWatch does not collect, sell or share your data. The app has no ads, no analytics, no accounts and no developer servers. This website has no analytics, no cookies and loads nothing from third-party servers.</p>
 
 <h2>Data processed on the phone</h2>
 <ul>
@@ -44,19 +53,33 @@ if(s==='ru'||(!s&&/^ru\b/i.test(l))){location.replace('ru/'+location.pathname.sp
 <ul>
 <li>devices on your local network and hosts you choose — ping, scanning, traceroute, ports, MikroTik;</li>
 <li>public servers for the speed test (mirror.yandex.ru, mirror.selectel.ru, speed.cloudflare.com, speed.hetzner.de) and DNS servers for the DNS test;</li>
-<li>GitHub and jsDelivr — to check for and download updates (automatic checks can be turned off in settings).</li>
+<li>GitHub and jsDelivr — to check for and download updates (automatic checks can be turned off in settings). The F-Droid version has no built-in updater and never contacts them.</li>
 </ul>
 <p>These servers see your IP address, as with any website. The app sends them no device or user identifiers.</p>
 
 <h2>Sharing</h2>
 <p>Data leaves the phone only when you act — when you share a PDF, TXT or CSV report yourself via the “Share” menu.</p>
 
+<h2>Website</h2>
+<p>The site is hosted on GitHub Pages, which may keep technical server logs (such as IP addresses) under the <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub privacy statement</a>. The site itself only remembers your language choice in your browser’s local storage.</p>
+
 <h2>Children</h2>
 <p>The app is not intended for children and collects no data about them.</p>
 
 <h2>Changes and contact</h2>
-<p>Changes to this policy are published on this page. Questions: <a href="https://github.com/L1TTLEHE11/NetWatch/issues">GitHub issues</a>. The app’s source code is open: <a href="https://github.com/L1TTLEHE11/NetWatch">github.com/L1TTLEHE11/NetWatch</a>.</p>
+<p>Changes to this policy are published on this page. Questions: <a href="https://github.com/L1TTLEHE11/NetWatch/issues">GitHub issues</a>. The source code is open: <a href="https://github.com/L1TTLEHE11/NetWatch">github.com/L1TTLEHE11/NetWatch</a>.</p>
 </main>
+<footer>
+  <div class="fg"><b>Guides:</b> <a href="who-is-on-my-wifi.html">Who is connected to my Wi-Fi</a> · <a href="best-wifi-channel.html">Best Wi-Fi channel</a> · <a href="prove-internet-outages.html">Prove outages to your ISP</a> · <a href="mikrotik-monitoring-android.html">MikroTik monitoring from a phone</a></div>
+  <div class="fl">
+  <span>NetWatch · Created by <a href="https://github.com/L1TTLEHE11">L1TTLEHE11</a></span>
+  <span>Free software under the <a href="https://github.com/L1TTLEHE11/NetWatch/blob/main/LICENSE">GNU GPL v3</a></span>
+  <span><a href="https://github.com/L1TTLEHE11/NetWatch">Source code</a></span>
+  <span><a href="https://github.com/L1TTLEHE11/NetWatch/issues">Report a bug</a></span>
+  <span><a href="privacy.html">Privacy</a></span>
+  </div>
+</footer>
+</div>
 <script>
 document.addEventListener('click',function(e){var a=e.target.closest('a[data-lang]');if(a){try{localStorage.setItem('nw_lang',a.dataset.lang)}catch(_){}}});
 </script>

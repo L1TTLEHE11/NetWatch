@@ -9,12 +9,12 @@
 **Бесплатный сетевой сканер и Wi-Fi анализатор для Android**<br>
 Сканер сети · Wi-Fi эфир · пинг · скорость интернета · мониторинг обрывов · traceroute · порты · MikroTik
 
-[![Версия](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FL1TTLEHE11%2FNetWatch%2Fmain%2Fupdate.json&query=%24.versionName&label=%D0%B2%D0%B5%D1%80%D1%81%D0%B8%D1%8F&color=ff003c)](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.6-universal.apk)
+[![Версия](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FL1TTLEHE11%2FNetWatch%2Fmain%2Fupdate.json&query=%24.versionName&label=%D0%B2%D0%B5%D1%80%D1%81%D0%B8%D1%8F&color=ff003c)](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.7-universal.apk)
 [![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-00f0ff)](#установка)
 [![Лицензия GPL-3.0](https://img.shields.io/badge/%D0%BB%D0%B8%D1%86%D0%B5%D0%BD%D0%B7%D0%B8%D1%8F-GPL--3.0-fcee0a)](LICENSE)
 [![Без рекламы](https://img.shields.io/badge/%D1%80%D0%B5%D0%BA%D0%BB%D0%B0%D0%BC%D0%B0-%D0%BD%D0%B5%D1%82-00ff66)](#приватность)
 
-### [📥 Скачать APK](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.6-universal.apk) · [Сайт](https://l1ttlehe11.github.io/NetWatch/ru/)
+### [📥 Скачать APK](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.7-universal.apk) · [Сайт](https://l1ttlehe11.github.io/NetWatch/ru/)
 
 </div>
 
@@ -56,13 +56,13 @@ NetWatch — набор инструментов для тех, кто наст�
 
 ## Установка
 
-1. Скачайте [**NetWatch-2.6-universal.apk**](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.6-universal.apk). Один файл для всех устройств на Android 8.0+ (arm64-v8a, armeabi-v7a, x86, x86_64).
+1. Скачайте [**NetWatch-2.7-universal.apk**](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.7-universal.apk). Один файл для всех устройств на Android 8.0+ (arm64-v8a, armeabi-v7a, x86, x86_64).
 2. Откройте его на телефоне и разрешите установку из этого источника.
 3. Разрешите доступ к геолокации, когда приложение попросит: без него Android скрывает имя Wi-Fi сети.
 
 Дальше приложение обновляется само: «Ещё → Настройки → Обновления».
 
-SHA-256: `b7cc6a4abf332ca507ee4a3d0ef69fc20f170e26a09cd0bff4b42ade90bb2ced`
+SHA-256: `46dac2f20847979e13fe2b85ff60bfebba8e5c0f7052385ae162ac4d59644f28`
 
 ## Приватность
 
@@ -91,8 +91,9 @@ NetWatch **ничего не собирает и никуда не отправ�
 ```bash
 # нужен JDK 17+ и Android SDK (platform 35, build-tools 35)
 echo "sdk.dir=/path/to/Android/Sdk" > local.properties
-./gradlew assembleRelease          # APK: app/build/outputs/apk/release/
-./gradlew testDebugUnitTest        # тесты протоколов + скриншоты экранов (Robolectric + Roborazzi)
+./gradlew assembleFullRelease          # APK: app/build/outputs/apk/full/release/
+./gradlew assembleFdroidRelease        # сборка для F-Droid: без встроенного обновления и REQUEST_INSTALL_PACKAGES
+./gradlew testFullDebugUnitTest        # тесты протоколов + скриншоты экранов (Robolectric + Roborazzi)
 ```
 
 <details>
@@ -102,16 +103,18 @@ echo "sdk.dir=/path/to/Android/Sdk" > local.properties
 
 **Выпуск версии.**
 1. Поднять `versionCode` и `versionName` в `app/build.gradle.kts`.
-2. `./gradlew assembleRelease`
+2. `./gradlew assembleFullRelease`
 3. `python3 tools/release.py --en "What's new" … --ru "Что нового" …` — APK в `apk/` (хранятся 3 последние), `update.json`, ссылки в README и на сайте, список изменений для каталогов.
 4. `git push`, затем `curl -s https://purge.jsdelivr.net/gh/L1TTLEHE11/NetWatch@main/update.json`.
 
-**Скриншоты для README и сайта:** `./gradlew testDebugUnitTest --tests '*DemoShots*'` (экраны с примерными данными → `docs/screenshots/en/` и `docs/screenshots/ru/`), затем `python3 tools/store_art.py .`
+**Скриншоты для README и сайта:** `./gradlew testFullDebugUnitTest --tests '*DemoShots*'` (экраны с примерными данными → `docs/screenshots/en/` и `docs/screenshots/ru/`), затем `python3 tools/store_art.py .`
 
 ```
 update.json                — актуальная версия для обновления из приложения
 tools/release.py           — выпуск новой версии
 docs/                      — сайт (GitHub Pages): английский в корне, русский в docs/ru/
+tools/site.py, site_text.py — генератор сайта и тексты (EN / RU)
+tools/fdroid/              — описание для репозитория F-Droid
 fastlane/metadata/android/ — описания и картинки для каталогов приложений
 app/src/main/res/values*/strings.xml — тексты интерфейса (values — английский, values-ru — русский)
 app/src/main/java/com/l1ttlehe11/netwatch/

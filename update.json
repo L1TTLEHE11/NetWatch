@@ -1,20 +1,20 @@
 {
-  "versionCode": 17,
-  "versionName": "2.6",
-  "apk": "apk/NetWatch-2.6-universal.apk",
-  "sha256": "b7cc6a4abf332ca507ee4a3d0ef69fc20f170e26a09cd0bff4b42ade90bb2ced",
-  "size": 1410456,
+  "versionCode": 18,
+  "versionName": "2.7",
+  "apk": "apk/NetWatch-2.7-universal.apk",
+  "sha256": "46dac2f20847979e13fe2b85ff60bfebba8e5c0f7052385ae162ac4d59644f28",
+  "size": 1406804,
   "date": "17.10.2026",
   "notes": [
-    "Новый идентификатор приложения: ставится отдельным приложением. После установки удалите старый NetWatch (история не переносится)",
-    "Подсказка обхода: комната, коридор, этаж"
+    "Сборка для F-Droid: без встроенного обновления и разрешения на установку",
+    "Новый сайт с пошаговыми инструкциями"
   ],
   "notes_en": [
-    "New app ID: installs as a separate app. Afterwards delete the old NetWatch (history is not transferred)",
-    "Survey hint: room, corridor, floor"
+    "F-Droid build: no in-app updater and no install permission",
+    "New website with step-by-step guides"
   ],
   "notes_ru": [
-    "Новый идентификатор приложения: ставится отдельным приложением. После установки удалите старый NetWatch (история не переносится)",
-    "Подсказка обхода: комната, коридор, этаж"
+    "Сборка для F-Droid: без встроенного обновления и разрешения на установку",
+    "Новый сайт с пошаговыми инструкциями"
   ]
 }

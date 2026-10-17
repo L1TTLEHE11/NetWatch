@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monitor a MikroTik router from your Android phone</title>
+<script>
+(function(){try{var s=localStorage.getItem('nw_lang');var l=(navigator.languages&&navigator.languages[0])||navigator.language||'';
+if(s==='ru'||(!s&&/^ru\b/i.test(l))){location.replace('ru/'+location.pathname.split('/').pop()+location.hash)}}catch(e){}})();
+</script><meta name="description" content="See MikroTik CPU, memory, temperature, live interface traffic, CAPsMAN access points, Wi-Fi clients and DHCP leases from an Android phone via the RouterOS API. Free app.">
+<link rel="canonical" href="https://l1ttlehe11.github.io/NetWatch/mikrotik-monitoring-android.html">
+<link rel="alternate" hreflang="en" href="https://l1ttlehe11.github.io/NetWatch/mikrotik-monitoring-android.html">
+<link rel="alternate" hreflang="ru" href="https://l1ttlehe11.github.io/NetWatch/ru/mikrotik-monitoring-android.html">
+<link rel="alternate" hreflang="x-default" href="https://l1ttlehe11.github.io/NetWatch/mikrotik-monitoring-android.html">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<meta name="theme-color" content="#060204">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Monitor a MikroTik router from your Android phone">
+<meta property="og:description" content="See MikroTik CPU, memory, temperature, live interface traffic, CAPsMAN access points, Wi-Fi clients and DHCP leases from an Android phone via the RouterOS API. Free app.">
+<meta property="og:image" content="https://l1ttlehe11.github.io/NetWatch/og.png">
+<meta property="og:url" content="https://l1ttlehe11.github.io/NetWatch/mikrotik-monitoring-android.html">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="ru_RU">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "Article",
+ "headline": "Monitor a MikroTik router from your phone",
+ "description": "See MikroTik CPU, memory, temperature, live interface traffic, CAPsMAN access points, Wi-Fi clients and DHCP leases from an Android phone via the RouterOS API. Free app.",
+ "inLanguage": "en",
+ "dateModified": "2026-10-17",
+ "image": "https://l1ttlehe11.github.io/NetWatch/screenshots/en/6_mikrotik.png",
+ "author": {
+  "@type": "Person",
+  "name": "L1TTLEHE11",
+  "url": "https://github.com/L1TTLEHE11"
+ },
+ "mainEntityOfPage": "https://l1ttlehe11.github.io/NetWatch/mikrotik-monitoring-android.html"
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+  {
+   "@type": "ListItem",
+   "position": 1,
+   "name": "NetWatch",
+   "item": "https://l1ttlehe11.github.io/NetWatch/"
+  },
+  {
+   "@type": "ListItem",
+   "position": 2,
+   "name": "MikroTik monitoring from a phone",
+   "item": "https://l1ttlehe11.github.io/NetWatch/mikrotik-monitoring-android.html"
+  }
+ ]
+}
+</script>
+<link rel="stylesheet" href="site.css">
+</head>
+<body class="doc">
+<div class="top"></div>
+<div class="wrap">
+<nav class="bar"><a class="mark" href="./">NETWATCH</a><span class="links"></span><span class="lang"><b aria-current="true">EN</b><span class="sep">|</span><a href="ru/mikrotik-monitoring-android.html" hreflang="ru" lang="ru" data-lang="ru">RU</a></span></nav>
+<main class="article">
+  <p class="crumb"><a href="./">← NetWatch</a></p>
+  <h1>Monitor a MikroTik router from your phone</h1>
+  <p class="lead">Winbox is great at a desk. Walking around a building, you want the same answers in your pocket: is the router overloaded, which port is busy, which access point a client is on and how strong its signal is.</p>
+  <figure class="shot"><img src="screenshots/en/6_mikrotik.png" alt="Monitor a MikroTik router from your phone" width="720" height="1558"></figure>
+
+<h2>1. Enable the API on the router</h2>
+<p>In Winbox or WebFig open <b>IP → Services</b> and enable <b>api</b> (port 8728) or <b>api-ssl</b> (port 8729). In the terminal:</p>
+<pre>/ip service enable api
+/ip service set api address=192.168.88.0/24</pre>
+<p>The second line allows API access only from your local network — don’t expose the API to the internet.</p>
+
+<h2>2. Create a read-only user</h2>
+<p>NetWatch only reads data, so a user from the <b>read</b> group is enough:</p>
+<pre>/user add name=netwatch group=read password=YOUR-PASSWORD</pre>
+
+<h2>3. Connect from NetWatch</h2>
+<p>Open <b>More → MikroTik</b> in <a href="./">NetWatch</a>, enter the router address (usually the gateway shown on the home screen), the user and the password. Tick “remember password” if you want — the password is stored only on your phone. Works with RouterOS v6 and v7.</p>
+
+<h2>4. What you see</h2>
+<ul>
+<li><b>System</b>: identity, model, RouterOS version, uptime, temperature, CPU and memory load.</li>
+<li><b>Interfaces</b>: live download and upload on every port and bridge.</li>
+<li><b>CAPsMAN</b>: managed access points and their state.</li>
+<li><b>Wi-Fi clients</b>: which access point and band each client uses, its signal and connection time.</li>
+<li><b>DHCP leases</b>: IP, MAC and host name of every device.</li>
+</ul>
+
+<h2>5. Use it with the other tools</h2>
+<p>Once a MikroTik is connected, the network scanner shows MAC addresses and names from the router. Combine it with <b>Wi-Fi → Site survey</b> to walk a building and map the signal of every access point, and with <b>Monitoring</b> to catch uplink outages.</p>
+
+  <div class="gcta">
+    <h2>Try it on your network</h2>
+    <p>NetWatch is free, has no ads and collects nothing.</p>
+    <div class="cta">
+      <a class="btn main" href="https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.7-universal.apk">⬇ DOWNLOAD APK</a>
+      <a class="btn alt" href="https://github.com/L1TTLEHE11/NetWatch">SOURCE CODE</a>
+    </div>
+    <div class="meta">Android 8.0+ · 1.3 MB · version 2.7</div>
+  </div>
+  <p class="mut">Updated: 2026-10-17</p>
+</main>
+<section>
+  <h2>More guides</h2>
+  <div class="guides">
+    <a class="guide" href="who-is-on-my-wifi.html"><b>How to see who is connected to your Wi-Fi</b><span>Find every device on your Wi-Fi network from an Android phone in 30 seconds, spot unknown devices and lock out strangers. Free, no ads.</span></a>
+    <a class="guide" href="best-wifi-channel.html"><b>How to choose the best Wi-Fi channel</b><span>Slow Wi-Fi in an apartment building? See how crowded each Wi-Fi channel is and switch your router to the least busy one. Free Android Wi-Fi analyzer.</span></a>
+    <a class="guide" href="prove-internet-outages.html"><b>How to prove internet outages to your ISP</b><span>Internet keeps dropping but your ISP says everything is fine? Log every outage with an Android phone, see whether it’s your Wi-Fi or the provider, and send a PDF report.</span></a>
+  </div>
+</section>
+<footer>
+  <div class="fg"><b>Guides:</b> <a href="who-is-on-my-wifi.html">Who is connected to my Wi-Fi</a> · <a href="best-wifi-channel.html">Best Wi-Fi channel</a> · <a href="prove-internet-outages.html">Prove outages to your ISP</a> · <a href="mikrotik-monitoring-android.html">MikroTik monitoring from a phone</a></div>
+  <div class="fl">
+  <span>NetWatch · Created by <a href="https://github.com/L1TTLEHE11">L1TTLEHE11</a></span>
+  <span>Free software under the <a href="https://github.com/L1TTLEHE11/NetWatch/blob/main/LICENSE">GNU GPL v3</a></span>
+  <span><a href="https://github.com/L1TTLEHE11/NetWatch">Source code</a></span>
+  <span><a href="https://github.com/L1TTLEHE11/NetWatch/issues">Report a bug</a></span>
+  <span><a href="privacy.html">Privacy</a></span>
+  </div>
+</footer>
+</div>
+<script>
+document.addEventListener('click',function(e){var a=e.target.closest('a[data-lang]');if(a){try{localStorage.setItem('nw_lang',a.dataset.lang)}catch(_){}}});
+</script>
+</body>
+</html>

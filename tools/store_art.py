@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Usage: python3 tools/store_art.py .   (after ./gradlew testDebugUnitTest --tests "*DemoShots*")
+# Usage: python3 tools/store_art.py .   (after ./gradlew testFullDebugUnitTest --tests "*DemoShots*")
 """Icon 512, 1024x500 banners and downsized screenshots (docs/screenshots/{en,ru}) for README / site / catalogs."""
 import sys, pathlib
 from PIL import Image, ImageDraw, ImageFont, ImageFilter

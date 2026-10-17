@@ -2,6 +2,10 @@
 
 **English** | [Русский](CHANGELOG.ru.md)
 
+## 2.7
+- F-Droid build flavor: no in-app updater and no install permission.
+- New website: use cases, comparison, FAQ, QR code for desktop visitors and step-by-step guides.
+
 ## 2.6
 - New app ID: com.l1ttlehe11.netwatch. It installs as a separate app — delete the old NetWatch afterwards (history is not transferred).
 - Neutral sample data, survey hint “room, corridor, floor”.

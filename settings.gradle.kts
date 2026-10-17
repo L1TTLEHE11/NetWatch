@@ -1,7 +1,7 @@
 pluginManagement {
     repositories {
         google()
-        maven("https://maven-central.storage-download.googleapis.com/maven2")
+        providers.gradleProperty("mavenMirror").orNull?.let { maven(it) }   // optional local mirror (~/.gradle/gradle.properties)
         mavenCentral()
         gradlePluginPortal()
     }
@@ -10,7 +10,7 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
-        maven("https://maven-central.storage-download.googleapis.com/maven2")
+        providers.gradleProperty("mavenMirror").orNull?.let { maven(it) }   // optional local mirror (~/.gradle/gradle.properties)
         mavenCentral()
     }
 }

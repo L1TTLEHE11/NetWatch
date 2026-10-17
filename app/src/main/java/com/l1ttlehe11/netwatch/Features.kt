@@ -522,11 +522,13 @@ class UpdateCtl(private val scope: CoroutineScope, private val ctx: Context) {
     val current: Long = try { Updater.currentVersionCode(ctx) } catch (_: Exception) { 0 }
     val currentName: String = BuildConfigCompat.version(ctx)
 
-    val hasUpdate get() = info?.let { it.versionCode > current } == true
+    /** false в сборке для F-Droid: обновления приходят из F-Droid. */
+    val enabled = BuildConfig.UPDATER
+    val hasUpdate get() = enabled && info?.let { it.versionCode > current } == true
     val showBanner get() = hasUpdate && info?.versionCode != dismissed
 
     /** Автопроверка при запуске — не чаще раза в 6 часов. */
-    fun autoCheck() { if (auto && System.currentTimeMillis() - lastCheck > 6 * 3600_000L) check(silent = true) }
+    fun autoCheck() { if (enabled && auto && System.currentTimeMillis() - lastCheck > 6 * 3600_000L) check(silent = true) }
 
     fun check(silent: Boolean = false) {
         if (phase == UpdPhase.CHECKING || phase == UpdPhase.DOWNLOADING) return

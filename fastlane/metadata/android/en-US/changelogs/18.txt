@@ -1,0 +1,2 @@
+• F-Droid build: no in-app updater and no install permission
+• New website with step-by-step guides

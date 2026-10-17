@@ -1,0 +1,31 @@
+# Metadata for the F-Droid repository (fdroiddata): metadata/com.l1ttlehe11.netwatch.yml
+# Descriptions, icon and screenshots are read from fastlane/metadata/android in this repo.
+Categories:
+  - Connectivity
+  - System
+License: GPL-3.0-only
+AuthorName: L1TTLEHE11
+WebSite: https://l1ttlehe11.github.io/NetWatch/
+SourceCode: https://github.com/L1TTLEHE11/NetWatch
+IssueTracker: https://github.com/L1TTLEHE11/NetWatch/issues
+Changelog: https://github.com/L1TTLEHE11/NetWatch/blob/main/CHANGELOG.md
+
+AutoName: NetWatch
+
+RepoType: git
+Repo: https://github.com/L1TTLEHE11/NetWatch.git
+
+Builds:
+  - versionName: '2.7'
+    versionCode: 18
+    commit: v2.7
+    subdir: app
+    gradle:
+      - fdroid
+    scandelete:
+      - apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: '2.7'
+CurrentVersionCode: 18
