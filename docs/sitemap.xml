@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://l1ttlehe11.github.io/NetWatch/</loc><lastmod>2026-10-17</lastmod><priority>1.0</priority></url>
-  <url><loc>https://l1ttlehe11.github.io/NetWatch/privacy.html</loc><lastmod>2026-10-17</lastmod><priority>0.3</priority></url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url><loc>https://l1ttlehe11.github.io/NetWatch/</loc><lastmod>2026-10-17</lastmod><priority>1.0</priority><xhtml:link rel="alternate" hreflang="en" href="https://l1ttlehe11.github.io/NetWatch/"/><xhtml:link rel="alternate" hreflang="ru" href="https://l1ttlehe11.github.io/NetWatch/ru/"/><xhtml:link rel="alternate" hreflang="x-default" href="https://l1ttlehe11.github.io/NetWatch/"/></url>
+  <url><loc>https://l1ttlehe11.github.io/NetWatch/ru/</loc><lastmod>2026-10-17</lastmod><priority>1.0</priority><xhtml:link rel="alternate" hreflang="en" href="https://l1ttlehe11.github.io/NetWatch/"/><xhtml:link rel="alternate" hreflang="ru" href="https://l1ttlehe11.github.io/NetWatch/ru/"/><xhtml:link rel="alternate" hreflang="x-default" href="https://l1ttlehe11.github.io/NetWatch/"/></url>
+  <url><loc>https://l1ttlehe11.github.io/NetWatch/privacy.html</loc><lastmod>2026-10-17</lastmod><priority>0.3</priority><xhtml:link rel="alternate" hreflang="en" href="https://l1ttlehe11.github.io/NetWatch/privacy.html"/><xhtml:link rel="alternate" hreflang="ru" href="https://l1ttlehe11.github.io/NetWatch/ru/privacy.html"/><xhtml:link rel="alternate" hreflang="x-default" href="https://l1ttlehe11.github.io/NetWatch/privacy.html"/></url>
+  <url><loc>https://l1ttlehe11.github.io/NetWatch/ru/privacy.html</loc><lastmod>2026-10-17</lastmod><priority>0.3</priority><xhtml:link rel="alternate" hreflang="en" href="https://l1ttlehe11.github.io/NetWatch/privacy.html"/><xhtml:link rel="alternate" hreflang="ru" href="https://l1ttlehe11.github.io/NetWatch/ru/privacy.html"/><xhtml:link rel="alternate" hreflang="x-default" href="https://l1ttlehe11.github.io/NetWatch/privacy.html"/></url>
 </urlset>

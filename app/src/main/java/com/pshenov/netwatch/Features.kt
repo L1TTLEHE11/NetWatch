@@ -61,21 +61,21 @@ class ScanCtl(private val scope: CoroutineScope, private val ctx: Context, priva
         val cm = ctx.getSystemService(android.net.ConnectivityManager::class.java)
         val lp = cm.getLinkProperties(cm.activeNetwork)
         val la = lp?.linkAddresses?.firstOrNull { it.address is Inet4Address }
-        if (la == null) { error = "Нет IPv4-подключения к локальной сети"; return }
+        if (la == null) { error = tr(R.string.no_ipv4_connection_to_a_local); return }
         val self = la.address.hostAddress!!
         val (list, _) = Ip.hostsOf(self, la.prefixLength)
         val gw = NetInfo.gateway(ctx)
         error = null; hosts = emptyList(); done = 0; total = list.size; running = true; finishedAt = null
         restored = false; newKeys = emptySet(); missing = emptyList(); network = NetInfo.networkLabel(ctx)
-        subnet = "$self/${la.prefixLength}" + if (la.prefixLength < 22) " (сканируется /22 вокруг вашего адреса)" else ""
+        subnet = "${self}/${la.prefixLength}" + if (la.prefixLength < 22) tr(R.string.scanning_the_22_around_your_address) else ""
         val k = known()
-        stage = "Опрос устройств (mDNS, UPnP)…"
+        stage = tr(R.string.asking_devices_mdns_upnp)
         job = scope.launch(Dispatchers.IO) {
             val me = coroutineContext[Job]!!
             // Сначала спрашиваем сеть «кто здесь?»: телевизоры, Chromecast, принтеры отвечают сами,
             // даже если молчат на ping и закрывают порты.
             val disc = try { Discovery.all(2500).filterKeys { it in list || it == self } } catch (_: Exception) { emptyMap() }
-            onMain { discovered = disc.size; stage = "Проверка адресов…" }
+            onMain { discovered = disc.size; stage = tr(R.string.checking_addresses) }
             LanScanner.scan(list, gw, self, k, { me.isActive },
                 onFound = { h -> scope.post { hosts = (hosts.filter { it.ip != h.ip } + h).sortedBy { Ip.sortKey(it.ip) } } },
                 onProgress = { n -> if (n % 4 == 0 || n == list.size) scope.post { done = n } },
@@ -102,19 +102,19 @@ class ScanCtl(private val scope: CoroutineScope, private val ctx: Context, priva
         newKeys = fresh
         missing = before.values.filter { it.key !in seen }.sortedByDescending { it.lastSeen }
         History.add(HItem(History.nextId(), System.currentTimeMillis(), HKind.SCAN, net,
-            "${hosts.size} устройств" + if (fresh.isNotEmpty()) " · новых ${fresh.size}" else "",
-            "$subnet · " + hosts.groupingBy { it.kind }.eachCount().entries.sortedByDescending { it.value }.take(4).joinToString(", ") { "${it.key}: ${it.value}" },
+            tr(R.string.devices, hosts.size) + if (fresh.isNotEmpty()) tr(R.string.new_2, fresh.size) else "",
+            "${subnet} · " + hosts.groupingBy { it.kind }.eachCount().entries.sortedByDescending { it.value }.take(4).joinToString(", ") { "${it.key}: ${it.value}" },
             text(), num1 = hosts.size.toDouble(), num2 = fresh.size.toDouble(), csv = hostsToJson(hosts)))
     }
 
     fun isNew(h: LanHost) = History.deviceKey(h) in newKeys
 
     fun text(): String = buildString {
-        append("Подсеть: $subnet · найдено устройств: ${hosts.size}\n")
+        append(tr(R.string.subnet_devices_found, subnet, hosts.size))
         for (h in hosts) {
-            append("%-15s  %-26s %s%s\n".format(h.ip, h.kind, listOfNotNull(h.name, h.title).joinToString(" · "), if (isNew(h)) "  [НОВОЕ]" else ""))
+            append("%-15s  %-26s %s%s\n".format(h.ip, h.kind, listOfNotNull(h.name, h.title).joinToString(" · "), if (isNew(h)) tr(R.string.new_label) else ""))
             if (h.mac != null || h.ports.isNotEmpty())
-                append("                 ${h.mac ?: ""}  порты: ${h.ports.joinToString(", ") { "$it ${PortInfo.label(it)}".trim() }}\n")
+                append(tr(R.string.ports, h.mac ?: "", h.ports.joinToString(", ") { "${it} ${PortInfo.label(it)}".trim() }))
         }
     }
 }
@@ -161,15 +161,15 @@ class WifiCtl(private val scope: CoroutineScope, private val ctx: Context) {
     }
 
     fun text(): String = buildString {
-        append("Сетей в эфире: ${aps.size}\n")
+        append(tr(R.string.networks_on_air, aps.size))
         for (b in listOf(24, 5, 6)) {
             val my = aps.firstOrNull { it.connected && it.band == b }?.channel
-            WifiScan.advice(aps, b, my)?.let { append("Диапазон ${bandName(b)}: рекомендуемый канал ${it.best}${it.current?.let { c -> ", ваш $c" } ?: ""} — ${it.note}\n") }
+            WifiScan.advice(aps, b, my)?.let { append(tr(R.string.band_recommended_channel, bandName(b), it.best, it.current?.let { c -> tr(R.string.yours, c) } ?: "", it.note)) }
         }
-        for (a in aps) append("%4d dBm  кан.%-3d %-6s %3d МГц  %-8s %s%s\n".format(a.dbm, a.channel, bandName(a.band), a.widthMhz, a.security, a.ssid, if (a.connected) "  ← подключены" else ""))
+        for (a in aps) append(tr(R.string.s_4d_dbm_ch_3d_6s_3d).format(a.dbm, a.channel, bandName(a.band), a.widthMhz, a.security, a.ssid, if (a.connected) tr(R.string.connected) else ""))
     }
 
-    companion object { fun bandName(b: Int) = when (b) { 24 -> "2.4 ГГц"; 5 -> "5 ГГц"; else -> "6 ГГц" } }
+    companion object { fun bandName(b: Int) = when (b) { 24 -> tr(R.string.s_2_4_ghz); 5 -> tr(R.string.s_5_ghz); else -> tr(R.string.s_6_ghz) } }
 }
 
 /* ============================ обход объекта ============================ */
@@ -192,19 +192,19 @@ class SurveyCtl(private val scope: CoroutineScope, private val ctx: Context) {
 
     fun measure(name: String) {
         if (busy) return
-        busy = true; stage = "сигнал…"
+        busy = true; stage = tr(R.string.signal_2)
         scope.launch(Dispatchers.IO) {
             val r = NetInfo.readRadio(ctx)
             val gwHost = NetInfo.gateway(ctx)
-            onMain { stage = "пинг роутера…" }
+            onMain { stage = tr(R.string.pinging_the_router) }
             val g = (1..5).map { Pinger.ping(gwHost) }
-            onMain { stage = "пинг интернета…" }
+            onMain { stage = tr(R.string.pinging_the_internet) }
             val i = (1..5).map { Pinger.ping("8.8.8.8") }
             var dl: Double? = null
-            if (withSpeed) { onMain { stage = "скорость…" }; dl = Speed.download({ true }, { _, _ -> }, threads = 4, durationMs = 4000) }
+            if (withSpeed) { onMain { stage = tr(R.string.speed_3) }; dl = Speed.download({ true }, { _, _ -> }, threads = 4, durationMs = 4000) }
             fun avg(l: List<Double?>) = l.filterNotNull().takeIf { it.isNotEmpty() }?.average()
             fun loss(l: List<Double?>) = l.count { it == null } * 100 / l.size
-            val p = SurveyPoint(System.currentTimeMillis(), name.ifBlank { "Точка ${points.size + 1}" }, r.ssid, r.bssid, r.dbm, r.freqMhz, r.linkMbps,
+            val p = SurveyPoint(System.currentTimeMillis(), name.ifBlank { tr(R.string.point, points.size + 1) }, r.ssid, r.bssid, r.dbm, r.freqMhz, r.linkMbps,
                 avg(g), loss(g), avg(i), loss(i), dl)
             onMain { points = points + p; busy = false; stage = ""; save() }
         }
@@ -217,8 +217,8 @@ class SurveyCtl(private val scope: CoroutineScope, private val ctx: Context) {
         if (points.isEmpty()) return
         val bad = points.count { it.bad }
         History.add(HItem(History.nextId(), points.first().time, HKind.SURVEY, points.firstNotNullOfOrNull { it.ssid } ?: "—",
-            objectName.ifBlank { "Обход ${SimpleDateFormat("dd.MM HH:mm", Locale.getDefault()).format(Date(points.first().time))}" },
-            "${points.size} точек · проблемных $bad · точек доступа ${points.mapNotNull { it.bssid }.distinct().size}",
+            objectName.ifBlank { tr(R.string.survey_2, SimpleDateFormat("dd.MM HH:mm", Locale.getDefault()).format(Date(points.first().time))) },
+            tr(R.string.points_problems_access_points, points.size, bad, points.mapNotNull { it.bssid }.distinct().size),
             text(), num1 = points.size.toDouble(), num2 = bad.toDouble(), csv = csv(), endTime = points.last().time))
         clear()
     }
@@ -241,21 +241,21 @@ class SurveyCtl(private val scope: CoroutineScope, private val ctx: Context) {
 
     fun csv(): String {
         val f = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
-        val head = "Время;Точка;Сеть (SSID);Точка доступа (BSSID);Сигнал, dBm;Частота, МГц;Канал;Линк, Мбит/с;Пинг роутера, мс;Потери роутер, %;Пинг интернет, мс;Потери интернет, %;Скачивание, Мбит/с;Оценка"
+        val head = tr(R.string.time_point_network_ssid_access_point)
         return head + "\n" + points.joinToString("\n") { p ->
             listOf(f.format(Date(p.time)), p.name, p.ssid, p.bssid, p.dbm, p.freq, p.freq?.let { NetInfo.channel(it) }, p.linkMbps,
                 p.gwMs?.let { "%.1f".format(it) }, p.gwLoss, p.inetMs?.let { "%.1f".format(it) }, p.inetLoss, p.dlMbps?.let { "%.1f".format(it) },
-                if (p.bad) "ПРОБЛЕМА" else "норма").joinToString(";") { Report.csvCell(it) }
+                if (p.bad) tr(R.string.problem_2) else tr(R.string.ok)).joinToString(";") { Report.csvCell(it) }
         }
     }
 
     fun text(): String = buildString {
         val bad = points.count { it.bad }
-        append("Точек замера: ${points.size}, проблемных: $bad\n")
-        for (p in points) append("%-22s %5s dBm  роутер %5s мс (%d%%)  интернет %5s мс (%d%%)%s%s  %s\n".format(
+        append(tr(R.string.survey_points_with_problems, points.size, bad))
+        for (p in points) append(tr(R.string.s_22s_5s_dbm_router_5s_ms).format(
             p.name.take(22), p.dbm?.toString() ?: "—", p.gwMs?.let { "%.0f".format(it) } ?: "—", p.gwLoss,
             p.inetMs?.let { "%.0f".format(it) } ?: "—", p.inetLoss, p.dlMbps?.let { "  ↓%.1f".format(it) } ?: "",
-            if (p.bad) "  ⚠ ПРОБЛЕМА" else "", p.bssid ?: ""))
+            if (p.bad) tr(R.string.problem) else "", p.bssid ?: ""))
     }
 }
 
@@ -272,7 +272,7 @@ class DiagCtl(private val scope: CoroutineScope, private val ctx: Context) {
     var dnsRunning by mutableStateOf(false)
 
     var portHost by mutableStateOf("")
-    var portSpec by mutableStateOf("популярные")
+    var portSpec by mutableStateOf(tr(R.string.popular))
     var openPorts by mutableStateOf(listOf<Pair<Int, Double>>())
     var portDone by mutableStateOf(0)
     var portTotal by mutableStateOf(0)
@@ -289,8 +289,8 @@ class DiagCtl(private val scope: CoroutineScope, private val ctx: Context) {
             onMain {
                 traceMsg = msg; traceRunning = false
                 if (hops.isNotEmpty()) History.add(HItem(History.nextId(), System.currentTimeMillis(), HKind.TRACE, NetInfo.networkLabel(ctx),
-                    "до $traceHost · ${hops.size} прыжков", if (hops.lastOrNull()?.final == true) "цель достигнута" + (hops.last().ms?.let { ", %.0f мс".format(it) } ?: "") else (msg ?: "прервано"),
-                    text().substringAfter("■ Трассировка").let { "■ Трассировка$it" }.substringBefore("■ Скорость DNS"), num1 = hops.size.toDouble(), num3 = hops.lastOrNull()?.ms))
+                    tr(R.string.to_hops, traceHost, hops.size), if (hops.lastOrNull()?.final == true) tr(R.string.target_reached) + (hops.last().ms?.let { tr(R.string.s_0f_ms_3).format(it) } ?: "") else (msg ?: tr(R.string.interrupted_2)),
+                    text().substringAfter(tr(R.string.traceroute)).let { tr(R.string.traceroute_2, it) }.substringBefore(tr(R.string.dns_speed)), num1 = hops.size.toDouble(), num3 = hops.lastOrNull()?.ms))
             }
         }
     }
@@ -301,7 +301,7 @@ class DiagCtl(private val scope: CoroutineScope, private val ctx: Context) {
         scope.launch(Dispatchers.IO) {
             val cm = ctx.getSystemService(android.net.ConnectivityManager::class.java)
             val own = cm.getLinkProperties(cm.activeNetwork)?.dnsServers.orEmpty().filterIsInstance<Inet4Address>()
-                .map { it.hostAddress!! to "Провайдер / роутер" }
+                .map { it.hostAddress!! to tr(R.string.provider_router) }
             val all = (own + DnsBench.publicServers).distinctBy { it.first }
             val res = all.map { (s, l) -> scope.launch(Dispatchers.IO) { val r = DnsBench.bench(s, l) { true }; scope.post { dns = (dns + r).sortedBy { it.avgMs ?: 1e9 } } } }
             res.forEach { it.join() }
@@ -309,9 +309,9 @@ class DiagCtl(private val scope: CoroutineScope, private val ctx: Context) {
                 dnsRunning = false
                 val best = dns.firstOrNull { it.avgMs != null }
                 if (dns.isNotEmpty()) History.add(HItem(History.nextId(), System.currentTimeMillis(), HKind.DNS, NetInfo.networkLabel(ctx),
-                    "лучший: ${best?.label ?: "—"}" + (best?.avgMs?.let { " · %.0f мс".format(it) } ?: ""),
+                    tr(R.string.best, best?.label ?: "—") + (best?.avgMs?.let { tr(R.string.s_0f_ms).format(it) } ?: ""),
                     dns.take(4).joinToString(" · ") { "${it.label.substringBefore(' ')} ${it.avgMs?.let { v -> "%.0f".format(v) } ?: "✖"}" },
-                    dns.joinToString("\n") { d -> "%-15s %-20s %s  ответов %d/%d".format(d.server, d.label, d.avgMs?.let { "%.0f мс".format(it) } ?: "нет ответа", d.ok, d.total) },
+                    dns.joinToString("\n") { d -> tr(R.string.s_15s_20s_s_replies_d_d).format(d.server, d.label, d.avgMs?.let { tr(R.string.s_0f_ms_2).format(it) } ?: tr(R.string.no_reply), d.ok, d.total) },
                     num3 = best?.avgMs))
             }
         }
@@ -319,7 +319,7 @@ class DiagCtl(private val scope: CoroutineScope, private val ctx: Context) {
 
     fun ports() {
         if (portRunning) { portJob?.cancel(); portRunning = false; return }
-        val host = portHost.trim(); if (host.isEmpty()) { portMsg = "Укажите адрес"; return }
+        val host = portHost.trim(); if (host.isEmpty()) { portMsg = tr(R.string.enter_an_address); return }
         val list = PortInfo.parse(portSpec)
         openPorts = emptyList(); portDone = 0; portTotal = list.size; portRunning = true; portMsg = null
         portJob = scope.launch(Dispatchers.IO) {
@@ -329,31 +329,31 @@ class DiagCtl(private val scope: CoroutineScope, private val ctx: Context) {
                     onOpen = { p, ms -> scope.post { openPorts = (openPorts + (p to ms)).sortedBy { it.first } } },
                     onProgress = { d -> if (d % 20 == 0 || d == list.size) scope.post { portDone = d } })
                 onMain {
-                    portMsg = "Готово: открыто $n из ${list.size}"
+                    portMsg = tr(R.string.done_of_open, n, list.size)
                     History.add(HItem(History.nextId(), System.currentTimeMillis(), HKind.PORTS, NetInfo.networkLabel(ctx),
-                        "$host · открыто $n", "проверено ${list.size} портов (${portSpec.trim()})",
-                        if (openPorts.isEmpty()) "Открытых портов не найдено" else openPorts.joinToString("\n") { (p, _) -> "%5d  %s".format(p, PortInfo.label(p)) },
+                        tr(R.string.open, host, n), tr(R.string.checked_ports, list.size, portSpec.trim()),
+                        if (openPorts.isEmpty()) tr(R.string.no_open_ports_found) else openPorts.joinToString("\n") { (p, _) -> "%5d  %s".format(p, PortInfo.label(p)) },
                         num1 = n.toDouble()))
                 }
-            } catch (e: Exception) { onMain { portMsg = "Ошибка: ${e.message}" } }
+            } catch (e: Exception) { onMain { portMsg = tr(R.string.error_3, e.message) } }
             onMain { portRunning = false }
         }
     }
 
     fun text(): String = buildString {
         if (hops.isNotEmpty()) {
-            append("■ Трассировка до $traceHost\n")
-            hops.forEach { h -> append("%2d  %-15s %-8s %s\n".format(h.ttl, h.ip ?: "*", h.ms?.let { "%.0f мс".format(it) } ?: "", h.name ?: "")) }
-            traceMsg?.let { append("$it\n") }
+            append(tr(R.string.traceroute_to, traceHost))
+            hops.forEach { h -> append("%2d  %-15s %-8s %s\n".format(h.ttl, h.ip ?: "*", h.ms?.let { tr(R.string.s_0f_ms_2).format(it) } ?: "", h.name ?: "")) }
+            traceMsg?.let { append("${it}\n") }
             append('\n')
         }
         if (dns.isNotEmpty()) {
-            append("■ Скорость DNS-серверов\n")
-            dns.forEach { d -> append("%-15s %-20s %s  ответов %d/%d\n".format(d.server, d.label, d.avgMs?.let { "%.0f мс".format(it) } ?: "нет ответа", d.ok, d.total)) }
+            append(tr(R.string.dns_server_speed_2))
+            dns.forEach { d -> append(tr(R.string.s_15s_20s_s_replies_d_d_2).format(d.server, d.label, d.avgMs?.let { tr(R.string.s_0f_ms_2).format(it) } ?: tr(R.string.no_reply), d.ok, d.total)) }
             append('\n')
         }
         if (openPorts.isNotEmpty()) {
-            append("■ Открытые порты $portHost\n")
+            append(tr(R.string.open_ports, portHost))
             openPorts.forEach { (p, _) -> append("%5d  %s\n".format(p, PortInfo.label(p))) }
         }
     }
@@ -372,20 +372,20 @@ class WolCtl(private val ctx: Context) {
     private fun save() = prefs.edit().putString("list", devices.joinToString("\n") { "${it.name}|${it.mac}" }).apply()
 
     fun add(name: String, mac: String): Boolean {
-        val m = WakeOnLan.normalizeMac(mac) ?: run { status = "Неверный MAC-адрес"; return false }
+        val m = WakeOnLan.normalizeMac(mac) ?: run { status = tr(R.string.invalid_mac_address); return false }
         devices = devices.filter { it.mac != m } + WolDevice(name.ifBlank { m }, m); save(); return true
     }
     fun remove(d: WolDevice) { devices = devices - d; save() }
 
     fun wake(mac: String) {
-        val m = WakeOnLan.normalizeMac(mac) ?: run { status = "Неверный MAC-адрес"; return }
+        val m = WakeOnLan.normalizeMac(mac) ?: run { status = tr(R.string.invalid_mac_address); return }
         Thread {
             val bc = try {
                 val cm = ctx.getSystemService(android.net.ConnectivityManager::class.java)
                 cm.getLinkProperties(cm.activeNetwork)?.linkAddresses?.firstOrNull { it.address is Inet4Address }
                     ?.let { Ip.hostsOf(it.address.hostAddress!!, it.prefixLength).second }
             } catch (_: Exception) { null }
-            val msg = try { WakeOnLan.send(m, bc); "✓ Магический пакет отправлен на $m (${bc ?: "255.255.255.255"})" } catch (e: Exception) { "Ошибка отправки: ${e.message}" }
+            val msg = try { WakeOnLan.send(m, bc); tr(R.string.magic_packet_sent_to, m, bc ?: "255.255.255.255") } catch (e: Exception) { tr(R.string.send_error, e.message) }
             android.os.Handler(android.os.Looper.getMainLooper()).post { status = msg }
         }.start()
     }
@@ -476,11 +476,11 @@ class MtCtl(private val scope: CoroutineScope, ctx: Context) {
     }
 
     private fun humanError(e: Exception): String = when {
-        e is java.net.ConnectException && !isRefused(e) -> "Адрес недоступен — проверьте IP роутера и что телефон в той же сети"
-        e is java.net.ConnectException -> "Роутер не принимает соединение на порту API. Включите: IP → Services → api (8728)"
-        e is java.net.SocketTimeoutException -> "Роутер не отвечает (таймаут). Проверьте адрес и доступ к сервису api"
-        e.message?.contains("invalid user", true) == true || e.message?.contains("cannot log in", true) == true -> "Неверный логин или пароль"
-        e is javax.net.ssl.SSLException -> "Ошибка TLS. Для api-ssl на роутере нужен сертификат — или используйте порт 8728 без TLS"
+        e is java.net.ConnectException && !isRefused(e) -> tr(R.string.address_unreachable_check_the_router_ip)
+        e is java.net.ConnectException -> tr(R.string.the_router_refuses_connections_on_the)
+        e is java.net.SocketTimeoutException -> tr(R.string.the_router_does_not_respond_timeout)
+        e.message?.contains("invalid user", true) == true || e.message?.contains("cannot log in", true) == true -> tr(R.string.wrong_login_or_password)
+        e is javax.net.ssl.SSLException -> tr(R.string.tls_error_api_ssl_needs_a)
         else -> e.message ?: e.toString()
     }
 
@@ -492,14 +492,14 @@ class MtCtl(private val scope: CoroutineScope, ctx: Context) {
 
     fun text(): String = if (!connected) "" else buildString {
         append("${info.identity} · ${info.board} · RouterOS ${info.version} · uptime ${info.uptime} · CPU ${info.cpu ?: "?"}% · RAM ${info.memUsedPct ?: "?"}%\n")
-        append("Интерфейсы:\n"); ifaces.filter { !it.disabled }.forEach { append("  %-18s %-8s %s ↓%s ↑%s\n".format(it.name, it.type, if (it.running) "UP  " else "DOWN", bps(it.rxBps), bps(it.txBps))) }
-        if (caps.isNotEmpty()) { append("Точки CAPsMAN: ${caps.size}\n"); caps.forEach { append("  ${it.identity}  ${it.address}  ${it.board}  ${it.state}\n") } }
-        append("Клиенты Wi-Fi ($wifiSrc): ${wifi.size}\n"); wifi.forEach { append("  ${it.mac}  ${it.signal.padEnd(10)} ${it.iface.padEnd(16)} ${it.host} ${it.ip}\n") }
-        append("DHCP-аренды: ${leases.size}\n"); leases.forEach { append("  %-15s %s  %s %s\n".format(it.ip, it.mac, it.host, it.comment)) }
+        append(tr(R.string.interfaces)); ifaces.filter { !it.disabled }.forEach { append("  %-18s %-8s %s ↓%s ↑%s\n".format(it.name, it.type, if (it.running) "UP  " else "DOWN", bps(it.rxBps), bps(it.txBps))) }
+        if (caps.isNotEmpty()) { append(tr(R.string.capsman_access_points_2, caps.size)); caps.forEach { append("  ${it.identity}  ${it.address}  ${it.board}  ${it.state}\n") } }
+        append(tr(R.string.wi_fi_clients_3, wifiSrc, wifi.size)); wifi.forEach { append("  ${it.mac}  ${it.signal.padEnd(10)} ${it.iface.padEnd(16)} ${it.host} ${it.ip}\n") }
+        append(tr(R.string.dhcp_leases_2, leases.size)); leases.forEach { append("  %-15s %s  %s %s\n".format(it.ip, it.mac, it.host, it.comment)) }
     }
 
     companion object {
-        fun bps(v: Double) = when { v >= 1e9 -> "%.2f Гбит/с".format(v / 1e9); v >= 1e6 -> "%.1f Мбит/с".format(v / 1e6); v >= 1e3 -> "%.0f Кбит/с".format(v / 1e3); else -> "%.0f бит/с".format(v) }
+        fun bps(v: Double) = when { v >= 1e9 -> tr(R.string.s_2f_gbit_s).format(v / 1e9); v >= 1e6 -> tr(R.string.s_1f_mbit_s).format(v / 1e6); v >= 1e3 -> tr(R.string.s_0f_kbit_s).format(v / 1e3); else -> tr(R.string.s_0f_bit_s).format(v) }
     }
 }
 
@@ -578,7 +578,7 @@ class UpdateCtl(private val scope: CoroutineScope, private val ctx: Context) {
     fun install() {
         val f = apk ?: return
         if (!Updater.canInstall(ctx)) { Updater.openInstallPermission(ctx); return }
-        try { Updater.install(ctx, f) } catch (e: Exception) { phase = UpdPhase.ERROR; error = "Не удалось открыть установщик: ${e.message}" }
+        try { Updater.install(ctx, f) } catch (e: Exception) { phase = UpdPhase.ERROR; error = tr(R.string.could_not_open_the_installer, e.message) }
     }
 
     fun setAutoCheck(v: Boolean) { auto = v; prefs.edit().putBoolean("auto", v).apply() }

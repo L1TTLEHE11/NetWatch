@@ -112,7 +112,7 @@ object NetInfo {
                 }
                 return RadioState(
                     status = status,
-                    ssid = ssid ?: if (status == RadioStatus.WIFI_OK) "Wi-Fi (Активная сеть)" else null,
+                    ssid = ssid ?: if (status == RadioStatus.WIFI_OK) tr(R.string.wi_fi_active_network) else null,
                     bssid = bssid,
                     dbm = rssi,
                     quality = rssi?.let { (2 * (it + 100)).coerceIn(0, 100) },
@@ -147,9 +147,9 @@ object NetInfo {
         return when (r.status) {
             RadioStatus.WIFI_OK -> r.ssid?.takeIf { !it.startsWith("Wi-Fi (") } ?: "Wi-Fi ${gateway(ctx)}"
             RadioStatus.WIFI_NO_PERMISSION, RadioStatus.WIFI_LOCATION_OFF -> "Wi-Fi ${gateway(ctx)}"
-            RadioStatus.CELLULAR -> "Мобильная" + (r.operator?.let { ": $it" } ?: "")
+            RadioStatus.CELLULAR -> tr(R.string.mobile_2) + (r.operator?.let { ": ${it}" } ?: "")
             RadioStatus.ETHERNET -> "Ethernet ${gateway(ctx)}"
-            RadioStatus.OFFLINE -> "Нет сети"
+            RadioStatus.OFFLINE -> tr(R.string.no_network)
         }
     }
 
@@ -173,55 +173,55 @@ object NetInfo {
         val cm = cm(ctx)
         val sb = StringBuilder()
         val active = cm.activeNetwork
-        sb.append("// УСТРОЙСТВО: ${Build.MANUFACTURER} ${Build.MODEL} · Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})\n\n")
+        sb.append(tr(R.string.device_android_api, Build.MANUFACTURER, Build.MODEL, Build.VERSION.RELEASE, Build.VERSION.SDK_INT))
         val nets = cm.allNetworks
-        if (nets.isEmpty()) sb.append("// АКТИВНЫХ СЕТЕЙ НЕТ\n")
+        if (nets.isEmpty()) sb.append(tr(R.string.no_active_networks))
         for (n in nets) {
             val caps = cm.getNetworkCapabilities(n) ?: continue
             val lp = cm.getLinkProperties(n) ?: continue
             val kinds = buildList {
                 if (caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) add("WI-FI")
-                if (caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) add("МОБИЛЬНАЯ")
+                if (caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) add(tr(R.string.mobile))
                 if (caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) add("ETHERNET")
                 if (caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) add("VPN")
                 if (caps.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH)) add("BLUETOOTH")
-            }.ifEmpty { listOf("ДРУГОЕ") }
+            }.ifEmpty { listOf(tr(R.string.other)) }
             sb.append("▌ ${kinds.joinToString("+")} — ${lp.interfaceName ?: "?"}")
-            if (n == active) sb.append("  [АКТИВНАЯ]")
+            if (n == active) sb.append(tr(R.string.active))
             sb.append('\n')
-            for (la in lp.linkAddresses) sb.append("   Адрес ........ ${la.address.hostAddress}/${la.prefixLength}\n")
+            for (la in lp.linkAddresses) sb.append(tr(R.string.address, la.address.hostAddress, la.prefixLength))
             lp.routes.filter { it.isDefaultRoute && it.gateway != null }.forEach {
-                sb.append("   Шлюз ......... ${it.gateway?.hostAddress}\n")
+                sb.append(tr(R.string.gateway, it.gateway?.hostAddress))
             }
             for (d in lp.dnsServers) sb.append("   DNS .......... ${d.hostAddress}\n")
-            lp.domains?.takeIf { it.isNotBlank() }?.let { sb.append("   Домен ........ $it\n") }
+            lp.domains?.takeIf { it.isNotBlank() }?.let { sb.append(tr(R.string.domain, it)) }
             if (Build.VERSION.SDK_INT >= 29 && lp.mtu > 0) sb.append("   MTU .......... ${lp.mtu}\n")
-            sb.append("   Интернет ..... ${if (caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) "ДА (проверен)" else "НЕТ / не проверен"}\n")
-            sb.append("   Тарификация .. ${if (caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)) "безлимит" else "ЛИМИТНАЯ"}\n")
+            sb.append(tr(R.string.internet, if (caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) tr(R.string.yes_verified) else tr(R.string.no_not_verified)))
+            sb.append(tr(R.string.metered, if (caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)) tr(R.string.unmetered) else tr(R.string.metered_2)))
             val down = caps.linkDownstreamBandwidthKbps; val up = caps.linkUpstreamBandwidthKbps
-            if (down > 0) sb.append("   Канал (оценка) ↓${down / 1000} / ↑${up / 1000} Мбит/с\n")
+            if (down > 0) sb.append(tr(R.string.bandwidth_est_mbit_s, down / 1000, up / 1000))
             if (caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
                 val wi = ctx.applicationContext.getSystemService(WifiManager::class.java).connectionInfo
                 sb.append("   SSID ......... ${wi.ssid?.trim('"')}\n")
                 sb.append("   BSSID ........ ${wi.bssid}\n")
-                sb.append("   Частота ...... ${wi.frequency} МГц (${band(wi.frequency)}, канал ${channel(wi.frequency)})\n")
-                sb.append("   Скорость ..... ${wi.linkSpeed} Мбит/с\n")
+                sb.append(tr(R.string.frequency_mhz_channel, wi.frequency, band(wi.frequency), channel(wi.frequency)))
+                sb.append(tr(R.string.link_speed_mbit_s, wi.linkSpeed))
                 sb.append("   RSSI ......... ${wi.rssi} dBm\n")
-                if (Build.VERSION.SDK_INT >= 30) sb.append("   Стандарт ..... ${wifiStd(wi.wifiStandard)}\n")
+                if (Build.VERSION.SDK_INT >= 30) sb.append(tr(R.string.standard, wifiStd(wi.wifiStandard)))
             }
             sb.append('\n')
         }
-        sb.append("▌ ИНТЕРФЕЙСЫ СИСТЕМЫ\n")
+        sb.append(tr(R.string.system_interfaces))
         try {
             NetworkInterface.getNetworkInterfaces()?.toList()?.filter { it.isUp }?.forEach { ni ->
                 val ips = ni.inetAddresses.toList().joinToString(", ") { it.hostAddress?.substringBefore('%') ?: "" }
-                sb.append("   ${ni.name.padEnd(10)} ${if (ni.isLoopback) "(loopback) " else ""}$ips\n")
+                sb.append("   ${ni.name.padEnd(10)} ${if (ni.isLoopback) "(loopback) " else ""}${ips}\n")
             }
-        } catch (e: Exception) { sb.append("   ошибка: ${e.message}\n") }
+        } catch (e: Exception) { sb.append(tr(R.string.error, e.message)) }
         return sb.toString()
     }
 
-    fun band(f: Int) = when { f in 2400..2500 -> "2.4 ГГц"; f in 4900..5900 -> "5 ГГц"; f in 5925..7125 -> "6 ГГц"; else -> "?" }
+    fun band(f: Int) = when { f in 2400..2500 -> tr(R.string.s_2_4_ghz); f in 4900..5900 -> tr(R.string.s_5_ghz); f in 5925..7125 -> tr(R.string.s_6_ghz); else -> "?" }
     fun channel(f: Int) = when {
         f == 2484 -> 14
         f in 2412..2472 -> (f - 2407) / 5
@@ -314,7 +314,7 @@ object Speed {
         val url = pickMirror() ?: return 0.0
         val sep = if ('?' in url) '&' else '?'
         return liveMeasure(threads, durationMs, running, onLive) { deadline, total ->
-            val c = open("$url${sep}r=${System.nanoTime()}")
+            val c = open("${url}${sep}r=${System.nanoTime()}")
             try {
                 val ins = c.inputStream
                 val buf = ByteArray(65536)
@@ -363,8 +363,8 @@ object Speed {
 
     /** Локальный TCP-тест до устройства в сети. Возвращает строки для журнала. */
     fun localTest(target: String, log: (String) -> Unit) {
-        log("\n--- Многопоточный тест локальной пропускной способности до $target ---")
-        val addr = try { InetAddress.getByName(target) } catch (e: Exception) { log("⚠️ Не удалось разрешить адрес: ${e.message}"); return }
+        log(tr(R.string.multi_threaded_lan_throughput_test_to, target))
+        val addr = try { InetAddress.getByName(target) } catch (e: Exception) { log(tr(R.string.could_not_resolve_the_address, e.message)); return }
         var open: Int? = null
         for (p in intArrayOf(80, 445, 443, 8291, 8080, 22, 139)) {
             try { Socket().use { it.connect(InetSocketAddress(addr, p), 600) }; open = p; break } catch (_: Exception) { }
@@ -392,10 +392,10 @@ object Speed {
             }.forEach { it.join(6000) }
             val el = (System.nanoTime() - t0) / 1e9
             val mbps = total.get() * 8 / (el * 1e6)
-            log("✓ Открыт TCP-порт $open. Прокачано ${"%.2f".format(total.get() / 1048576.0)} МБ в $n потоков за ${"%.2f".format(el)} сек.")
-            log("✓ Реальная измеренная скорость локального TCP-обмена с $target: ${"%.2f".format(mbps)} Мбит/с")
+            log(tr(R.string.tcp_port_is_open_transferred_mb, open, "%.2f".format(total.get() / 1048576.0), n, "%.2f".format(el)))
+            log(tr(R.string.measured_lan_tcp_throughput_to_mbit, target, "%.2f".format(mbps)))
         } else {
-            log("Открытые TCP-порты не найдены. Запуск нагрузочного ICMP-теста (15 × 1400 байт)...")
+            log(tr(R.string.no_open_tcp_ports_found_running))
             try {
                 val t0 = System.nanoTime()
                 val p = ProcessBuilder("/system/bin/ping", "-c", "15", "-i", "0.2", "-s", "1400", "-W", "1", target)
@@ -405,10 +405,10 @@ object Speed {
                 val el = (System.nanoTime() - t0) / 1e9
                 val got = Regex("""(\d+) (packets )?received""").find(out)?.groupValues?.get(1)?.toIntOrNull() ?: 0
                 log(out.trim())
-                if (got == 0) log("⚠️ Узел $target не отвечает или блокирует крупные пакеты.")
-                else log("✓ Скорость обмена ICMP-пакетами: ${"%.2f".format(got * 1400 * 2 * 8 / (el * 1e6))} Мбит/с (ограничено интервалом ping)")
+                if (got == 0) log(tr(R.string.host_does_not_respond_or_blocks, target))
+                else log(tr(R.string.icmp_exchange_speed_mbit_s_limited, "%.2f".format(got * 1400 * 2 * 8 / (el * 1e6))))
             } catch (_: Exception) {
-                log("⚠️ Узел $target не отвечает или блокирует крупные пакеты.")
+                log(tr(R.string.host_does_not_respond_or_blocks, target))
             }
         }
     }

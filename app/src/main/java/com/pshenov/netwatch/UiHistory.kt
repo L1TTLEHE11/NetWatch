@@ -52,56 +52,56 @@ fun HistoryTab(vm: NetVm) {
     val list = all.filter { (kind == null || it.kind.name == kind) && (net == null || it.network == net) && (period == 0 || it.time >= now - period * 86_400_000L) }
 
     Card {
-        CardTitle("ИСТОРИЯ ЗАМЕРОВ")
-        T("Записей: ${all.size} · ${"%.0f".format(History.sizeBytes() / 1024.0)} КБ · хранится ${if (retention == 0) "всегда" else "$retention дней"}", Cp.muted, 10.sp)
+        CardTitle(tr(R.string.measurement_history))
+        T(tr(R.string.records_kb_kept, all.size, "%.0f".format(History.sizeBytes() / 1024.0), if (retention == 0) tr(R.string.forever) else tr(R.string.days, retention)), Cp.muted, 10.sp)
         Spacer(Modifier.height(6.dp))
-        T("Тип", Cp.muted, 9.sp, bold = true)
+        T(tr(R.string.type), Cp.muted, 9.sp, bold = true)
         Row(Modifier.horizontalScroll(rememberScrollState()).padding(vertical = 4.dp)) {
-            Chip("Все", kind == null) { kind = null }
+            Chip(tr(R.string.all), kind == null) { kind = null }
             HKind.entries.filter { k -> all.any { it.kind == k } }.forEach { k ->
                 Chip("${k.icon} ${k.label} ${all.count { it.kind == k }}", kind == k.name) { kind = if (kind == k.name) null else k.name }
             }
         }
         if (networks.size > 1) {
-            T("Сеть", Cp.muted, 9.sp, bold = true)
+            T(tr(R.string.network_2), Cp.muted, 9.sp, bold = true)
             Row(Modifier.horizontalScroll(rememberScrollState()).padding(vertical = 4.dp)) {
-                Chip("Все сети", net == null) { net = null }
+                Chip(tr(R.string.all_networks), net == null) { net = null }
                 networks.forEach { n -> Chip(n, net == n) { net = if (net == n) null else n } }
             }
         }
-        T("Период", Cp.muted, 9.sp, bold = true)
+        T(tr(R.string.period), Cp.muted, 9.sp, bold = true)
         Row(Modifier.padding(vertical = 4.dp)) {
-            listOf(1 to "Сутки", 7 to "Неделя", 30 to "Месяц", 0 to "Всё").forEach { (d, l) -> Chip(l, period == d) { period = d } }
+            listOf(1 to tr(R.string.day), 7 to tr(R.string.week), 30 to tr(R.string.month), 0 to tr(R.string.all_2)).forEach { (d, l) -> Chip(l, period == d) { period = d } }
         }
     }
 
     // --- сводка по скорости: главный аргумент для провайдера ---
     val speed = list.filter { it.kind == HKind.SPEED }.sortedBy { it.time }
     if (speed.size >= 2 && (kind == null || kind == HKind.SPEED.name)) Card(Cp.cyan) {
-        CardTitle("СКОРОСТЬ ЗА ПЕРИОД · ${speed.size} ЗАМЕРОВ")
+        CardTitle(tr(R.string.speed_over_period_tests, speed.size))
         val d = speed.mapNotNull { it.num1 }; val u = speed.mapNotNull { it.num2 }; val p = speed.mapNotNull { it.num3 }
         Row {
-            Stat("↓ СРЕДНЯЯ", "%.1f".format(d.average()), Cp.cyan, Modifier.weight(1f))
-            Stat("↓ МИН", "%.1f".format(d.min()), if (d.min() < d.average() * 0.5) Cp.red else Cp.cyan, Modifier.weight(1f))
-            Stat("↑ СРЕДНЯЯ", "%.1f".format(u.average()), Cp.yellow, Modifier.weight(1f))
-            Stat("ПИНГ", if (p.isEmpty()) "—" else "%.0f".format(p.average()), Cp.green, Modifier.weight(1f))
+            Stat(tr(R.string.average_3), "%.1f".format(d.average()), Cp.cyan, Modifier.weight(1f))
+            Stat(tr(R.string.min), "%.1f".format(d.min()), if (d.min() < d.average() * 0.5) Cp.red else Cp.cyan, Modifier.weight(1f))
+            Stat(tr(R.string.average_2), "%.1f".format(u.average()), Cp.yellow, Modifier.weight(1f))
+            Stat(tr(R.string.ping), if (p.isEmpty()) "—" else "%.0f".format(p.average()), Cp.green, Modifier.weight(1f))
         }
         Spacer(Modifier.height(6.dp))
         SpeedHistoryChart(speed)
         // худшее время суток
         val byHour = speed.groupBy { java.util.Calendar.getInstance().apply { timeInMillis = it.time }.get(java.util.Calendar.HOUR_OF_DAY) / 6 }
         if (byHour.size > 1) {
-            val names = listOf("ночью", "утром", "днём", "вечером")
+            val names = listOf(tr(R.string.at_night), tr(R.string.in_the_morning), tr(R.string.in_the_afternoon), tr(R.string.in_the_evening))
             val worst = byHour.minByOrNull { (_, v) -> v.mapNotNull { it.num1 }.average() }!!
-            T("Медленнее всего ${names[worst.key]}: в среднем %.1f Мбит/с".format(worst.value.mapNotNull { it.num1 }.average()), Cp.muted, 10.sp, modifier = Modifier.padding(top = 4.dp))
+            T(tr(R.string.slowest_on_average_1f_mbit_s, names[worst.key]).format(worst.value.mapNotNull { it.num1 }.average()), Cp.muted, 10.sp, modifier = Modifier.padding(top = 4.dp))
         }
         Spacer(Modifier.height(6.dp))
-        CpButton("📤 ВЫГРУЗИТЬ В EXCEL (CSV)", Cp.cyan, modifier = Modifier.fillMaxWidth()) { Report.shareCsv(ctx, "NetWatch_скорость", History.speedCsv(speed)) }
+        CpButton(tr(R.string.export_to_excel_csv), Cp.cyan, modifier = Modifier.fillMaxWidth()) { Report.shareCsv(ctx, tr(R.string.netwatch_speed), History.speedCsv(speed)) }
     }
 
     if (list.isEmpty()) Card(Cp.dim) {
-        T(if (all.isEmpty()) "Пока пусто. Сюда автоматически попадают замеры скорости, сканы сети, сессии мониторинга, traceroute, тесты DNS и порты, а также обходы, отправленные в архив."
-          else "По выбранным фильтрам ничего нет.", Cp.muted, 11.sp)
+        T(if (all.isEmpty()) tr(R.string.empty_for_now_speed_tests_network)
+          else tr(R.string.nothing_matches_the_selected_filters), Cp.muted, 11.sp)
     }
 
     var lastDay = ""
@@ -112,18 +112,18 @@ fun HistoryTab(vm: NetVm) {
     }
 
     Card(Cp.dim) {
-        CardTitle("ХРАНЕНИЕ")
-        T("Срок хранения записей", Cp.muted, 9.sp, bold = true)
+        CardTitle(tr(R.string.storage))
+        T(tr(R.string.keep_records_for), Cp.muted, 9.sp, bold = true)
         Row(Modifier.padding(vertical = 4.dp)) {
-            listOf(7 to "7 дней", 30 to "30 дней", 90 to "90 дней", 0 to "всегда").forEach { (d, l) -> Chip(l, retention == d) { History.setRetention(ctx, d); retention = d } }
+            listOf(7 to tr(R.string.s_7_days), 30 to tr(R.string.s_30_days), 90 to tr(R.string.s_90_days), 0 to tr(R.string.forever)).forEach { (d, l) -> Chip(l, retention == d) { History.setRetention(ctx, d); retention = d } }
         }
-        Hint("Всё хранится только на этом телефоне. Старые записи удаляются автоматически.")
+        Hint(tr(R.string.everything_is_stored_only_on_this))
         Row(Modifier.padding(top = 4.dp)) {
-            CpButton("📄 ВСЯ ИСТОРИЯ В PDF", Cp.cyan, modifier = Modifier.weight(1f)) {
-                Report.sharePdf(ctx, "NetWatch — история замеров", list.reversed().joinToString("\n\n") { textOf(it) })
+            CpButton(tr(R.string.full_history_as_pdf), Cp.cyan, modifier = Modifier.weight(1f)) {
+                Report.sharePdf(ctx, tr(R.string.netwatch_measurement_history), list.reversed().joinToString("\n\n") { textOf(it) })
             }
             Spacer(Modifier.width(6.dp))
-            CpButton(if (confirmClear) "ТОЧНО ОЧИСТИТЬ?" else "ОЧИСТИТЬ ВСЁ", if (confirmClear) Cp.red else Color(0xFF240B15), Cp.text, modifier = Modifier.weight(1f)) {
+            CpButton(if (confirmClear) tr(R.string.really_clear) else tr(R.string.clear_all), if (confirmClear) Cp.red else Color(0xFF240B15), Cp.text, modifier = Modifier.weight(1f)) {
                 if (confirmClear) { History.clear(); confirmClear = false } else confirmClear = true
             }
         }
@@ -169,7 +169,7 @@ private fun HistoryCard(i: HItem, open: Boolean, onToggle: () -> Unit) {
                     CpButton("📊 CSV", Cp.cyan) { Report.shareCsv(ctx, "NetWatch_${i.kind.label}", i.csv) }
                 }
                 Spacer(Modifier.weight(1f))
-                CpButton(if (confirm) "УДАЛИТЬ?" else "🗑", if (confirm) Cp.red else Color(0xFF240B15), Cp.text) {
+                CpButton(if (confirm) tr(R.string.delete) else "🗑", if (confirm) Cp.red else Color(0xFF240B15), Cp.text) {
                     if (confirm) History.remove(i.id) else confirm = true
                 }
             }

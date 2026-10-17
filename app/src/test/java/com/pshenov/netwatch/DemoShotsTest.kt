@@ -18,11 +18,17 @@ import kotlin.math.sin
  * (на JVM нет реальной сети). Запуск: ./gradlew testDebugUnitTest --tests DemoShotsTest
  * Результат: PNG-файлы в docs/screenshots
  */
-@RunWith(RobolectricTestRunner::class)
+@RunWith(org.robolectric.ParameterizedRobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [34], qualifiers = "w390dp-h844dp-xxhdpi")
-class DemoShotsTest {
+class DemoShotsTest(private val lang: String) {
+    companion object {
+        @JvmStatic @org.robolectric.ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
+        fun langs() = listOf(arrayOf<Any>("en"), arrayOf<Any>("ru"))
+    }
     @get:Rule val rule = createComposeRule()
+    /** Примерные тексты на языке скриншота. */
+    private fun L(en: String, ru: String) = if (lang == "ru") ru else en
     private val now = System.currentTimeMillis()
     private val min = 60_000L
 
@@ -30,17 +36,18 @@ class DemoShotsTest {
 
     private fun demoVm(): NetVm {
         val ctx = ApplicationProvider.getApplicationContext<Application>()
+        Lang.pin(ctx, lang)
         History.init(ctx); History.clear()
         listOf(
-            HItem(11, now - 3 * 86_400_000L, HKind.SPEED, "Office-5G", "↓ 87.4  ↑ 39.2 Мбит/с", "пинг 12 мс", "", 87.4, 39.2, 12.0),
-            HItem(12, now - 2 * 86_400_000L, HKind.SPEED, "Office-5G", "↓ 91.0  ↑ 40.5 Мбит/с", "пинг 11 мс", "", 91.0, 40.5, 11.0),
-            HItem(13, now - 26 * 3_600_000L, HKind.SPEED, "Office-5G", "↓ 62.3  ↑ 35.8 Мбит/с", "пинг 19 мс", "", 62.3, 35.8, 19.0),
-            HItem(14, now - 20 * 3_600_000L, HKind.SPEED, "Office-5G", "↓ 95.1  ↑ 41.7 Мбит/с", "пинг 10 мс", "", 95.1, 41.7, 10.0),
-            HItem(15, now - 8 * 3_600_000L, HKind.TRACE, "Office-5G", "до ya.ru · 9 прыжков", "цель достигнута, 14 мс", ""),
-            HItem(16, now - 3 * 3_600_000L, HKind.MONITOR, "Office-5G", "Мониторинг 2ч 14м", "обрывов 1 · без интернета 4м 02с · потери 0.6%", "", 0.6, 1.0, 242.0),
-            HItem(17, now - 40 * min, HKind.DNS, "Office-5G", "лучший: Яндекс · 9 мс", "Яндекс 9 · Google 14 · Cloudflare 15", "", num3 = 9.0),
-            HItem(18, now - 12 * min, HKind.SCAN, "Office-5G", "7 устройств · новых 1", "192.168.88.57/24", "", 7.0, 1.0),
-            HItem(19, now - 3 * min, HKind.SPEED, "Office-5G", "↓ 94.2  ↑ 41.8 Мбит/с", "пинг 11 мс · mirror.yandex.ru", "", 94.2, 41.8, 11.0),
+            HItem(11, now - 3 * 86_400_000L, HKind.SPEED, "Office-5G", L("↓ 87.4  ↑ 39.2 Mbit/s", "↓ 87.4  ↑ 39.2 Мбит/с"), L("ping 12 ms", "пинг 12 мс"), "", 87.4, 39.2, 12.0),
+            HItem(12, now - 2 * 86_400_000L, HKind.SPEED, "Office-5G", L("↓ 91.0  ↑ 40.5 Mbit/s", "↓ 91.0  ↑ 40.5 Мбит/с"), L("ping 11 ms", "пинг 11 мс"), "", 91.0, 40.5, 11.0),
+            HItem(13, now - 26 * 3_600_000L, HKind.SPEED, "Office-5G", L("↓ 62.3  ↑ 35.8 Mbit/s", "↓ 62.3  ↑ 35.8 Мбит/с"), L("ping 19 ms", "пинг 19 мс"), "", 62.3, 35.8, 19.0),
+            HItem(14, now - 20 * 3_600_000L, HKind.SPEED, "Office-5G", L("↓ 95.1  ↑ 41.7 Mbit/s", "↓ 95.1  ↑ 41.7 Мбит/с"), L("ping 10 ms", "пинг 10 мс"), "", 95.1, 41.7, 10.0),
+            HItem(15, now - 8 * 3_600_000L, HKind.TRACE, "Office-5G", L("to ya.ru · 9 hops", "до ya.ru · 9 прыжков"), L("target reached, 14 ms", "цель достигнута, 14 мс"), ""),
+            HItem(16, now - 3 * 3_600_000L, HKind.MONITOR, "Office-5G", L("Monitoring 2h 14m", "Мониторинг 2ч 14м"), L("outages 1 · down 4m 02s · loss 0.6%", "обрывов 1 · без интернета 4м 02с · потери 0.6%"), "", 0.6, 1.0, 242.0),
+            HItem(17, now - 40 * min, HKind.DNS, "Office-5G", L("best: Yandex · 9 ms", "лучший: Яндекс · 9 мс"), L("Yandex 9 · Google 14 · Cloudflare 15", "Яндекс 9 · Google 14 · Cloudflare 15"), "", num3 = 9.0),
+            HItem(18, now - 12 * min, HKind.SCAN, "Office-5G", L("7 devices · new 1", "7 устройств · новых 1"), "192.168.88.57/24", "", 7.0, 1.0),
+            HItem(19, now - 3 * min, HKind.SPEED, "Office-5G", L("↓ 94.2  ↑ 41.8 Mbit/s", "↓ 94.2  ↑ 41.8 Мбит/с"), L("ping 11 ms · mirror.yandex.ru", "пинг 11 мс · mirror.yandex.ru"), "", 94.2, 41.8, 11.0),
         ).forEach { History.add(it) }
 
         // разрешения и системные состояния, как у настроенного телефона
@@ -67,14 +74,14 @@ class DemoShotsTest {
 
         fun host(ip: String, ms: Double, ports: List<Int>, name: String?, title: String?, mac: String?, kind: String, gw: Boolean = false, self: Boolean = false) =
             LanHost(ip, ms, ports, name, title, mac, kind, gw, self)
-        val cam = host("192.168.88.24", 6.0, listOf(80, 554), null, "IPC Web Viewer", "02:1c:27:5a:00:24", "IP-камера / регистратор")
+        val cam = host("192.168.88.24", 6.0, listOf(80, 554), null, "IPC Web Viewer", "02:1c:27:5a:00:24", tr(R.string.ip_camera_nvr))
         vm.scan.hosts = listOf(
-            host("192.168.88.1", 1.0, listOf(22, 80, 8291, 8728), "router", "RouterOS", "02:4c:5e:0c:00:01", "Роутер MikroTik (шлюз)", gw = true),
-            host("192.168.88.10", 3.0, listOf(80, 631, 9100), "Printer-2F", "Printer Web", null, "Принтер"),
+            host("192.168.88.1", 1.0, listOf(22, 80, 8291, 8728), "router", "RouterOS", "02:4c:5e:0c:00:01", tr(R.string.mikrotik_router_gateway), gw = true),
+            host("192.168.88.10", 3.0, listOf(80, 631, 9100), "Printer-2F", "Printer Web", null, tr(R.string.printer)),
             cam,
-            host("192.168.88.31", 4.0, listOf(8008, 8009, 8443), "Гостиная TV", "Android TV", null, "Android TV"),
-            host("192.168.88.40", 3.0, listOf(139, 445, 3389), "RECEPTION-PC", null, "02:1a:2b:3c:4d:5e", "Компьютер Windows"),
-            host("192.168.88.57", 0.0, emptyList(), null, null, null, "Этот телефон", self = true),
+            host("192.168.88.31", 4.0, listOf(8008, 8009, 8443), L("Living Room TV", "Гостиная TV"), "Android TV", null, "Android TV"),
+            host("192.168.88.40", 3.0, listOf(139, 445, 3389), "RECEPTION-PC", null, "02:1a:2b:3c:4d:5e", tr(R.string.windows_computer)),
+            host("192.168.88.57", 0.0, emptyList(), null, null, null, tr(R.string.this_phone), self = true),
             host("192.168.88.63", 7.0, listOf(62078), "iPhone", null, null, "iPhone / iPad"),
         )
         vm.scan.newKeys = setOf(History.deviceKey(cam))
@@ -85,7 +92,7 @@ class DemoShotsTest {
                 if (band == 24) 2407 + ch * 5 else 5000 + ch * 5, ch, band, w, sec, conn)
         vm.wifi.band = 24
         vm.wifi.aps = listOf(
-            ap("Office", 1, -41, "WPA2", conn = true), ap("Neighbor_2G", 3, -63, "WPA2"), ap("Cafe-Guest", 6, -68, "Открытая"),
+            ap("Office", 1, -41, "WPA2", conn = true), ap("Neighbor_2G", 3, -63, "WPA2"), ap("Cafe-Guest", 6, -68, tr(R.string.open_3)),
             ap("TP-Link_7A", 6, -74, "WPA2"), ap("HomeNet", 11, -82, "WPA3"), ap("Office-5G", 44, -54, "WPA2", w = 80, band = 5),
         ).sortedByDescending { it.dbm }
         vm.wifi.lastScan = now - min
@@ -96,9 +103,9 @@ class DemoShotsTest {
                 TargetStats("8.8.8.8", 4020, 24, 3996 * 18.0, 212.0, 18.4, 0, false, 0, 1, 242_000),
                 wave(80, 2.6f, 1.1f).map { maxOf(0.4f, it) }, wave(80, 18f, 6f, 2f).map { maxOf(1f, it) },
                 listOf(
-                    MonEvent(now - 47 * min, "✔ Интернет снова на связи (не было 4м 02с)", false),
-                    MonEvent(now - 51 * min, "✖ Интернет не отвечает", true),
-                    MonEvent(now - (2 * 60 + 14) * min, "Мониторинг запущен: роутер 192.168.88.1, интернет 8.8.8.8", false),
+                    MonEvent(now - 47 * min, L("✔ Internet is back online (was down 4m 02s)", "✔ Интернет снова на связи (не было 4м 02с)"), false),
+                    MonEvent(now - 51 * min, L("✖ Internet is not responding", "✖ Интернет не отвечает"), true),
+                    MonEvent(now - (2 * 60 + 14) * min, L("Monitoring started: router 192.168.88.1, internet 8.8.8.8", "Мониторинг запущен: роутер 192.168.88.1, интернет 8.8.8.8"), false),
                 ))
         }
 
@@ -121,7 +128,7 @@ class DemoShotsTest {
         vm.mt.leases = listOf(
             MtLease("192.168.88.40", "02:1A:2B:3C:4D:5E", "RECEPTION-PC", "bound", ""),
             MtLease("192.168.88.70", "02:AA:00:00:00:01", "Laptop-Reception", "bound", ""),
-            MtLease("192.168.88.24", "02:1C:27:5A:00:24", "", "bound", "камера вход"),
+            MtLease("192.168.88.24", "02:1C:27:5A:00:24", "", "bound", L("entrance camera", "камера вход")),
         )
         return vm
     }
@@ -131,7 +138,7 @@ class DemoShotsTest {
         vm.selectTab(tab)
         rule.setContent { NetWatchScreen(vm) }
         rule.waitForIdle()
-        rule.onRoot().captureRoboImage("../docs/screenshots/$name.png")
+        rule.onRoot().captureRoboImage("../docs/screenshots/$lang/$name.png")
     }
 
     @Test fun s1home() = shot("1_home", TAB_DASH)

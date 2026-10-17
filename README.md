@@ -1,146 +1,139 @@
 <div align="center">
 
-<img src="docs/icon.png" width="96" alt="Иконка NetWatch">
+**English** | [Русский](README.ru.md)
+
+<img src="docs/icon.png" width="96" alt="NetWatch icon">
 
 # NetWatch: Network Scanner
 
-**Бесплатный сетевой сканер и Wi-Fi анализатор для Android**<br>
-Сканер сети · Wi-Fi эфир · пинг · скорость интернета · мониторинг обрывов · traceroute · порты · MikroTik
+**Free network scanner and Wi-Fi analyzer for Android**<br>
+LAN scanner · Wi-Fi channels · ping · speed test · outage monitor · traceroute · ports · MikroTik
 
-[![Версия](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FL1TTLEHE11%2FNetWatch%2Fmain%2Fupdate.json&query=%24.versionName&label=%D0%B2%D0%B5%D1%80%D1%81%D0%B8%D1%8F&color=ff003c)](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.4.2-universal.apk)
-[![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-00f0ff)](#установка)
-[![Лицензия GPL-3.0](https://img.shields.io/badge/%D0%BB%D0%B8%D1%86%D0%B5%D0%BD%D0%B7%D0%B8%D1%8F-GPL--3.0-fcee0a)](LICENSE)
-[![Без рекламы](https://img.shields.io/badge/%D1%80%D0%B5%D0%BA%D0%BB%D0%B0%D0%BC%D0%B0-%D0%BD%D0%B5%D1%82-00ff66)](#приватность)
+[![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FL1TTLEHE11%2FNetWatch%2Fmain%2Fupdate.json&query=%24.versionName&label=version&color=ff003c)](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.5-universal.apk)
+[![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-00f0ff)](#install)
+[![License GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-fcee0a)](LICENSE)
+[![No ads](https://img.shields.io/badge/ads-none-00ff66)](#privacy)
 
-### [📥 Скачать APK](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.4.2-universal.apk) · [Сайт](https://l1ttlehe11.github.io/NetWatch/) · [English](#english)
+### [📥 Download APK](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.5-universal.apk) · [Website](https://l1ttlehe11.github.io/NetWatch/)
 
 </div>
 
 <table>
 <tr>
-<td><img src="docs/screenshots/1_home.png" alt="Главная: сигнал, пинги, последний замер"></td>
-<td><img src="docs/screenshots/3_scan.png" alt="Сканер сети: устройства с типами"></td>
-<td><img src="docs/screenshots/4_wifi.png" alt="Wi-Fi анализатор: каналы и рекомендация"></td>
-<td><img src="docs/screenshots/2_speed.png" alt="Интернетометр"></td>
+<td><img src="docs/screenshots/en/1_home.png" alt="Home: signal, pings, last speed test"></td>
+<td><img src="docs/screenshots/en/3_scan.png" alt="LAN scanner: devices with types"></td>
+<td><img src="docs/screenshots/en/4_wifi.png" alt="Wi-Fi analyzer: channels and recommendation"></td>
+<td><img src="docs/screenshots/en/2_speed.png" alt="Speed test"></td>
 </tr>
 <tr>
-<td><img src="docs/screenshots/5_monitor.png" alt="Мониторинг обрывов"></td>
-<td><img src="docs/screenshots/6_mikrotik.png" alt="MikroTik: интерфейсы, CAPsMAN, клиенты"></td>
-<td><img src="docs/screenshots/7_history.png" alt="История замеров"></td>
-<td><img src="docs/screenshots/8_more.png" alt="Раздел «Ещё»"></td>
+<td><img src="docs/screenshots/en/5_monitor.png" alt="Outage monitor"></td>
+<td><img src="docs/screenshots/en/6_mikrotik.png" alt="MikroTik: interfaces, CAPsMAN, clients"></td>
+<td><img src="docs/screenshots/en/7_history.png" alt="Measurement history"></td>
+<td><img src="docs/screenshots/en/8_more.png" alt="More section"></td>
 </tr>
 </table>
 
-NetWatch — набор инструментов для тех, кто настраивает и чинит сети: от домашнего роутера до отеля с десятком точек доступа. Всё в одном приложении, бесплатно, без рекламы и без сбора данных. Изначально — Android-версия десктопной утилиты NetWatch (Python / Tkinter).
+NetWatch is a toolkit for people who set up and fix networks — from a home router to a hotel with a dozen access points. Everything in one app, free, with no ads and no data collection. It started as the Android port of the NetWatch desktop utility (Python / Tkinter).
 
-## Возможности
+## Features
 
-| Раздел | Что умеет |
+| Section | What it does |
 |---|---|
-| **01 Главная** | Сигнал Wi-Fi в dBm с графиком, пинг до роутера и интернета, быстрые действия, последний замер скорости и итог за неделю, устройства в сети, статус мониторинга |
-| **02 Скорость** | Многопоточный замер (8 потоков ↓, 6 ↑), цифры и шкалы обновляются 10 раз в секунду, пинг и джиттер, график и история |
-| **03 Сеть → Сканер** | Все устройства подсети за 10–30 с, тип устройства (роутер, MikroTik, камера, принтер, Android TV, Smart TV, ПК, iPhone, NAS), открытые порты, имена через NetBIOS, mDNS и UPnP, метка «НОВОЕ» для новых устройств |
-| **03 Сеть → Пинг · TCP** | Live-пинг любого узла со статистикой потерь, TCP-тест скорости до устройства в локальной сети, Wake-on-LAN |
-| **03 Сеть → Диагностика** | Traceroute, сравнение DNS-серверов (провайдер, Google, Cloudflare, Яндекс, Quad9, AdGuard), сканер портов с расшифровкой служб, интерфейсы и маршруты |
-| **04 Wi-Fi → Эфир** | Все сети вокруг, график загрузки каналов 2.4 / 5 / 6 ГГц, рекомендация лучшего канала |
-| **04 Wi-Fi → Обход** | Замеры по точкам объекта («номер 204», «ресепшн»): сигнал, точка доступа, пинг, потери, скорость; проблемные точки подсвечиваются; выгрузка в Excel и PDF |
-| **05 Ещё → Мониторинг** | Фоновая проверка роутера и интернета каждые 2 с, уведомления об обрывах, потери, время без связи, журнал событий |
-| **05 Ещё → MikroTik** | RouterOS API (v6 и v7): CPU, память, температура, трафик по интерфейсам, точки CAPsMAN, Wi-Fi клиенты с сигналом, DHCP-аренды |
-| **05 Ещё → История** | Все замеры, сканы и сессии сохраняются автоматически; фильтры по типу, сети и периоду; сводка скорости за период с выгрузкой в Excel |
+| **01 Home** | Wi-Fi signal in dBm with a graph, ping to the router and the internet, quick actions, last speed test and weekly summary, devices on the network, monitor status |
+| **02 Speed** | Multi-threaded test (8 streams ↓, 6 ↑), numbers and bars update 10 times per second, ping and jitter, graph and history |
+| **03 Network → Scanner** | All subnet devices in 10–30 s, device type (router, MikroTik, camera, printer, Android TV, Smart TV, PC, iPhone, NAS), open ports, names via NetBIOS, mDNS and UPnP, a “NEW” tag for new devices |
+| **03 Network → Ping · TCP** | Live ping of any host with loss statistics, TCP throughput test to a LAN device, Wake-on-LAN |
+| **03 Network → Diagnostics** | Traceroute, DNS benchmark (ISP, Google, Cloudflare, Yandex, Quad9, AdGuard), port scanner with service names, interfaces and routes |
+| **04 Wi-Fi → Air** | All nearby networks, 2.4 / 5 / 6 GHz channel load graph, best channel recommendation |
+| **04 Wi-Fi → Survey** | Measurements per location (“room 204”, “reception”): signal, access point, ping, loss, speed; weak spots are highlighted; export to Excel and PDF |
+| **05 More → Monitor** | Background router and internet checks every 2 s, outage notifications, loss, downtime, event log |
+| **05 More → MikroTik** | RouterOS API (v6 and v7): CPU, memory, temperature, interface traffic, CAPsMAN access points, Wi-Fi clients with signal, DHCP leases |
+| **05 More → History** | Every test, scan and session is saved automatically; filters by type, network and period; speed summary with Excel export |
 
-Также: PDF-отчёт одной кнопкой, виджет на рабочий стол, крупный шрифт, обновление прямо из приложения с проверкой SHA-256.
+Also: one-tap PDF report, home-screen widget, large font, in-app updates with SHA-256 verification.
 
-## Установка
+**Languages:** English and Russian — follows the system language, switchable in “More → Settings → Language”.
 
-1. Скачайте [**NetWatch-2.4.2-universal.apk**](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.4.2-universal.apk). Один файл для всех устройств на Android 8.0+ (arm64-v8a, armeabi-v7a, x86, x86_64).
-2. Откройте его на телефоне и разрешите установку из этого источника.
-3. Разрешите доступ к геолокации, когда приложение попросит: без него Android скрывает имя Wi-Fi сети.
+## Install
 
-Дальше приложение обновляется само: «Ещё → Настройки → Обновления».
+1. Download [**NetWatch-2.5-universal.apk**](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.5-universal.apk). One file for every device on Android 8.0+ (arm64-v8a, armeabi-v7a, x86, x86_64).
+2. Open it on the phone and allow installs from this source.
+3. Allow location access when asked: without it Android hides the Wi-Fi network name.
 
-SHA-256: `5d242123f6df6489a7579eeacd444875bd24103ba388686792ac2a15dbe18ec8`
+After that the app updates itself: “More → Settings → Updates”.
 
-## Приватность
+SHA-256: `134a3c75f8ba4f9bd2405fd41f231d6ae312f0a10106d34b9df1202685e72b89`
 
-NetWatch **ничего не собирает и никуда не отправляет**: нет аналитики, рекламы, учётных записей и серверов. История замеров хранится только на телефоне. Подробно — в [политике конфиденциальности](https://l1ttlehe11.github.io/NetWatch/privacy.html).
+## Privacy
 
-| Разрешение | Зачем |
+NetWatch **collects nothing and sends nothing anywhere**: no analytics, no ads, no accounts, no servers. History stays on the phone. Details: [privacy policy](https://l1ttlehe11.github.io/NetWatch/privacy.html).
+
+| Permission | Why |
 |---|---|
-| `INTERNET`, `ACCESS_NETWORK_STATE`, `ACCESS_WIFI_STATE` | пинги, замеры, параметры сети |
-| `ACCESS_FINE/COARSE_LOCATION` | без него Android скрывает SSID и результаты сканирования Wi-Fi; координаты не используются |
-| `CHANGE_WIFI_STATE` | запуск сканирования Wi-Fi эфира |
-| `FOREGROUND_SERVICE`, `WAKE_LOCK`, `POST_NOTIFICATIONS` | фоновый мониторинг и уведомления об обрывах |
-| `REQUEST_INSTALL_PACKAGES` | установка обновлений, скачанных из приложения |
+| `INTERNET`, `ACCESS_NETWORK_STATE`, `ACCESS_WIFI_STATE` | pings, tests, network parameters |
+| `ACCESS_FINE/COARSE_LOCATION` | without it Android hides the SSID and Wi-Fi scan results; coordinates are never used |
+| `CHANGE_WIFI_STATE` | starting a Wi-Fi scan |
+| `FOREGROUND_SERVICE`, `WAKE_LOCK`, `POST_NOTIFICATIONS` | background monitor and outage notifications |
+| `REQUEST_INSTALL_PACKAGES` | installing updates downloaded by the app |
 
-## Ошибки и предложения
+## Translations
 
-Нашли ошибку или есть идея — [создайте issue](https://github.com/L1TTLEHE11/NetWatch/issues/new/choose). Pull request'ы приветствуются.
+Want NetWatch in your language? Translate `app/src/main/res/values/strings.xml` (the English source) and send it as `values-<language code>/strings.xml` in a pull request or an issue. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Для разработчиков
+## Bugs and ideas
 
-**Kotlin + Jetpack Compose**, minSdk 26, targetSdk 35. Без сторонних сетевых библиотек: RouterOS API, mDNS, SSDP, NetBIOS, DNS, Wake-on-LAN реализованы в коде проекта.
+Found a bug or have an idea? [Open an issue](https://github.com/L1TTLEHE11/NetWatch/issues/new/choose). Pull requests are welcome.
+
+## For developers
+
+**Kotlin + Jetpack Compose**, minSdk 26, targetSdk 35. No third-party networking libraries: RouterOS API, mDNS, SSDP, NetBIOS, DNS and Wake-on-LAN are implemented in the project.
 
 ```bash
-# нужен JDK 17+ и Android SDK (platform 35, build-tools 35)
+# needs JDK 17+ and Android SDK (platform 35, build-tools 35)
 echo "sdk.dir=/path/to/Android/Sdk" > local.properties
 ./gradlew assembleRelease          # APK: app/build/outputs/apk/release/
-./gradlew testDebugUnitTest        # тесты протоколов + скриншоты экранов (Robolectric + Roborazzi)
+./gradlew testDebugUnitTest        # protocol tests + screen screenshots (Robolectric + Roborazzi)
 ```
 
 <details>
-<summary>Подпись, выпуск версий, структура проекта</summary>
+<summary>Signing, releases, project layout</summary>
 
-**Подпись.** Release подписывается ключом из `keystore.properties` → `keys/netwatch-release.jks` (оба в `.gitignore`). Обновление ставится поверх только при подписи тем же ключом. Без `keystore.properties` сборка подпишется debug-ключом.
+**Signing.** Release builds are signed with the key from `keystore.properties` → `keys/netwatch-release.jks` (both in `.gitignore`). An update installs over the old version only when signed with the same key. Without `keystore.properties` the build is signed with the debug key.
 
-**Выпуск версии.**
-1. Поднять `versionCode` и `versionName` в `app/build.gradle.kts`.
+**Releasing a version.**
+1. Bump `versionCode` and `versionName` in `app/build.gradle.kts`.
 2. `./gradlew assembleRelease`
-3. `python3 tools/release.py "что нового 1" "что нового 2"` — APK в `apk/` (хранятся 3 последние), `update.json`, ссылки в README и на сайте, список изменений для каталогов.
-4. `git push`, затем `curl -s https://purge.jsdelivr.net/gh/L1TTLEHE11/NetWatch@main/update.json`.
+3. `python3 tools/release.py --en "What's new" … --ru "Что нового" …` — APK into `apk/` (the 3 latest are kept), `update.json`, links in the READMEs and on the site, changelogs for app catalogs.
+4. `git push`, then `curl -s https://purge.jsdelivr.net/gh/L1TTLEHE11/NetWatch@main/update.json`.
 
-**Скриншоты для README и сайта:** `./gradlew testDebugUnitTest --tests '*DemoShots*'` (экраны с примерными данными → `docs/screenshots/`).
+**Screenshots for README and site:** `./gradlew testDebugUnitTest --tests '*DemoShots*'` (screens with sample data → `docs/screenshots/en/` and `docs/screenshots/ru/`), then `python3 tools/store_art.py .`
 
 ```
-update.json                — актуальная версия для обновления из приложения
-tools/release.py           — выпуск новой версии
-docs/                      — сайт (GitHub Pages), политика конфиденциальности, скриншоты
-fastlane/metadata/android/ — описания и картинки для каталогов приложений
+update.json                — current version for in-app updates
+tools/release.py           — publishing a new version
+docs/                      — website (GitHub Pages): English at the root, Russian in docs/ru/
+fastlane/metadata/android/ — descriptions and images for app catalogs
+app/src/main/res/values*/strings.xml — UI texts (values — English, values-ru — Russian)
 app/src/main/java/com/pshenov/netwatch/
-├── NetVm.kt, Features.kt  — состояние и логика экранов
-├── Net.kt                 — пинг, Wi-Fi / сотовая сеть, шлюз, замеры скорости
-├── Tools.kt               — сканер сети и портов, traceroute, DNS, NetBIOS, Wake-on-LAN
-├── Discovery.kt           — обнаружение устройств по mDNS и SSDP/UPnP
-├── WifiScan.kt            — сканирование эфира и выбор канала
-├── Mikrotik.kt            — клиент RouterOS API
-├── Monitor.kt             — фоновый мониторинг
-├── History.kt             — хранилище истории и известных устройств
-├── Updater.kt             — обновление из приложения
-├── Report.kt, Widget.kt   — отчёты PDF/TXT/CSV, виджет
-└── Ui*.kt                 — интерфейс
+├── NetVm.kt, Features.kt  — screen state and logic
+├── Net.kt                 — ping, Wi-Fi / cellular, gateway, speed tests
+├── Tools.kt               — LAN and port scanner, traceroute, DNS, NetBIOS, Wake-on-LAN
+├── Discovery.kt           — device discovery via mDNS and SSDP/UPnP
+├── WifiScan.kt            — Wi-Fi scanning and channel choice
+├── Mikrotik.kt            — RouterOS API client
+├── Monitor.kt             — background monitor
+├── History.kt             — history and known devices storage
+├── Updater.kt             — in-app updates
+├── Lang.kt                — UI language (system / manual)
+├── Report.kt, Widget.kt   — PDF/TXT/CSV reports, widget
+└── Ui*.kt                 — user interface
 ```
 </details>
 
----
+<sub>Keywords: network scanner, IP scanner, LAN scanner, Wi-Fi analyzer, WiFi channel analyzer, ping, traceroute, port scanner, speed test, network monitor, MikroTik, RouterOS, CAPsMAN, Wake-on-LAN, mDNS, UPnP</sub>
 
-## English
+## License
 
-**NetWatch** is a free, open-source network scanner and Wi-Fi analyzer for Android with a cyberpunk HUD interface. No ads, no analytics, no data collection. *Interface language: Russian.*
-
-- **LAN scanner** — finds all devices on the subnet, detects routers, MikroTik, IP cameras, printers, Android TV / Smart TV, PCs, iPhones and NAS; discovers silent devices via mDNS and SSDP/UPnP with their names; highlights new devices.
-- **Wi-Fi analyzer** — nearby networks, 2.4 / 5 / 6 GHz channel graph, best channel recommendation.
-- **Site survey** — signal, ping and loss per location, export to CSV and PDF.
-- **Speed test** — multi-threaded download / upload with live gauges, ping, jitter, history.
-- **Diagnostics** — traceroute, DNS benchmark, port scanner, interfaces and routes, live ping, LAN TCP throughput test, Wake-on-LAN.
-- **24/7 monitor** — background router and internet checks with outage notifications and downtime statistics.
-- **MikroTik** — RouterOS API client: resources, live interface traffic, CAPsMAN access points, Wi-Fi clients, DHCP leases.
-- **History, PDF reports, home-screen widget, in-app updates** with SHA-256 verification.
-
-[**Download APK**](https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.4.2-universal.apk) — universal, Android 8.0+.
-
-<sub>Keywords: network scanner, IP scanner, LAN scanner, Wi-Fi analyzer, WiFi channel analyzer, ping, traceroute, port scanner, speed test, network monitor, MikroTik, RouterOS, CAPsMAN, Wake-on-LAN, mDNS, UPnP · сетевой сканер, сканер IP, анализатор Wi-Fi, пинг, трассировка, сканер портов, скорость интернета, мониторинг сети, микротик</sub>
-
-## Лицензия
-
-[GNU GPL v3](LICENSE) — свободное ПО: его можно использовать, изучать, менять и распространять; изменённые версии тоже должны оставаться открытыми под GPL-3.0.
+[GNU GPL v3](LICENSE) — free software: you may use, study, modify and share it; modified versions must stay open under GPL-3.0 too.
 
 **NetWatch** · Created by **L1TTLEHE11**

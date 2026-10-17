@@ -10,7 +10,12 @@ import kotlin.concurrent.thread
 import java.nio.file.Files
 import java.security.MessageDigest
 
+// Robolectric — чтобы были ресурсы строк; язык фиксируем русский, на нём написаны проверки
+@org.junit.runner.RunWith(org.robolectric.RobolectricTestRunner::class)
+@org.robolectric.annotation.Config(sdk = [34])
 class UpdaterTest {
+    @org.junit.Before fun pinLang() { Lang.pin(androidx.test.core.app.ApplicationProvider.getApplicationContext(), "ru") }
+
     private lateinit var srv: ServerSocket
     private val apk = ByteArray(300_000) { (it * 31 % 251).toByte() }
     private val sha = MessageDigest.getInstance("SHA-256").digest(apk).joinToString("") { "%02x".format(it) }

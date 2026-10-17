@@ -22,19 +22,19 @@ object Discovery {
 
     /* ---------------- mDNS ---------------- */
 
-    val mdnsServices = linkedMapOf(
+    val mdnsServices get() = linkedMapOf(
         "_androidtvremote2._tcp.local" to "Android TV",
         "_googlecast._tcp.local" to "Chromecast / Smart TV",
         "_airplay._tcp.local" to "Apple TV / AirPlay",
-        "_raop._tcp.local" to "AirPlay-колонка",
-        "_ipp._tcp.local" to "Принтер",
-        "_printer._tcp.local" to "Принтер",
-        "_pdl-datastream._tcp.local" to "Принтер",
-        "_smb._tcp.local" to "Компьютер / NAS",
+        "_raop._tcp.local" to tr(R.string.airplay_speaker),
+        "_ipp._tcp.local" to tr(R.string.printer),
+        "_printer._tcp.local" to tr(R.string.printer),
+        "_pdl-datastream._tcp.local" to tr(R.string.printer),
+        "_smb._tcp.local" to tr(R.string.computer_nas),
         "_afpovertcp._tcp.local" to "Mac / NAS",
-        "_hap._tcp.local" to "Умный дом (HomeKit)",
-        "_spotify-connect._tcp.local" to "Колонка Spotify",
-        "_workstation._tcp.local" to "Компьютер",
+        "_hap._tcp.local" to tr(R.string.smart_home_homekit),
+        "_spotify-connect._tcp.local" to tr(R.string.spotify_speaker),
+        "_workstation._tcp.local" to tr(R.string.computer),
         "_http._tcp.local" to null,
     )
 
@@ -129,7 +129,7 @@ object Discovery {
                     for ((svc, inst) in r.ptr) {
                         val key = mdnsServices.keys.firstOrNull { svc.equals(it, true) } ?: continue
                         val t = r.txt[inst].orEmpty()
-                        val friendly = t["fn"] ?: t["n"] ?: inst.removeSuffix(".$key").removeSuffix("." + key.lowercase())
+                        val friendly = t["fn"] ?: t["n"] ?: inst.removeSuffix(".${key}").removeSuffix("." + key.lowercase())
                         val prev = found[ip]
                         val kind = mdnsServices[key]
                         // более конкретный тип важнее (Android TV > Chromecast > http)
@@ -153,16 +153,16 @@ object Discovery {
     fun kindFromUpnp(deviceType: String?, server: String?, name: String?): String? {
         val d = deviceType.orEmpty().lowercase(); val s = server.orEmpty().lowercase(); val n = name.orEmpty().lowercase()
         return when {
-            "internetgatewaydevice" in d || "wanconnection" in d -> "Роутер / шлюз"
-            "printer" in d -> "Принтер"
-            "mediaserver" in d -> "Медиасервер / NAS"
-            "mediarenderer" in d || "dial" in d || "tv" in n || "android" in s || "webos" in s || "tizen" in s -> "Smart TV / медиаплеер"
-            "camera" in d || "digitalsecuritycamera" in d -> "IP-камера / регистратор"
+            "internetgatewaydevice" in d || "wanconnection" in d -> tr(R.string.router_gateway)
+            "printer" in d -> tr(R.string.printer)
+            "mediaserver" in d -> tr(R.string.media_server_nas)
+            "mediarenderer" in d || "dial" in d || "tv" in n || "android" in s || "webos" in s || "tizen" in s -> tr(R.string.smart_tv_media_player)
+            "camera" in d || "digitalsecuritycamera" in d -> tr(R.string.ip_camera_nvr)
             else -> null
         }
     }
 
-    private fun tag(xml: String, t: String) = Regex("<$t>([^<]{1,120})</$t>", RegexOption.IGNORE_CASE).find(xml)?.groupValues?.get(1)?.trim()
+    private fun tag(xml: String, t: String) = Regex("<${t}>([^<]{1,120})</${t}>", RegexOption.IGNORE_CASE).find(xml)?.groupValues?.get(1)?.trim()
 
     fun ssdp(timeoutMs: Int = 2500): List<Discovered> {
         val loc = mutableMapOf<String, Map<String, String>>()
@@ -171,7 +171,7 @@ object Discovery {
                 s.soTimeout = 250
                 val group = InetAddress.getByName("239.255.255.250")
                 fun search(st: String) {
-                    val m = "M-SEARCH * HTTP/1.1\r\nHOST: 239.255.255.250:1900\r\nMAN: \"ssdp:discover\"\r\nMX: 2\r\nST: $st\r\n\r\n".toByteArray()
+                    val m = "M-SEARCH * HTTP/1.1\r\nHOST: 239.255.255.250:1900\r\nMAN: \"ssdp:discover\"\r\nMX: 2\r\nST: ${st}\r\n\r\n".toByteArray()
                     s.send(DatagramPacket(m, m.size, group, 1900))
                 }
                 search("ssdp:all"); search("urn:dial-multiscreen-org:service:dial:1"); search("upnp:rootdevice")

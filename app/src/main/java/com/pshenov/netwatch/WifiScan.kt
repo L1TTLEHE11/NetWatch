@@ -32,7 +32,7 @@ object WifiScan {
         caps.contains("WPA2") || caps.contains("RSN") -> "WPA2"
         caps.contains("WPA") -> "WPA"
         caps.contains("WEP") -> "WEP"
-        else -> "Открытая"
+        else -> tr(R.string.open_3)
     }
 
     @Suppress("DEPRECATION")
@@ -46,7 +46,7 @@ object WifiScan {
                 val center = if (w > 20 && r.centerFreq0 > 0) r.centerFreq0 else r.frequency
                 val ssid = (if (Build.VERSION.SDK_INT >= 33) r.wifiSsid?.toString() else r.SSID)?.trim('"').orEmpty()
                 Ap(
-                    ssid = ssid.ifBlank { "<скрытая сеть>" }, bssid = r.BSSID ?: "", dbm = r.level, freq = r.frequency,
+                    ssid = ssid.ifBlank { tr(R.string.hidden_network) }, bssid = r.BSSID ?: "", dbm = r.level, freq = r.frequency,
                     centerFreq = center, channel = NetInfo.channel(r.frequency), band = bandOf(r.frequency), widthMhz = w,
                     security = security(r.capabilities ?: ""), connected = r.BSSID != null && r.BSSID.equals(myBssid, true),
                 )
@@ -85,10 +85,10 @@ object WifiScan {
         val best = scores.minByOrNull { it.value } ?: return null
         val cur = myChannel?.let { load(inBand, freqOf(it, band), 20) }
         val note = when {
-            cur == null -> "Рекомендуемый канал для новой точки доступа"
-            myChannel == best.key -> "Ваш канал уже оптимальный"
-            cur <= best.value * 1.5 + 1 -> "Ваш канал в порядке, разница небольшая"
-            else -> "Смена канала заметно уменьшит помехи"
+            cur == null -> tr(R.string.recommended_channel_for_a_new_access)
+            myChannel == best.key -> tr(R.string.your_channel_is_already_optimal)
+            cur <= best.value * 1.5 + 1 -> tr(R.string.your_channel_is_fine_the_difference)
+            else -> tr(R.string.switching_channel_will_noticeably_reduce_interference)
         }
         return ChannelAdvice(band, best.key, best.value, myChannel, cur, note)
     }

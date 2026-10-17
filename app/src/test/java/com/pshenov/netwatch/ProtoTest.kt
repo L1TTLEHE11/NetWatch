@@ -7,7 +7,12 @@ import java.io.ByteArrayOutputStream
 import java.net.ServerSocket
 import kotlin.concurrent.thread
 
+// Robolectric — чтобы были ресурсы строк; язык фиксируем русский, на нём написаны проверки
+@org.junit.runner.RunWith(org.robolectric.RobolectricTestRunner::class)
+@org.robolectric.annotation.Config(sdk = [34])
 class ProtoTest {
+    @org.junit.Before fun pinLang() { Lang.pin(androidx.test.core.app.ApplicationProvider.getApplicationContext(), "ru") }
+
     @Test fun lengthEncoding() {
         for (n in listOf(0, 1, 0x7f, 0x80, 0x3fff, 0x4000, 0x1fffff, 0x200000, 0xfffffff, 0x10000000)) {
             val enc = RouterOs.encodeLen(n)

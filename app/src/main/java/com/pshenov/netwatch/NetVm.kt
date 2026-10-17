@@ -40,12 +40,15 @@ const val TAB_DIAG = 5; const val TAB_LOCAL = 6; const val TAB_MONITOR = 7; cons
 const val TAB_MORE = 10; const val TAB_SETTINGS = 11
 
 /** Пять разделов нижнего меню; внутри «Сети» и «Wi-Fi» — переключатель, внутри «Ещё» — свои экраны. */
-enum class Section(val idx: String, val label: String, val title: String, val root: Int, val tabs: List<Int>) {
-    HOME("01", "ГЛАВНАЯ", "Главная", TAB_DASH, listOf(TAB_DASH)),
-    SPEED("02", "СКОРОСТЬ", "Скорость", TAB_SPEED, listOf(TAB_SPEED)),
-    NET("03", "СЕТЬ", "Сеть", TAB_SCAN, listOf(TAB_SCAN, TAB_LOCAL, TAB_DIAG)),
-    WIFI("04", "WI-FI", "Wi-Fi", TAB_WIFI, listOf(TAB_WIFI, TAB_SURVEY)),
-    MORE("05", "ЕЩЁ", "Ещё", TAB_MORE, listOf(TAB_MORE, TAB_MONITOR, TAB_MIKROTIK, TAB_HISTORY, TAB_SETTINGS));
+enum class Section(val idx: String, private val labelRes: Int, private val titleRes: Int, val root: Int, val tabs: List<Int>) {
+    HOME("01", R.string.home, R.string.home_2, TAB_DASH, listOf(TAB_DASH)),
+    SPEED("02", R.string.speed, R.string.speed_2, TAB_SPEED, listOf(TAB_SPEED)),
+    NET("03", R.string.network, R.string.network_2, TAB_SCAN, listOf(TAB_SCAN, TAB_LOCAL, TAB_DIAG)),
+    WIFI("04", 0, 0, TAB_WIFI, listOf(TAB_WIFI, TAB_SURVEY)),
+    MORE("05", R.string.more, R.string.more_2, TAB_MORE, listOf(TAB_MORE, TAB_MONITOR, TAB_MIKROTIK, TAB_HISTORY, TAB_SETTINGS));
+    // перевод на текущий язык — при каждом обращении (язык может смениться без перезапуска)
+    val label: String get() = if (labelRes == 0) "WI-FI" else tr(labelRes)
+    val title: String get() = if (titleRes == 0) "Wi-Fi" else tr(titleRes)
     companion object { fun of(tab: Int) = entries.firstOrNull { tab in it.tabs } ?: HOME }
 }
 
@@ -56,7 +59,7 @@ class NetVm(app: Application) : AndroidViewModel(app) {
 
     var radio by mutableStateOf(RadioState())
     var radioHist by mutableStateOf(List(40) { -100f })
-    var report by mutableStateOf("// ЗАГРУЗКА КОНФИГУРАЦИИ СЕТЕВЫХ АДАПТЕРОВ...")
+    var report by mutableStateOf(tr(R.string.loading_network_adapter_configuration))
 
     val gw = PingCard("192.168.1.1")
     val inet = PingCard("8.8.8.8")
@@ -136,10 +139,10 @@ class NetVm(app: Application) : AndroidViewModel(app) {
     private fun saveSpeed(d: Double, u: Double) {
         val net = NetInfo.networkLabel(ctx)
         History.add(HItem(History.nextId(), System.currentTimeMillis(), HKind.SPEED, net,
-            "↓ %.1f  ↑ %.1f Мбит/с".format(d, u),
-            "пинг ${pingMs?.let { "%.0f".format(it) } ?: "—"} мс · джиттер ${jitterMs?.let { "%.1f".format(it) } ?: "—"} мс · $server",
-            "Сеть: $net\nСервер: $server\nПинг: ${pingMs?.let { "%.1f мс".format(it) } ?: "—"}\nДжиттер: ${jitterMs?.let { "%.1f мс".format(it) } ?: "—"}\n" +
-                "Скачивание: %.2f Мбит/с (8 потоков)\nОтдача: %.2f Мбит/с (6 потоков)".format(d, u),
+            tr(R.string.s_1f_1f_mbit_s).format(d, u),
+            tr(R.string.ping_ms_jitter_ms, pingMs?.let { "%.0f".format(it) } ?: "—", jitterMs?.let { "%.1f".format(it) } ?: "—", server),
+            tr(R.string.network_server_ping_jitter, net, server, pingMs?.let { tr(R.string.s_1f_ms).format(it) } ?: "—", jitterMs?.let { tr(R.string.s_1f_ms).format(it) } ?: "—") +
+                tr(R.string.download_2f_mbit_s_8_threads).format(d, u),
             num1 = d, num2 = u, num3 = pingMs))
     }
 
@@ -147,7 +150,7 @@ class NetVm(app: Application) : AndroidViewModel(app) {
     private fun markInterruptedMonitor() {
         if (Monitor.state.value.running) return
         History.items.value.filter { it.kind == HKind.MONITOR && it.title.startsWith("● ") }.forEach {
-            History.upsert(it.copy(title = it.title.removePrefix("● ").replace("идёт", "прервана")))
+            History.upsert(it.copy(title = it.title.removePrefix("● ").replace(tr(R.string.running_2), tr(R.string.interrupted))))
         }
     }
     private fun syncActive() {
@@ -156,7 +159,7 @@ class NetVm(app: Application) : AndroidViewModel(app) {
         if (wifi.active) viewModelScope.launch(Dispatchers.IO) { wifi.scan() }
     }
 
-    var localLog by mutableStateOf("Live-Пинг запущен автоматически! Введите любой IP в поле выше, чтобы видеть график отклика до устройства в реальном времени.\n")
+    var localLog by mutableStateOf(tr(R.string.live_ping_started_automatically_enter_any))
     var localBusy by mutableStateOf(false)
 
     private val uiPrefs = ctx.getSharedPreferences("ui", android.content.Context.MODE_PRIVATE)
@@ -203,7 +206,7 @@ class NetVm(app: Application) : AndroidViewModel(app) {
     fun autoGateway() = viewModelScope.launch(Dispatchers.IO) { detectGateway() }
 
     fun refreshReport() = viewModelScope.launch(Dispatchers.IO) {
-        val r = try { NetInfo.report(ctx) } catch (e: Exception) { "// ОШИБКА ПОЛУЧЕНИЯ СПИСКА АДАПТЕРОВ: $e" }
+        val r = try { NetInfo.report(ctx) } catch (e: Exception) { tr(R.string.failed_to_read_adapters, e) }
         ui { report = r }
     }
 
@@ -265,36 +268,36 @@ class NetVm(app: Application) : AndroidViewModel(app) {
     /** Сводный отчёт по всем модулям — для PDF/TXT. */
     fun fullReport(): String = buildString {
         val f = java.text.SimpleDateFormat("dd.MM.yyyy HH:mm:ss", java.util.Locale.getDefault())
-        append("Дата: ${f.format(java.util.Date())}\n\n")
-        append("== СЕТЬ И ИНТЕРФЕЙСЫ ==\n"); append(report.trim()).append("\n\n")
+        append(tr(R.string.date, f.format(java.util.Date())))
+        append(tr(R.string.network_and_interfaces)); append(report.trim()).append("\n\n")
         val r = radio
-        append("== СИГНАЛ ==\n")
-        append("Тип: ${r.status}  Сеть: ${r.ssid ?: r.operator ?: "—"}  Сигнал: ${r.dbm ?: "—"} dBm  Качество: ${r.quality ?: "—"}%")
-        r.freqMhz?.let { append("  ${NetInfo.band(it)}, канал ${NetInfo.channel(it)}") }; r.linkMbps?.let { append("  линк $it Мбит/с") }
-        append("\n\n== ПИНГИ (последние 40 замеров) ==\n")
-        for ((n, c) in listOf("Роутер" to gw, "Интернет" to inet, "Узел" to custom)) {
+        append(tr(R.string.signal))
+        append(tr(R.string.type_network_signal_dbm_quality, r.status, r.ssid ?: r.operator ?: "—", r.dbm ?: "—", r.quality ?: "—"))
+        r.freqMhz?.let { append(tr(R.string.channel, NetInfo.band(it), NetInfo.channel(it))) }; r.linkMbps?.let { append(tr(R.string.link_mbit_s, it)) }
+        append(tr(R.string.pings_last_40_samples))
+        for ((n, c) in listOf(tr(R.string.router_2) to gw, tr(R.string.internet_3) to inet, tr(R.string.host) to custom)) {
             val v = c.valid
-            append("%-9s %-16s мин %.1f / сред %.1f / макс %.1f мс, потери %d/%d\n".format(n, c.host, v.minOrNull() ?: 0f,
+            append(tr(R.string.s_9s_16s_min_1f_avg_1f).format(n, c.host, v.minOrNull() ?: 0f,
                 if (v.isEmpty()) 0f else v.average().toFloat(), v.maxOrNull() ?: 0f, c.lost, c.sent))
         }
         if (results.isNotEmpty()) {
-            append("\n== ЗАМЕРЫ СКОРОСТИ ==\n")
-            results.forEach { x -> append("%s  пинг %s мс  ↓ %.1f Мбит/с  ↑ %.1f Мбит/с\n".format(f.format(java.util.Date(x.time)), x.ping?.let { "%.0f".format(it) } ?: "—", x.dl, x.ul)) }
+            append(tr(R.string.speed_tests))
+            results.forEach { x -> append(tr(R.string.s_ping_s_ms_1f_mbit).format(f.format(java.util.Date(x.time)), x.ping?.let { "%.0f".format(it) } ?: "—", x.dl, x.ul)) }
         }
         val sp = History.items.value.filter { it.kind == HKind.SPEED && it.time > System.currentTimeMillis() - 30 * 86_400_000L }
         if (sp.size > 1) {
             val d = sp.mapNotNull { it.num1 }; val u = sp.mapNotNull { it.num2 }
-            append("\n== СКОРОСТЬ ЗА 30 ДНЕЙ (${sp.size} замеров) ==\n")
-            append("Скачивание: средн. %.1f, мин %.1f, макс %.1f Мбит/с\n".format(d.average(), d.min(), d.max()))
-            append("Отдача:     средн. %.1f, мин %.1f, макс %.1f Мбит/с\n".format(u.average(), u.min(), u.max()))
+            append(tr(R.string.speed_over_30_days_tests, sp.size))
+            append(tr(R.string.download_avg_1f_min_1f_max).format(d.average(), d.min(), d.max()))
+            append(tr(R.string.upload_avg_1f_min_1f_max).format(u.average(), u.min(), u.max()))
         }
-        if (scan.hosts.isNotEmpty()) { append("\n== УСТРОЙСТВА В СЕТИ ==\n"); append(scan.text()) }
-        if (wifi.aps.isNotEmpty()) { append("\n== WI-FI ЭФИР ==\n"); append(wifi.text()) }
-        if (survey.points.isNotEmpty()) { append("\n== ОБХОД ОБЪЕКТА ==\n"); append(survey.text()) }
-        val d = diag.text(); if (d.isNotBlank()) { append("\n== ДИАГНОСТИКА ==\n"); append(d) }
+        if (scan.hosts.isNotEmpty()) { append(tr(R.string.devices_on_the_network)); append(scan.text()) }
+        if (wifi.aps.isNotEmpty()) { append(tr(R.string.wi_fi_spectrum)); append(wifi.text()) }
+        if (survey.points.isNotEmpty()) { append(tr(R.string.site_survey)); append(survey.text()) }
+        val d = diag.text(); if (d.isNotBlank()) { append(tr(R.string.diagnostics)); append(d) }
         val m = Monitor.state.value
         if (m.startedAt > 0) {
-            append("\n== МОНИТОРИНГ СВЯЗИ ==\n"); append(Monitor.summary(m)).append("\n")
+            append(tr(R.string.connection_monitor)); append(Monitor.summary(m)).append("\n")
             m.events.take(50).forEach { e -> append("${f.format(java.util.Date(e.time))}  ${e.text}\n") }
         }
         val t = mt.text(); if (t.isNotBlank()) { append("\n== MIKROTIK ==\n"); append(t) }

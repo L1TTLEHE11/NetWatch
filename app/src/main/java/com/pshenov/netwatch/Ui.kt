@@ -130,7 +130,7 @@ fun Card(borderColor: Color = Cp.border, content: @Composable ColumnScope.() -> 
 }
 
 @Composable
-fun CardTitle(s: String) = T("/// $s", Cp.yellow, 12.sp, bold = true, modifier = Modifier.padding(bottom = 6.dp))
+fun CardTitle(s: String) = T("/// ${s}", Cp.yellow, 12.sp, bold = true, modifier = Modifier.padding(bottom = 6.dp))
 
 /* ------------------------------ графики ------------------------------ */
 
@@ -153,8 +153,8 @@ fun Sparkline(data: List<Float>, color: Color, unit: String, isDbm: Boolean = fa
             val v = data.filter { it > 0f }
             0f to (if (v.isEmpty()) 50f else maxOf(10f, v.max() * 1.3f))
         }
-        drawText(tm, "${maxV.toInt()}$unit", Offset(4.dp.toPx(), size.height * 0.12f), lbl.copy(color = Cp.yellow))
-        drawText(tm, "${minV.toInt()}$unit", Offset(4.dp.toPx(), size.height * 0.68f), lbl.copy(color = Cp.muted, fontWeight = FontWeight.Normal))
+        drawText(tm, "${maxV.toInt()}${unit}", Offset(4.dp.toPx(), size.height * 0.12f), lbl.copy(color = Cp.yellow))
+        drawText(tm, "${minV.toInt()}${unit}", Offset(4.dp.toPx(), size.height * 0.68f), lbl.copy(color = Cp.muted, fontWeight = FontWeight.Normal))
         val pad = 6.dp.toPx()
         val step = (size.width - left - pad) / (data.size - 1)
         val path = Path()
@@ -187,7 +187,7 @@ fun SpeedChart(dl: List<Float>, ul: List<Float>) {
         for (i in 0..4) {
             val y = top + h * i / 4
             drawLine(Color(0xFF2E0C19), Offset(left, y), Offset(size.width - right, y), pathEffect = dash)
-            drawText(tm, "${(maxV * (1 - i / 4f)).toInt()} Мб", Offset(2.dp.toPx(), y - 6.dp.toPx()), lbl)
+            drawText(tm, tr(R.string.mb, (maxV * (1 - i / 4f)).toInt()), Offset(2.dp.toPx(), y - 6.dp.toPx()), lbl)
         }
         fun series(d: List<Float>, c: Color) {
             if (d.size < 2) return
@@ -214,8 +214,8 @@ fun NetWatchScreen(vm: NetVm) {
             Box(Modifier.fillMaxWidth().height(3.dp).background(Cp.red))
             Header(vm) { showReport = true }
             when (sec) {
-                Section.NET -> SubTabs(listOf(TAB_SCAN to "Сканер", TAB_LOCAL to "Пинг · TCP", TAB_DIAG to "Диагностика"), tab) { vm.selectTab(it) }
-                Section.WIFI -> SubTabs(listOf(TAB_WIFI to "Эфир", TAB_SURVEY to "Обход объекта"), tab) { vm.selectTab(it) }
+                Section.NET -> SubTabs(listOf(TAB_SCAN to tr(R.string.scanner), TAB_LOCAL to tr(R.string.ping_tcp), TAB_DIAG to tr(R.string.diagnostics_2)), tab) { vm.selectTab(it) }
+                Section.WIFI -> SubTabs(listOf(TAB_WIFI to tr(R.string.spectrum), TAB_SURVEY to tr(R.string.site_survey_3)), tab) { vm.selectTab(it) }
                 else -> {}
             }
             // каждая вкладка со своей прокруткой, чтобы при переключении не прыгать в чужую позицию
@@ -252,19 +252,19 @@ fun DashboardTab(vm: NetVm) {
     Card {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                CardTitle(if (r.status == RadioStatus.CELLULAR) "РАДИОСКАНЕР СОТОВОЙ СЕТИ (dBm)" else "РАДИОЧАСТОТНЫЙ СКАНЕР WI-FI (dBm)")
+                CardTitle(if (r.status == RadioStatus.CELLULAR) tr(R.string.cellular_signal_scanner_dbm) else tr(R.string.wi_fi_signal_scanner_dbm))
                 T(
                     when (r.status) {
                         RadioStatus.WIFI_OK -> "SSID: ${r.ssid}"
-                        RadioStatus.WIFI_NO_PERMISSION, RadioStatus.WIFI_LOCATION_OFF -> "SSID: скрыт системой"
-                        RadioStatus.CELLULAR -> "ОПЕРАТОР: ${r.operator ?: "—"}"
-                        RadioStatus.ETHERNET -> "ETHERNET / КАБЕЛЬ"
-                        RadioStatus.OFFLINE -> "НЕТ ПОДКЛЮЧЕНИЯ"
+                        RadioStatus.WIFI_NO_PERMISSION, RadioStatus.WIFI_LOCATION_OFF -> tr(R.string.ssid_hidden_by_the_system)
+                        RadioStatus.CELLULAR -> tr(R.string.carrier, r.operator ?: "—")
+                        RadioStatus.ETHERNET -> tr(R.string.ethernet_cable)
+                        RadioStatus.OFFLINE -> tr(R.string.no_connection)
                     }, Cp.cyan, 12.sp, bold = true, maxLines = 1
                 )
             }
             if (r.status == RadioStatus.WIFI_NO_PERMISSION || r.status == RadioStatus.WIFI_LOCATION_OFF) {
-                CpButton("[ 🔓 РАЗБЛОКИРОВАТЬ ]", Color(0xFF260812), Cp.cyan) {
+                CpButton(tr(R.string.unlock), Color(0xFF260812), Cp.cyan) {
                     if (!NetInfo.hasLocationPermission(ctx))
                         permLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
                     else ctx.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
@@ -276,17 +276,17 @@ fun DashboardTab(vm: NetVm) {
             val good = if (r.status == RadioStatus.CELLULAR) -85 else -60
             val ok = if (r.status == RadioStatus.CELLULAR) -100 else -75
             val c = when { dbm == null -> Cp.muted; dbm >= good -> Cp.green; dbm >= ok -> Cp.yellow; else -> Cp.red }
-            T(dbm?.let { "$it dBm" } ?: "N/A", c, 26.sp, bold = true)
+            T(dbm?.let { "${it} dBm" } ?: "N/A", c, 26.sp, bold = true)
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                T("[ КАЧЕСТВО: ${r.quality?.let { "$it%" } ?: "--"} ]", Cp.text, 11.sp, bold = true)
+                T(tr(R.string.quality, r.quality?.let { "${it}%" } ?: "--"), Cp.text, 11.sp, bold = true)
                 val st = when {
-                    r.status == RadioStatus.WIFI_NO_PERMISSION -> "НУЖЕН ДОСТУП К ГЕОПОЗИЦИИ"
-                    r.status == RadioStatus.WIFI_LOCATION_OFF -> "ВКЛЮЧИТЕ ГЕОЛОКАЦИЮ"
-                    dbm == null -> if (r.status == RadioStatus.ETHERNET) "КАБЕЛЬНОЕ ПОДКЛЮЧЕНИЕ" else "ОЖИДАНИЕ..."
-                    dbm >= good -> "ОТЛИЧНЫЙ СИГНАЛ"
-                    dbm >= ok -> "НОРМАЛЬНЫЙ СИГНАЛ"
-                    else -> "СЛАБЫЙ СИГНАЛ"
+                    r.status == RadioStatus.WIFI_NO_PERMISSION -> tr(R.string.location_access_needed)
+                    r.status == RadioStatus.WIFI_LOCATION_OFF -> tr(R.string.turn_on_location_2)
+                    dbm == null -> if (r.status == RadioStatus.ETHERNET) tr(R.string.wired_connection) else tr(R.string.waiting)
+                    dbm >= good -> tr(R.string.excellent_signal)
+                    dbm >= ok -> tr(R.string.fair_signal)
+                    else -> tr(R.string.weak_signal)
                 }
                 T(st, if (dbm == null) Cp.yellow else c, 10.sp, bold = true)
             }
@@ -294,23 +294,23 @@ fun DashboardTab(vm: NetVm) {
         if (r.freqMhz != null || r.linkMbps != null) {
             T(
                 listOfNotNull(
-                    r.freqMhz?.let { "${NetInfo.band(it)} · кан. ${NetInfo.channel(it)}" },
-                    r.linkMbps?.let { "линк $it Мбит/с" },
-                    r.bssid?.let { "BSSID $it" }
+                    r.freqMhz?.let { tr(R.string.ch_2, NetInfo.band(it), NetInfo.channel(it)) },
+                    r.linkMbps?.let { tr(R.string.link_mbit_s_2, it) },
+                    r.bssid?.let { "BSSID ${it}" }
                 ).joinToString("  |  "), Cp.muted, 10.sp, modifier = Modifier.padding(top = 4.dp)
             )
         }
         Sparkline(vm.radioHist, Cp.cyan, "dB", isDbm = true)
     }
 
-    PingCardView("ПИНГ ДО РОУТЕРА / ШЛЮЗА (LIVE)", vm.gw, Cp.green, good = 15.0, mid = 50.0, okColor = Cp.green, label = "Шлюз",
-        extra = { CpButton("[ 🔄 АВТО ]", Cp.cyan) { vm.autoGateway() } })
-    PingCardView("ПИНГ ДО ВНЕШНЕГО УЗЛА (LIVE)", vm.inet, Cp.yellow, good = 45.0, mid = 100.0, okColor = Cp.cyan, label = "Узел")
+    PingCardView(tr(R.string.ping_to_router_gateway_live), vm.gw, Cp.green, good = 15.0, mid = 50.0, okColor = Cp.green, label = tr(R.string.gateway_2),
+        extra = { CpButton(tr(R.string.auto), Cp.cyan) { vm.autoGateway() } })
+    PingCardView(tr(R.string.ping_to_external_host_live), vm.inet, Cp.yellow, good = 45.0, mid = 100.0, okColor = Cp.cyan, label = tr(R.string.host))
 
     Card {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.weight(1f)) { CardTitle("СЕТЕВЫЕ ИНТЕРФЕЙСЫ И МАРШРУТЫ") }
-            CpButton("[ 🔄 ОБНОВИТЬ ]", Cp.red) { vm.refreshReport() }
+            Box(Modifier.weight(1f)) { CardTitle(tr(R.string.network_interfaces_and_routes)) }
+            CpButton(tr(R.string.refresh), Cp.red) { vm.refreshReport() }
         }
         Box(Modifier.fillMaxWidth().background(Cp.inner).border(1.dp, Cp.dim).horizontalScroll(rememberScrollState()).padding(10.dp)) {
             SelectionContainer { T(vm.report, Cp.cyan, 11.sp) }
@@ -323,7 +323,7 @@ fun PingCardView(title: String, card: PingCard, line: Color, good: Double, mid: 
     Card {
         CardTitle(title)
         Row(verticalAlignment = Alignment.CenterVertically) {
-            T("IP / ХОСТ:", Cp.muted, 10.sp, bold = true)
+            T(tr(R.string.ip_host), Cp.muted, 10.sp, bold = true)
             Spacer(Modifier.width(6.dp))
             CpField(card.host, { card.host = it; card.reset() }, Modifier.weight(1f))
             if (extra != null) { Spacer(Modifier.width(8.dp)); extra() }
@@ -331,14 +331,14 @@ fun PingCardView(title: String, card: PingCard, line: Color, good: Double, mid: 
         Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
             val v = card.rtt
             val c = when { v == null -> Cp.red; v < good -> okColor; v < mid -> Cp.yellow; else -> Cp.red }
-            T(if (!card.started) "-- мс" else v?.let { "%.1f мс".format(it) } ?: "Таймаут", c, 26.sp, bold = true)
+            T(if (!card.started) tr(R.string.ms_2) else v?.let { tr(R.string.s_1f_ms).format(it) } ?: tr(R.string.timeout), c, 26.sp, bold = true)
             Spacer(Modifier.weight(1f))
             T(
-                if (!card.started) "ОЖИДАНИЕ..." else if (v != null) "$label ${card.host} онлайн" else "$label ${card.host} не отвечает",
+                if (!card.started) tr(R.string.waiting) else if (v != null) tr(R.string.is_online, label, card.host) else tr(R.string.is_not_responding, label, card.host),
                 if (!card.started) Cp.muted else if (v != null) okColor else Cp.red, 10.sp, bold = true, maxLines = 1
             )
         }
-        Sparkline(card.history, line, "мс")
+        Sparkline(card.history, line, tr(R.string.ms_3))
     }
 }
 
@@ -367,7 +367,7 @@ fun SpeedBar(title: String, value: Double?, color: Color, active: Boolean, progr
         val v = value ?: 0.0
         Row(verticalAlignment = Alignment.Bottom, modifier = Modifier.padding(vertical = 4.dp)) {
             T(if (value == null) "--" else if (v >= 100) "%.1f".format(v) else "%.2f".format(v), color, 34.sp, bold = true)
-            T(" Мбит/с", Cp.muted, 12.sp, bold = true, modifier = Modifier.padding(bottom = 6.dp))
+            T(tr(R.string.mbit_s), Cp.muted, 12.sp, bold = true, modifier = Modifier.padding(bottom = 6.dp))
         }
         val tm = rememberTextMeasurer()
         val frac = gaugeFrac(v.toFloat())
@@ -416,47 +416,47 @@ fun SpeedTab(vm: NetVm) {
     )
     val color = if (vm.phase == Phase.UPLOAD) Cp.yellow else Cp.cyan
     val label = when (vm.phase) {
-        Phase.IDLE -> "ГОТОВ"
-        Phase.PING -> "ПИНГ..."
-        Phase.DOWNLOAD -> "СКАЧИВАНИЕ..."
-        Phase.UPLOAD -> "ОТДАЧА..."
-        Phase.DONE -> "ЗАВЕРШЁН"
-        Phase.ERROR -> "НЕТ СВЯЗИ"
+        Phase.IDLE -> tr(R.string.ready)
+        Phase.PING -> tr(R.string.ping_2)
+        Phase.DOWNLOAD -> tr(R.string.download)
+        Phase.UPLOAD -> tr(R.string.upload)
+        Phase.DONE -> tr(R.string.finished)
+        Phase.ERROR -> tr(R.string.no_connection_2)
     }
-    T("/// ИНТЕРНЕТОМЕТР // МНОГОПОТОЧНЫЙ ЗАМЕР", Cp.yellow, 12.sp, bold = true, modifier = Modifier.padding(bottom = 4.dp))
-    T("Сервер: ${vm.server}", Cp.muted, 10.sp)
+    T(tr(R.string.speed_test_multi_threaded), Cp.yellow, 12.sp, bold = true, modifier = Modifier.padding(bottom = 4.dp))
+    T(tr(R.string.server, vm.server), Cp.muted, 10.sp)
 
     Spacer(Modifier.height(8.dp))
     Row(Modifier.fillMaxWidth().padding(bottom = 10.dp)) {
-        ResultBox("ПИНГ", vm.pingMs?.let { "%.0f".format(it) } ?: "--", "мс", Cp.green, vm.phase == Phase.PING, Modifier.weight(1f))
+        ResultBox(tr(R.string.ping), vm.pingMs?.let { "%.0f".format(it) } ?: "--", tr(R.string.ms_3), Cp.green, vm.phase == Phase.PING, Modifier.weight(1f))
         Spacer(Modifier.width(6.dp))
-        ResultBox("ДЖИТТЕР", vm.jitterMs?.let { "%.1f".format(it) } ?: "--", "мс", Cp.green, vm.phase == Phase.PING, Modifier.weight(1f))
+        ResultBox(tr(R.string.jitter), vm.jitterMs?.let { "%.1f".format(it) } ?: "--", tr(R.string.ms_3), Cp.green, vm.phase == Phase.PING, Modifier.weight(1f))
         Spacer(Modifier.width(6.dp))
-        ResultBox("СТАТУС", label, "", if (vm.phase == Phase.ERROR) Cp.red else color, vm.testing, Modifier.weight(1.4f), valueSize = 14.sp)
+        ResultBox(tr(R.string.status), label, "", if (vm.phase == Phase.ERROR) Cp.red else color, vm.testing, Modifier.weight(1.4f), valueSize = 14.sp)
     }
 
     val dlNow = vm.phase == Phase.DOWNLOAD
     val ulNow = vm.phase == Phase.UPLOAD
-    SpeedBar("📥 СКОРОСТЬ СКАЧИВАНИЯ (8 ПОТОКОВ)", if (dlNow) shown.toDouble() else vm.dl, Cp.cyan, dlNow, vm.progress)
-    SpeedBar("📤 СКОРОСТЬ ОТДАЧИ (6 ПОТОКОВ)", if (ulNow) shown.toDouble() else vm.ul, Cp.yellow, ulNow, vm.progress)
+    SpeedBar(tr(R.string.download_speed_8_threads), if (dlNow) shown.toDouble() else vm.dl, Cp.cyan, dlNow, vm.progress)
+    SpeedBar(tr(R.string.upload_speed_6_threads), if (ulNow) shown.toDouble() else vm.ul, Cp.yellow, ulNow, vm.progress)
 
-    if (vm.testing) CpButton("[ ⏹ ОСТАНОВИТЬ ]", Cp.red, modifier = Modifier.fillMaxWidth()) { vm.stopTest() }
-    else CpButton(if (vm.phase == Phase.IDLE) "[ ▶ НАЧАТЬ ЗАМЕР ]" else "[ 🔄 ЗАМЕРИТЬ ЕЩЁ РАЗ ]", Cp.green, modifier = Modifier.fillMaxWidth()) { vm.startTest() }
-    T("Один замер расходует примерно от 10 МБ до сотен МБ — на мобильном интернете учитывайте трафик.",
+    if (vm.testing) CpButton(tr(R.string.stop), Cp.red, modifier = Modifier.fillMaxWidth()) { vm.stopTest() }
+    else CpButton(if (vm.phase == Phase.IDLE) tr(R.string.start_test) else tr(R.string.test_again), Cp.green, modifier = Modifier.fillMaxWidth()) { vm.startTest() }
+    T(tr(R.string.one_test_uses_roughly_10_mb),
         Cp.muted, 9.sp, modifier = Modifier.padding(top = 6.dp, bottom = 10.dp))
 
     if (vm.dlCurve.isNotEmpty() || vm.ulCurve.isNotEmpty()) Card {
         Row {
-            T("■ СКАЧИВАНИЕ (8 ПОТОКОВ)", Cp.cyan, 10.sp, bold = true)
+            T(tr(R.string.download_8_threads), Cp.cyan, 10.sp, bold = true)
             Spacer(Modifier.width(14.dp))
-            T("■ ОТДАЧА (6)", Cp.yellow, 10.sp, bold = true)
+            T(tr(R.string.upload_6), Cp.yellow, 10.sp, bold = true)
         }
         Spacer(Modifier.height(6.dp))
         SpeedChart(vm.dlCurve, vm.ulCurve)
     }
 
     if (vm.results.isNotEmpty()) Card {
-        CardTitle("ИСТОРИЯ ЗАМЕРОВ")
+        CardTitle(tr(R.string.measurement_history))
         val fmt = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
         vm.results.forEach { r ->
             Row(Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
@@ -473,40 +473,40 @@ fun SpeedTab(vm: NetVm) {
 fun LocalTab(vm: NetVm) {
     val c = vm.custom
     Card {
-        CardTitle("LIVE-ПИНГ ЛЮБОГО УЗЛА И ТЕСТ ЛОКАЛЬНОЙ ПРОПУСКНОЙ СПОСОБНОСТИ")
+        CardTitle(tr(R.string.live_ping_to_any_host_and))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            T("Целевой IP:", Cp.cyan, 11.sp, bold = true)
+            T(tr(R.string.target_ip), Cp.cyan, 11.sp, bold = true)
             Spacer(Modifier.width(8.dp))
             CpField(c.host, { c.host = it; c.reset(); vm.customManual = true }, Modifier.weight(1f), color = Cp.yellow)
         }
         Spacer(Modifier.height(8.dp))
         Row {
-            if (vm.customRunning) CpButton("⏹ Пауза пинга", Cp.red, modifier = Modifier.weight(1f)) { vm.customRunning = false }
-            else CpButton("▶ Запустить пинг", Cp.green, modifier = Modifier.weight(1f)) { vm.customRunning = true }
+            if (vm.customRunning) CpButton(tr(R.string.pause_ping), Cp.red, modifier = Modifier.weight(1f)) { vm.customRunning = false }
+            else CpButton(tr(R.string.start_ping), Cp.green, modifier = Modifier.weight(1f)) { vm.customRunning = true }
             Spacer(Modifier.width(8.dp))
-            CpButton("🔄 Сброс", Color(0xFF240B15), Cp.text, modifier = Modifier.weight(1f)) { c.reset() }
+            CpButton(tr(R.string.reset), Color(0xFF240B15), Cp.text, modifier = Modifier.weight(1f)) { c.reset() }
         }
         Spacer(Modifier.height(8.dp))
-        CpButton(if (vm.localBusy) "⏳ Идёт замер..." else "⚡ Замер локальной скорости (TCP)", Cp.green, modifier = Modifier.fillMaxWidth(), enabled = !vm.localBusy) { vm.runLocalTest() }
+        CpButton(if (vm.localBusy) tr(R.string.measuring_2) else tr(R.string.lan_speed_test_tcp), Cp.green, modifier = Modifier.fillMaxWidth(), enabled = !vm.localBusy) { vm.runLocalTest() }
 
         val v = c.rtt
         T(
-            "Текущий (${c.host}): " + if (!c.started) "-- мс" else v?.let { "%.1f мс".format(it) } ?: "Таймаут",
+            tr(R.string.current, c.host) + if (!c.started) tr(R.string.ms_2) else v?.let { tr(R.string.s_1f_ms).format(it) } ?: tr(R.string.timeout),
             if (c.started && v == null) Cp.red else Cp.green, 16.sp, bold = true, modifier = Modifier.padding(top = 10.dp)
         )
         val valid = c.valid
         val loss = c.lost * 100.0 / maxOf(1, c.sent)
         T(
-            "Мин: %.1f | Сред: %.1f | Макс: %.1f мс | Потери: %.0f%% (%d/%d)".format(
+            tr(R.string.min_1f_avg_1f_max_1f).format(
                 valid.minOrNull() ?: 0f, if (valid.isEmpty()) 0f else valid.average().toFloat(), valid.maxOrNull() ?: 0f, loss, c.lost, c.sent
             ), Cp.cyan, 10.sp, bold = true, modifier = Modifier.padding(vertical = 4.dp)
         )
-        Sparkline(c.history, Cp.red, "мс", height = 110)
+        Sparkline(c.history, Cp.red, tr(R.string.ms_3), height = 110)
     }
     Card {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.weight(1f)) { CardTitle("ЖУРНАЛ ДИАГНОСТИКИ") }
-            CpButton("[ ОЧИСТИТЬ ]", Color(0xFF240B15), Cp.text) { vm.clearLog() }
+            Box(Modifier.weight(1f)) { CardTitle(tr(R.string.diagnostics_log)) }
+            CpButton(tr(R.string.clear), Color(0xFF240B15), Cp.text) { vm.clearLog() }
         }
         Box(Modifier.fillMaxWidth().heightIn(min = 90.dp).background(Cp.inner).border(1.dp, Cp.dim).padding(10.dp)) {
             SelectionContainer { T(vm.localLog, Cp.green, 11.sp) }

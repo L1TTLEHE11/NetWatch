@@ -68,14 +68,14 @@ object Monitor {
     fun summary(s: MonitorState, now: Long = System.currentTimeMillis()): String {
         val dur = fmtDur(now - s.startedAt)
         fun t(name: String, x: TargetStats) =
-            "$name ${x.host}: потери %.1f%% (%d/%d), средн. %.1f мс, макс %.0f мс, обрывов %d, без связи %s".format(
+            tr(R.string.loss_1f_d_d_avg_1f, name, x.host).format(
                 x.lossPct, x.lost, x.sent, x.avg, x.maxMs, x.outages, fmtDur(x.currentDownMs(now)))
-        return "Мониторинг идёт $dur\n" + t("Роутер", s.gw) + "\n" + t("Интернет", s.inet)
+        return tr(R.string.monitoring_for, dur) + t(tr(R.string.router_2), s.gw) + "\n" + t(tr(R.string.internet_3), s.inet)
     }
 
     fun fmtDur(ms: Long): String {
         val s = ms / 1000; val h = s / 3600; val m = s % 3600 / 60; val sec = s % 60
-        return if (h > 0) "%dч %02dм".format(h, m) else if (m > 0) "%dм %02dс".format(m, sec) else "${sec}с"
+        return if (h > 0) tr(R.string.dh_02dm).format(h, m) else if (m > 0) tr(R.string.dm_02ds).format(m, sec) else tr(R.string.s, sec)
     }
 }
 
@@ -94,20 +94,21 @@ class MonitorService : Service() {
     private val fmt = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
 
     override fun onBind(intent: Intent?): IBinder? = null
+    override fun attachBaseContext(newBase: Context) { super.attachBaseContext(Lang.wrap(newBase)) }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP) { shutdown(); return START_NOT_STICKY }
         channels()
         val gw = intent?.getStringExtra("gw")?.ifBlank { null } ?: NetInfo.gateway(this).ifBlank { "192.168.1.1" }
         val inet = intent?.getStringExtra("inet")?.ifBlank { null } ?: "8.8.8.8"
-        ServiceCompat.startForeground(this, ID_RUN, runNotification("Запуск мониторинга…"),
+        ServiceCompat.startForeground(this, ID_RUN, runNotification(tr(R.string.starting_monitoring)),
             if (Build.VERSION.SDK_INT >= 34) ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE else 0)
         if (!running) {
             running = true
             History.init(this)
             sessionId = History.nextId(); network = NetInfo.networkLabel(this)
             Monitor.reset(gw, inet)
-            Monitor.update { it.copy(events = listOf(MonEvent(System.currentTimeMillis(), "Мониторинг запущен: роутер $gw, интернет $inet", false))) }
+            Monitor.update { it.copy(events = listOf(MonEvent(System.currentTimeMillis(), tr(R.string.monitoring_started_router_internet, gw, inet), false))) }
             wake = (getSystemService(POWER_SERVICE) as PowerManager).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "NetWatch:monitor").apply { acquire(24 * 3600_000L) }
             worker = thread(isDaemon = true, name = "netwatch-monitor") { loop(gw, inet) }
         }
@@ -127,12 +128,12 @@ class MonitorService : Service() {
                 val ev = s.events.toMutableList()
                 fun add(e: String?, what: String, st: TargetStats) {
                     when (e) {
-                        "DOWN" -> { ev.add(0, MonEvent(now, "✖ $what не отвечает", true)); alert("✖ $what не отвечает", "${fmt.format(Date(now))} — ${st.host} перестал отвечать") }
-                        "UP" -> { val d = Monitor.fmtDur(now - s.let { if (what == "Роутер") it.gw.downSince else it.inet.downSince })
-                            ev.add(0, MonEvent(now, "✔ $what снова на связи (не было $d)", false)); alert("✔ $what снова на связи", "Связи не было $d") }
+                        "DOWN" -> { ev.add(0, MonEvent(now, tr(R.string.is_not_responding_2, what), true)); alert(tr(R.string.is_not_responding_2, what), tr(R.string.stopped_responding, fmt.format(Date(now)), st.host)) }
+                        "UP" -> { val d = Monitor.fmtDur(now - s.let { if (what == tr(R.string.router_2)) it.gw.downSince else it.inet.downSince })
+                            ev.add(0, MonEvent(now, tr(R.string.is_back_online_was_down, what, d), false)); alert(tr(R.string.is_back_online, what), tr(R.string.connection_was_down_for, d)) }
                     }
                 }
-                add(ge, "Роутер", g); add(ne, "Интернет", n)
+                add(ge, tr(R.string.router_2), g); add(ne, tr(R.string.internet_3), n)
                 if (ge != null || ne != null) pendingSave = true
                 s.copy(gw = g, inet = n, gwHist = (s.gwHist + (a?.toFloat() ?: 0f)).takeLast(150),
                     inetHist = (s.inetHist + (b?.toFloat() ?: 0f)).takeLast(150), events = ev.take(200))
@@ -141,8 +142,8 @@ class MonitorService : Service() {
             if (tick++ % 5 == 0) {
                 val s = Monitor.state.value
                 getSystemService(NotificationManager::class.java).notify(ID_RUN, runNotification(
-                    "Роутер: ${s.gw.last?.let { "%.0f мс".format(it) } ?: "нет ответа"} · Интернет: ${s.inet.last?.let { "%.0f мс".format(it) } ?: "нет ответа"} · потери %.1f%%".format(s.inet.lossPct)))
-                NetWatchWidget.push(this, s.gw.last, s.inet.last, null, "монитор")
+                    tr(R.string.router_internet_loss_1f, s.gw.last?.let { tr(R.string.s_0f_ms_2).format(it) } ?: tr(R.string.no_reply), s.inet.last?.let { tr(R.string.s_0f_ms_2).format(it) } ?: tr(R.string.no_reply)).format(s.inet.lossPct)))
+                NetWatchWidget.push(this, s.gw.last, s.inet.last, null, tr(R.string.monitor_3))
             }
             val sleep = Monitor.PERIOD_MS - (System.currentTimeMillis() - t0)
             if (sleep > 0) try { Thread.sleep(sleep) } catch (_: InterruptedException) { break }
@@ -161,11 +162,11 @@ class MonitorService : Service() {
         val downSec = s.inet.currentDownMs(now) / 1000.0
         History.upsert(HItem(
             id = sessionId, time = s.startedAt, kind = HKind.MONITOR, network = network,
-            title = (if (final) "" else "● ") + "Мониторинг ${Monitor.fmtDur(now - s.startedAt)}" + (if (final) "" else " · идёт"),
-            summary = "обрывов $outages · без интернета ${Monitor.fmtDur(s.inet.currentDownMs(now))} · потери %.1f%%".format(s.inet.lossPct),
-            details = Monitor.summary(s, now) + "\n\nСобытия:\n" + s.events.reversed().joinToString("\n") { "${f.format(Date(it.time))}  ${it.text}" },
+            title = (if (final) "" else "● ") + tr(R.string.monitoring_3, Monitor.fmtDur(now - s.startedAt)) + (if (final) "" else tr(R.string.running)),
+            summary = tr(R.string.outages_down_loss_1f, outages, Monitor.fmtDur(s.inet.currentDownMs(now))).format(s.inet.lossPct),
+            details = Monitor.summary(s, now) + tr(R.string.events) + s.events.reversed().joinToString("\n") { "${f.format(Date(it.time))}  ${it.text}" },
             num1 = s.inet.lossPct, num2 = outages.toDouble(), num3 = downSec,
-            csv = "Время;Событие\n" + s.events.reversed().joinToString("\n") { "${f.format(Date(it.time))};${Report.csvCell(it.text)}" },
+            csv = tr(R.string.time_event) + s.events.reversed().joinToString("\n") { "${f.format(Date(it.time))};${Report.csvCell(it.text)}" },
             endTime = now,
         ))
     }
@@ -175,7 +176,7 @@ class MonitorService : Service() {
         running = false
         worker?.interrupt()
         try { wake?.release() } catch (_: Exception) { }
-        Monitor.update { it.copy(running = false, events = listOf(MonEvent(System.currentTimeMillis(), "Мониторинг остановлен", false)) + it.events) }
+        Monitor.update { it.copy(running = false, events = listOf(MonEvent(System.currentTimeMillis(), tr(R.string.monitoring_stopped), false)) + it.events) }
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
@@ -184,19 +185,19 @@ class MonitorService : Service() {
 
     private fun channels() {
         val nm = getSystemService(NotificationManager::class.java)
-        nm.createNotificationChannel(NotificationChannel(CH_RUN, "Мониторинг связи", NotificationManager.IMPORTANCE_LOW))
-        nm.createNotificationChannel(NotificationChannel(CH_ALERT, "Обрывы связи", NotificationManager.IMPORTANCE_HIGH))
+        nm.createNotificationChannel(NotificationChannel(CH_RUN, tr(R.string.connection_monitor_2), NotificationManager.IMPORTANCE_LOW))
+        nm.createNotificationChannel(NotificationChannel(CH_ALERT, tr(R.string.connection_outages), NotificationManager.IMPORTANCE_HIGH))
     }
 
     private fun openApp() = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), PendingIntent.FLAG_IMMUTABLE)
 
     private fun runNotification(text: String): Notification = NotificationCompat.Builder(this, CH_RUN)
         .setSmallIcon(R.drawable.ic_stat)
-        .setContentTitle("NetWatch · мониторинг связи")
+        .setContentTitle(tr(R.string.netwatch_connection_monitor))
         .setContentText(text)
         .setOngoing(true).setOnlyAlertOnce(true)
         .setContentIntent(openApp())
-        .addAction(0, "Остановить", PendingIntent.getService(this, 1, Intent(this, MonitorService::class.java).setAction(ACTION_STOP), PendingIntent.FLAG_IMMUTABLE))
+        .addAction(0, tr(R.string.stop_2), PendingIntent.getService(this, 1, Intent(this, MonitorService::class.java).setAction(ACTION_STOP), PendingIntent.FLAG_IMMUTABLE))
         .build()
 
     private fun alert(title: String, text: String) {

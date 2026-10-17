@@ -11,9 +11,10 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-enum class HKind(val label: String, val icon: String) {
-    SPEED("Скорость", "⚡"), MONITOR("Мониторинг", "🚨"), SCAN("Скан сети", "🔍"),
-    TRACE("Traceroute", "🛰"), DNS("Тест DNS", "🌐"), PORTS("Порты", "🚪"), SURVEY("Обход", "🗺"),
+enum class HKind(private val labelRes: Int, val icon: String) {
+    SPEED(R.string.speed_2, "⚡"), MONITOR(R.string.monitoring, "🚨"), SCAN(R.string.network_scan, "🔍"),
+    TRACE(0, "🛰"), DNS(R.string.dns_test, "🌐"), PORTS(R.string.ports_3, "🚪"), SURVEY(R.string.survey, "🗺");
+    val label: String get() = if (labelRes == 0) "Traceroute" else tr(labelRes)
 }
 
 /**
@@ -173,15 +174,15 @@ object History {
         val c = Calendar.getInstance().apply { timeInMillis = now }
         val d = Calendar.getInstance().apply { timeInMillis = t }
         fun same(a: Calendar, b: Calendar) = a.get(Calendar.YEAR) == b.get(Calendar.YEAR) && a.get(Calendar.DAY_OF_YEAR) == b.get(Calendar.DAY_OF_YEAR)
-        if (same(c, d)) return "Сегодня"
+        if (same(c, d)) return tr(R.string.today)
         c.add(Calendar.DAY_OF_YEAR, -1)
-        if (same(c, d)) return "Вчера"
-        return SimpleDateFormat(if (d.get(Calendar.YEAR) == Calendar.getInstance().get(Calendar.YEAR)) "d MMMM, EEEE" else "d MMMM yyyy", Locale("ru")).format(Date(t))
+        if (same(c, d)) return tr(R.string.yesterday)
+        return SimpleDateFormat(if (d.get(Calendar.YEAR) == Calendar.getInstance().get(Calendar.YEAR)) "d MMMM, EEEE" else "d MMMM yyyy", Lang.locale).format(Date(t))
     }
 
     fun speedCsv(items: List<HItem>): String {
         val f = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
-        return "Дата;Сеть;Пинг, мс;Скачивание, Мбит/с;Отдача, Мбит/с\n" + items.filter { it.kind == HKind.SPEED }.sortedBy { it.time }.joinToString("\n") {
+        return tr(R.string.date_network_ping_ms_download_mbit) + items.filter { it.kind == HKind.SPEED }.sortedBy { it.time }.joinToString("\n") {
             listOf(f.format(Date(it.time)), it.network, it.num3?.let { v -> "%.0f".format(v) }, it.num1?.let { v -> "%.1f".format(v) }, it.num2?.let { v -> "%.1f".format(v) })
                 .joinToString(";") { c -> Report.csvCell(c) }
         }

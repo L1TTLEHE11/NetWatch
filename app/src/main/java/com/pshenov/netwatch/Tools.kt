@@ -19,18 +19,18 @@ import kotlin.random.Random
 /* ============================ порты ============================ */
 
 object PortInfo {
-    val labels = linkedMapOf(
-        21 to "FTP", 22 to "SSH", 23 to "Telnet", 25 to "SMTP", 53 to "DNS", 80 to "HTTP (веб-интерфейс)",
+    val labels get() = linkedMapOf(
+        21 to "FTP", 22 to "SSH", 23 to "Telnet", 25 to "SMTP", 53 to "DNS", 80 to tr(R.string.http_web_interface),
         110 to "POP3", 123 to "NTP", 135 to "MS RPC", 139 to "NetBIOS", 143 to "IMAP", 161 to "SNMP",
-        443 to "HTTPS", 445 to "SMB (общие папки)", 554 to "RTSP (IP-камера)", 631 to "IPP (принтер)",
+        443 to "HTTPS", 445 to tr(R.string.smb_shared_folders), 554 to tr(R.string.rtsp_ip_camera), 631 to tr(R.string.ipp_printer),
         993 to "IMAPS", 1723 to "PPTP VPN", 1883 to "MQTT", 1900 to "UPnP", 3306 to "MySQL",
-        3389 to "RDP (удалённый рабочий стол)", 5000 to "UPnP / Synology", 5060 to "SIP (IP-телефония)",
-        5432 to "PostgreSQL", 5555 to "ADB (Android)", 5900 to "VNC", 6466 to "Android TV (пульт)", 6467 to "Android TV (пульт)", 7000 to "AirPlay",
+        3389 to tr(R.string.rdp_remote_desktop), 5000 to "UPnP / Synology", 5060 to tr(R.string.sip_voip),
+        5432 to "PostgreSQL", 5555 to "ADB (Android)", 5900 to "VNC", 6466 to tr(R.string.android_tv_remote), 6467 to tr(R.string.android_tv_remote), 7000 to "AirPlay",
         8001 to "Samsung Smart TV", 8002 to "Samsung Smart TV", 3000 to "LG webOS TV", 3001 to "LG webOS TV",
-        1925 to "Philips TV", 1926 to "Philips TV", 6095 to "Xiaomi Mi TV", 50001 to "Sony BRAVIA", 8060 to "Roku", 8000 to "HTTP (камеры/NVR)",
-        8008 to "HTTP (Chromecast)", 8009 to "Chromecast", 8080 to "HTTP-альт / прокси", 8291 to "Winbox (MikroTik)",
-        8443 to "HTTPS-альт", 8728 to "MikroTik API", 8729 to "MikroTik API-SSL", 9100 to "Печать RAW (принтер)",
-        34567 to "XMeye (камера/DVR)", 37777 to "Dahua (камера/NVR)", 62078 to "iPhone / iPad",
+        1925 to "Philips TV", 1926 to "Philips TV", 6095 to "Xiaomi Mi TV", 50001 to "Sony BRAVIA", 8060 to "Roku", 8000 to tr(R.string.http_cameras_nvr),
+        8008 to "HTTP (Chromecast)", 8009 to "Chromecast", 8080 to tr(R.string.http_alt_proxy), 8291 to "Winbox (MikroTik)",
+        8443 to tr(R.string.https_alt), 8728 to "MikroTik API", 8729 to "MikroTik API-SSL", 9100 to tr(R.string.raw_printing_printer),
+        34567 to tr(R.string.xmeye_camera_dvr), 37777 to tr(R.string.dahua_camera_nvr), 62078 to "iPhone / iPad",
     )
     /** Быстрый набор для сканера сети. */
     val quick = listOf(22, 53, 80, 139, 443, 445, 554, 631, 1925, 3000, 3389, 5555, 6095, 6466, 7000, 8000, 8001, 8002, 8008, 8009, 8060, 8080, 8291, 8443, 8728, 9100, 34567, 37777, 50001, 62078)
@@ -38,12 +38,12 @@ object PortInfo {
     fun label(p: Int) = labels[p] ?: ""
 
     fun guessKind(ports: Collection<Int>, isGateway: Boolean, isSelf: Boolean): String = when {
-        isSelf -> "Этот телефон"
-        isGateway && (8291 in ports || 8728 in ports) -> "Роутер MikroTik (шлюз)"
-        isGateway -> "Роутер / шлюз"
+        isSelf -> tr(R.string.this_phone)
+        isGateway && (8291 in ports || 8728 in ports) -> tr(R.string.mikrotik_router_gateway)
+        isGateway -> tr(R.string.router_gateway)
         8291 in ports || 8728 in ports -> "MikroTik"
-        554 in ports || 37777 in ports || 34567 in ports -> "IP-камера / регистратор"
-        9100 in ports || 631 in ports -> "Принтер"
+        554 in ports || 37777 in ports || 34567 in ports -> tr(R.string.ip_camera_nvr)
+        9100 in ports || 631 in ports -> tr(R.string.printer)
         6466 in ports || 6467 in ports -> "Android TV"
         8001 in ports || 8002 in ports -> "Samsung Smart TV"
         3000 in ports || 3001 in ports -> "LG webOS TV"
@@ -53,19 +53,23 @@ object PortInfo {
         8060 in ports -> "Roku"
         8009 in ports || 8008 in ports -> "Chromecast / Smart TV"
         62078 in ports -> "iPhone / iPad"
-        5555 in ports -> "Android-устройство"
-        3389 in ports || (445 in ports && 139 in ports) -> "Компьютер Windows"
-        445 in ports -> "Компьютер / NAS"
-        22 in ports -> "Linux / сервер"
-        53 in ports -> "DNS / роутер"
-        80 in ports || 443 in ports || 8080 in ports -> "Устройство с веб-интерфейсом"
-        else -> "Устройство"
+        5555 in ports -> tr(R.string.android_device)
+        3389 in ports || (445 in ports && 139 in ports) -> tr(R.string.windows_computer)
+        445 in ports -> tr(R.string.computer_nas)
+        22 in ports -> tr(R.string.linux_server)
+        53 in ports -> tr(R.string.dns_router)
+        80 in ports || 443 in ports || 8080 in ports -> tr(R.string.device_with_a_web_interface)
+        else -> tr(R.string.device)
     }
 
     /** "22,80,443", "1-1024", "popular" → список портов. */
+    /** «популярные» — на любом из языков (настройка могла сохраниться до смены языка). */
+    fun isPopular(spec: String): Boolean { val s = spec.trim().lowercase(); return s.isEmpty() || s.startsWith("pop") || s.startsWith("поп") }  // i18n-ignore
+
     fun parse(spec: String): List<Int> {
         val s = spec.trim().lowercase()
-        if (s.isEmpty() || s.startsWith("поп") || s == "popular") return popular
+        // «популярные» могли сохраниться на любом языке
+        if (s.isEmpty() || s.startsWith("pop") || s.startsWith("поп") || s.startsWith(tr(R.string.pop))) return popular  // i18n-ignore
         val out = sortedSetOf<Int>()
         for (part in s.split(',', ' ', ';').filter { it.isNotBlank() }) {
             val r = part.split('-')
@@ -253,7 +257,7 @@ object LanScanner {
     }
 
     private fun httpTitle(ip: String, port: Int): String? = try {
-        val c = (URL("http://$ip:$port/").openConnection() as HttpURLConnection).apply {
+        val c = (URL("http://${ip}:${port}/").openConnection() as HttpURLConnection).apply {
             connectTimeout = 700; readTimeout = 900; instanceFollowRedirects = true
             setRequestProperty("User-Agent", "NetWatch")
         }
@@ -272,7 +276,7 @@ object LanScanner {
         InetAddress.getByName(ip).canonicalHostName.takeIf { it != ip && !it.matches(Regex("""[\d.]+""")) }
     } catch (_: Exception) { null }
 
-    private val genericKinds = setOf("Устройство", "Устройство с веб-интерфейсом", "Компьютер / NAS", "Linux / сервер", "Android-устройство")
+    private val genericKinds get() = setOf(tr(R.string.device), tr(R.string.device_with_a_web_interface), tr(R.string.computer_nas), tr(R.string.linux_server), tr(R.string.android_device))
 
     /** Тип по портам, уточнённый тем, что устройство само сообщило о себе (mDNS/UPnP). */
     fun kindOf(ports: Collection<Int>, gw: Boolean, self: Boolean, d: Discovered?): String {
@@ -345,16 +349,16 @@ object Traceroute {
 
     /** Трассировка через ping с растущим TTL. Для промежуточных узлов время — по часам (≈). */
     fun run(host: String, running: () -> Boolean, onHop: (Hop) -> Unit, maxHops: Int = 30): String? {
-        val target = try { InetAddress.getByName(host).hostAddress } catch (e: Exception) { return "Не удалось разрешить имя: ${e.message}" }
+        val target = try { InetAddress.getByName(host).hostAddress } catch (e: Exception) { return tr(R.string.could_not_resolve_the_name, e.message) }
         for (ttl in 1..maxHops) {
             if (!running()) return null
             var hop = Hop(ttl, null, null, null, false)
             for (attempt in 0 until 2) {
                 val t0 = System.nanoTime()
                 val out = try {
-                    val p = ProcessBuilder("/system/bin/ping", "-c", "1", "-t", "$ttl", "-W", "1", target!!).redirectErrorStream(true).start()
+                    val p = ProcessBuilder("/system/bin/ping", "-c", "1", "-t", "${ttl}", "-W", "1", target!!).redirectErrorStream(true).start()
                     if (!p.waitFor(2500, TimeUnit.MILLISECONDS)) { p.destroy(); "" } else p.inputStream.bufferedReader().readText()
-                } catch (e: Exception) { return "Системный ping недоступен на этом устройстве: ${e.message}" }
+                } catch (e: Exception) { return tr(R.string.system_ping_is_not_available_on, e.message) }
                 val wall = (System.nanoTime() - t0) / 1e6
                 val reply = replyRe.find(out)
                 if (reply != null) {
@@ -370,7 +374,7 @@ object Traceroute {
             onHop(named)
             if (named.final) return null
         }
-        return "Цель не достигнута за $maxHops прыжков"
+        return tr(R.string.target_not_reached_in_hops, maxHops)
     }
 }
 
@@ -379,8 +383,8 @@ object Traceroute {
 data class DnsResult(val server: String, val label: String, val avgMs: Double?, val minMs: Double?, val ok: Int, val total: Int)
 
 object DnsBench {
-    val publicServers = listOf(
-        "8.8.8.8" to "Google", "1.1.1.1" to "Cloudflare", "77.88.8.8" to "Яндекс",
+    val publicServers get() = listOf(
+        "8.8.8.8" to "Google", "1.1.1.1" to "Cloudflare", "77.88.8.8" to tr(R.string.yandex),
         "9.9.9.9" to "Quad9", "94.140.14.14" to "AdGuard",
     )
     val domains = listOf("yandex.ru", "google.com", "vk.com", "youtube.com", "wikipedia.org", "mail.ru")

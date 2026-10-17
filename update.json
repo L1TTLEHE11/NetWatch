@@ -1,12 +1,23 @@
 {
-  "versionCode": 15,
-  "versionName": "2.4.2",
-  "apk": "apk/NetWatch-2.4.2-universal.apk",
-  "sha256": "5d242123f6df6489a7579eeacd444875bd24103ba388686792ac2a15dbe18ec8",
-  "size": 1163712,
+  "versionCode": 16,
+  "versionName": "2.5",
+  "apk": "apk/NetWatch-2.5-universal.apk",
+  "sha256": "134a3c75f8ba4f9bd2405fd41f231d6ae312f0a10106d34b9df1202685e72b89",
+  "size": 1410448,
   "date": "17.10.2026",
   "notes": [
-    "Свободное ПО под лицензией GNU GPL v3",
-    "В «Настройках → О приложении» — ссылки на исходный код и на сообщение об ошибке"
+    "Английский язык интерфейса: как в системе или вручную — «Ещё → Настройки → Язык»",
+    "«Что нового» в обновлениях — на языке приложения",
+    "Сайт и README на английском и русском"
+  ],
+  "notes_en": [
+    "English interface: follows the system language, or choose it in More → Settings → Language",
+    "Update notes are shown in the app language",
+    "Website and README in English and Russian"
+  ],
+  "notes_ru": [
+    "Английский язык интерфейса: как в системе или вручную — «Ещё → Настройки → Язык»",
+    "«Что нового» в обновлениях — на языке приложения",
+    "Сайт и README на английском и русском"
   ]
 }

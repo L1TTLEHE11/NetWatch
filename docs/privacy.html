@@ -1,62 +1,64 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Политика конфиденциальности — NetWatch</title>
-<meta name="description" content="Политика конфиденциальности приложения NetWatch: приложение не собирает, не хранит на серверах и не передаёт персональные данные.">
+<title>Privacy policy — NetWatch</title>
+<script>
+(function(){try{var s=localStorage.getItem('nw_lang');var l=(navigator.languages&&navigator.languages[0])||navigator.language||'';
+if(s==='ru'||(!s&&/^ru\b/i.test(l))){location.replace('ru/'+location.pathname.split('/').pop()+location.hash)}}catch(e){}})();
+</script><meta name="description" content="NetWatch privacy policy: the app does not collect, store on servers or share personal data.">
 <link rel="canonical" href="https://l1ttlehe11.github.io/NetWatch/privacy.html">
+<link rel="alternate" hreflang="en" href="https://l1ttlehe11.github.io/NetWatch/privacy.html">
+<link rel="alternate" hreflang="ru" href="https://l1ttlehe11.github.io/NetWatch/ru/privacy.html">
+<link rel="alternate" hreflang="x-default" href="https://l1ttlehe11.github.io/NetWatch/privacy.html">
 <link rel="icon" type="image/png" href="favicon.png">
-<style>
-:root{--bg:#060204;--line:#4a0b1d;--red:#ff003c;--yel:#fcee0a;--cyan:#00f0ff;--text:#f0f6fc;--mut:#b08a98}
-body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 ui-monospace,"JetBrains Mono","DejaVu Sans Mono",Menlo,Consolas,monospace}
-.top{height:4px;background:var(--red)}
-main{max-width:780px;margin:0 auto;padding:36px 20px 60px}
-a{color:var(--cyan)}a:hover{color:var(--yel)}
-h1{color:var(--yel);font-size:26px;line-height:1.25}
-h2{color:var(--yel);font-size:18px;margin-top:32px}
-p,li{color:#e6dbe0}
-.mut{color:var(--mut);font-size:14px}
-</style>
+<link rel="apple-touch-icon" href="icon.png">
+<meta name="theme-color" content="#060204">
+<link rel="stylesheet" href="site.css">
 </head>
-<body>
+<body class="doc">
 <div class="top"></div>
 <main>
+<nav class="lang" aria-label="Language"><b aria-current="true">EN</b><span>|</span><a href="ru/privacy.html" hreflang="ru" lang="ru" data-lang="ru">RU</a></nav>
 <p><a href="./">← NetWatch</a></p>
-<h1>Политика конфиденциальности приложения NetWatch</h1>
-<p class="mut">Действует с 17 октября 2026 года · разработчик: L1TTLEHE11</p>
+<h1>NetWatch privacy policy</h1>
+<p class="mut">Effective from 17 October 2026 · developer: L1TTLEHE11</p>
 
-<h2>Коротко</h2>
-<p>NetWatch не собирает, не продаёт и не передаёт ваши данные. В приложении нет рекламы, аналитики, учётных записей и собственных серверов разработчика.</p>
+<h2>In short</h2>
+<p>NetWatch does not collect, sell or share your data. The app has no ads, no analytics, no accounts and no developer servers.</p>
 
-<h2>Какие данные обрабатываются на телефоне</h2>
+<h2>Data processed on the phone</h2>
 <ul>
-<li>Параметры сети: имя и сигнал Wi-Fi, IP-адреса, шлюз, DNS — для отображения и диагностики.</li>
-<li>Результаты замеров: пинги, скорость, найденные устройства в локальной сети, точки обхода, сессии мониторинга.</li>
-<li>Введённые вами адреса и настройки, включая адрес, логин и (если вы выбрали «запомнить») пароль MikroTik.</li>
+<li>Network parameters: Wi-Fi name and signal, IP addresses, gateway, DNS — for display and diagnostics.</li>
+<li>Measurement results: pings, speed, devices found on the local network, survey points, monitor sessions.</li>
+<li>Addresses and settings you enter, including the MikroTik address, login and (if you choose “remember”) password.</li>
 </ul>
-<p>Всё это хранится только в закрытой папке приложения на вашем устройстве и удаляется вместе с приложением или кнопкой «Очистить» в разделе «История».</p>
+<p>All of this is stored only in the app’s private folder on your device and is deleted together with the app or with the “Clear” button in “History”.</p>
 
-<h2>Геолокация</h2>
-<p>Разрешение на геолокацию запрашивается только потому, что Android без него не отдаёт приложениям имя Wi-Fi сети (SSID) и результаты сканирования эфира. Координаты не запрашиваются, не используются и не сохраняются.</p>
+<h2>Location</h2>
+<p>Location permission is requested only because Android does not give apps the Wi-Fi network name (SSID) and scan results without it. Coordinates are never requested, used or stored.</p>
 
-<h2>Сетевые запросы</h2>
-<p>Для работы функций приложение обращается к:</p>
+<h2>Network requests</h2>
+<p>To work, the app connects to:</p>
 <ul>
-<li>устройствам вашей локальной сети и выбранным вами узлам — пинг, сканирование, traceroute, порты, MikroTik;</li>
-<li>публичным серверам для замера скорости (mirror.yandex.ru, mirror.selectel.ru, speed.cloudflare.com, speed.hetzner.de) и DNS-серверам для теста DNS;</li>
-<li>GitHub и jsDelivr — для проверки и загрузки обновлений (можно отключить автопроверку в настройках).</li>
+<li>devices on your local network and hosts you choose — ping, scanning, traceroute, ports, MikroTik;</li>
+<li>public servers for the speed test (mirror.yandex.ru, mirror.selectel.ru, speed.cloudflare.com, speed.hetzner.de) and DNS servers for the DNS test;</li>
+<li>GitHub and jsDelivr — to check for and download updates (automatic checks can be turned off in settings).</li>
 </ul>
-<p>Эти серверы видят ваш IP-адрес, как при открытии любого сайта. Никаких идентификаторов устройства или пользователя приложение им не передаёт.</p>
+<p>These servers see your IP address, as with any website. The app sends them no device or user identifiers.</p>
 
-<h2>Передача данных</h2>
-<p>Данные покидают телефон только по вашему действию — когда вы сами отправляете отчёт PDF, TXT или CSV через меню «Поделиться».</p>
+<h2>Sharing</h2>
+<p>Data leaves the phone only when you act — when you share a PDF, TXT or CSV report yourself via the “Share” menu.</p>
 
-<h2>Дети</h2>
-<p>Приложение не предназначено для детей и не собирает данные о них.</p>
+<h2>Children</h2>
+<p>The app is not intended for children and collects no data about them.</p>
 
-<h2>Изменения и контакты</h2>
-<p>Изменения этой политики публикуются на этой странице. Вопросы — через <a href="https://github.com/L1TTLEHE11/NetWatch/issues">issues на GitHub</a>. Исходный код приложения открыт: <a href="https://github.com/L1TTLEHE11/NetWatch">github.com/L1TTLEHE11/NetWatch</a>.</p>
+<h2>Changes and contact</h2>
+<p>Changes to this policy are published on this page. Questions: <a href="https://github.com/L1TTLEHE11/NetWatch/issues">GitHub issues</a>. The app’s source code is open: <a href="https://github.com/L1TTLEHE11/NetWatch">github.com/L1TTLEHE11/NetWatch</a>.</p>
 </main>
+<script>
+document.addEventListener('click',function(e){var a=e.target.closest('a[data-lang]');if(a){try{localStorage.setItem('nw_lang',a.dataset.lang)}catch(_){}}});
+</script>
 </body>
 </html>

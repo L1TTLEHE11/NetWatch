@@ -1,24 +1,29 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NetWatch — бесплатный сетевой сканер и Wi-Fi анализатор для Android</title>
-<meta name="description" content="NetWatch — бесплатное приложение для диагностики сети на Android: сканер устройств в сети, анализатор Wi-Fi каналов, пинг, замер скорости интернета, мониторинг обрывов, traceroute, сканер портов и MikroTik. Без рекламы и сбора данных, открытый код.">
-<meta name="keywords" content="сетевой сканер, сканер сети android, анализатор wi-fi, wifi analyzer, сканер ip, пинг, traceroute, сканер портов, скорость интернета, мониторинг сети, mikrotik, routeros, capsman, wake on lan, network scanner, lan scanner">
+<title>NetWatch — free network scanner and Wi-Fi analyzer for Android</title>
+<script>
+(function(){try{var s=localStorage.getItem('nw_lang');var l=(navigator.languages&&navigator.languages[0])||navigator.language||'';
+if(s==='ru'||(!s&&/^ru\b/i.test(l))){location.replace('ru/'+location.pathname.split('/').pop()+location.hash)}}catch(e){}})();
+</script><meta name="description" content="NetWatch is a free network diagnostics app for Android: LAN device scanner, Wi-Fi channel analyzer, ping, internet speed test, outage monitor, traceroute, port scanner and MikroTik. No ads, no data collection, open source.">
 <link rel="canonical" href="https://l1ttlehe11.github.io/NetWatch/">
+<link rel="alternate" hreflang="en" href="https://l1ttlehe11.github.io/NetWatch/">
+<link rel="alternate" hreflang="ru" href="https://l1ttlehe11.github.io/NetWatch/ru/">
+<link rel="alternate" hreflang="x-default" href="https://l1ttlehe11.github.io/NetWatch/">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="icon.png">
 <meta name="theme-color" content="#060204">
+<meta name="keywords" content="network scanner, network scanner android, lan scanner, ip scanner, wifi analyzer, wi-fi channel analyzer, ping, traceroute, port scanner, speed test, network monitor, mikrotik, routeros, capsman, wake on lan, mdns, upnp">
 <meta property="og:type" content="website">
-<meta property="og:title" content="NetWatch — сетевой сканер и Wi-Fi анализатор для Android">
-<meta property="og:description" content="Сканер сети, Wi-Fi эфир, пинг, скорость, мониторинг обрывов и MikroTik в одном бесплатном приложении. Без рекламы, открытый код.">
+<meta property="og:title" content="NetWatch — network scanner and Wi-Fi analyzer for Android">
+<meta property="og:description" content="LAN scanner, Wi-Fi channels, ping, speed test, outage monitor and MikroTik in one free app. No ads, open source.">
 <meta property="og:image" content="https://l1ttlehe11.github.io/NetWatch/og.png">
 <meta property="og:url" content="https://l1ttlehe11.github.io/NetWatch/">
-<meta property="og:locale" content="ru_RU">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="ru_RU">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="alternate" hreflang="ru" href="https://l1ttlehe11.github.io/NetWatch/">
-<link rel="alternate" hreflang="en" href="https://l1ttlehe11.github.io/NetWatch/#en">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -27,149 +32,116 @@
   "alternateName": "NetWatch",
   "operatingSystem": "Android 8.0+",
   "applicationCategory": "UtilitiesApplication",
-  "softwareVersion": "2.4.2",
+  "softwareVersion": "2.5",
+  "inLanguage": [
+    "en",
+    "ru"
+  ],
   "license": "https://www.gnu.org/licenses/gpl-3.0.html",
   "isAccessibleForFree": true,
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "RUB" },
-  "downloadUrl": "https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.4.2-universal.apk",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "downloadUrl": "https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.5-universal.apk",
   "codeRepository": "https://github.com/L1TTLEHE11/NetWatch",
   "image": "https://l1ttlehe11.github.io/NetWatch/icon.png",
-  "screenshot": "https://l1ttlehe11.github.io/NetWatch/screenshots/3_scan.png",
-  "author": { "@type": "Person", "name": "L1TTLEHE11", "url": "https://github.com/L1TTLEHE11" },
-  "description": "Бесплатный сетевой сканер и Wi-Fi анализатор для Android: устройства в сети, каналы Wi-Fi, пинг, скорость интернета, мониторинг обрывов, traceroute, порты, MikroTik."
+  "screenshot": "https://l1ttlehe11.github.io/NetWatch/screenshots/en/3_scan.png",
+  "author": {
+    "@type": "Person",
+    "name": "L1TTLEHE11",
+    "url": "https://github.com/L1TTLEHE11"
+  },
+  "description": "Free network scanner and Wi-Fi analyzer for Android: LAN devices, Wi-Fi channels, ping, internet speed, outage monitor, traceroute, ports, MikroTik."
 }
 </script>
-<style>
-:root{--bg:#060204;--card:#0d0609;--line:#4a0b1d;--red:#ff003c;--yel:#fcee0a;--cyan:#00f0ff;--green:#00ff66;--text:#f0f6fc;--mut:#b08a98}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 ui-monospace,"JetBrains Mono","Cascadia Mono","Segoe UI Mono","DejaVu Sans Mono",Menlo,Consolas,monospace;
-  background-image:linear-gradient(#14080e 1px,transparent 1px),linear-gradient(90deg,#14080e 1px,transparent 1px);background-size:32px 32px}
-a{color:var(--cyan)}a:hover{color:var(--yel)}
-.top{height:4px;background:var(--red)}
-.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
-header.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding:56px 0 40px}
-.logo{display:inline-block;background:var(--red);color:var(--bg);font-weight:800;font-size:clamp(22px,4vw,34px);padding:4px 14px;letter-spacing:.5px}
-h1{font-size:clamp(26px,4.2vw,42px);line-height:1.2;margin:22px 0 12px;color:var(--yel)}
-.lead{color:var(--mut);font-size:18px;margin:0 0 26px}
-.cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
-.btn{display:inline-flex;align-items:center;gap:10px;min-height:52px;padding:0 22px;font:inherit;font-weight:800;letter-spacing:.5px;text-decoration:none;
-  clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px)}
-.btn.main{background:var(--green);color:var(--bg)}
-.btn.main:hover{background:var(--yel);color:var(--bg)}
-.btn.alt{border:1px solid var(--cyan);color:var(--cyan)}
-.meta{color:var(--mut);font-size:13px;margin-top:12px}
-.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
-.tag{border:1px solid var(--line);padding:2px 10px;font-size:13px;color:var(--mut)}
-.phones{position:relative;height:540px}
-.phones img{position:absolute;width:250px;border:2px solid var(--red);box-shadow:0 0 28px rgba(255,0,60,.45)}
-.phones img:nth-child(1){left:0;top:30px}
-.phones img:nth-child(2){right:0;top:0;border-color:var(--cyan);box-shadow:0 0 28px rgba(0,240,255,.4)}
-h2{font-size:22px;color:var(--yel);margin:56px 0 18px;letter-spacing:1px}
-h2::before{content:"/// ";color:var(--red)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
-.card{background:var(--card);border:1px solid var(--line);padding:18px 18px 16px}
-.card b{display:block;color:var(--text);font-size:17px;margin-bottom:6px}
-.card .n{color:var(--red);font-size:12px;font-weight:800;letter-spacing:1px}
-.card p{margin:0;color:var(--mut);font-size:14px}
-.gallery{display:flex;gap:16px;overflow-x:auto;padding:4px 2px 14px;scroll-snap-type:x mandatory}
-.gallery figure{margin:0;flex:0 0 220px;scroll-snap-align:start}
-.gallery img{width:100%;display:block;border:1px solid var(--line)}
-.gallery figcaption{color:var(--mut);font-size:13px;padding-top:6px}
-.privacy{border:1px solid var(--green);background:#04140a;padding:20px}
-.privacy b{color:var(--green)}
-ol.steps{padding-left:22px}ol.steps li{margin:6px 0}
-.en{border-top:1px solid var(--line);margin-top:56px;padding-top:8px}
-footer{border-top:1px solid var(--line);margin-top:56px;padding:22px 0 40px;color:var(--mut);font-size:13px;display:flex;flex-wrap:wrap;gap:12px 28px}
-@media (max-width:860px){
-  header.hero{grid-template-columns:1fr;padding-top:36px}
-  .phones{height:400px;max-width:420px}
-  .phones img{width:190px}
-}
-@media (max-width:420px){.phones img{width:160px}.phones{height:340px}}
-</style>
+<link rel="stylesheet" href="site.css">
 </head>
 <body>
 <div class="top"></div>
 <div class="wrap">
+<nav class="lang" aria-label="Language"><b aria-current="true">EN</b><span>|</span><a href="ru/" hreflang="ru" lang="ru" data-lang="ru">RU</a></nav>
 
 <header class="hero">
   <div>
     <span class="logo">NETWATCH // TOOL</span>
-    <h1>Бесплатный сетевой сканер и&nbsp;Wi-Fi анализатор для&nbsp;Android</h1>
-    <p class="lead">Найдёт все устройства в сети, подберёт канал Wi-Fi, замерит скорость, поймает обрывы провайдера и покажет, что творится на MikroTik. Без рекламы, без сбора данных, с открытым кодом.</p>
+    <h1>Free network scanner and&nbsp;Wi-Fi analyzer for&nbsp;Android</h1>
+    <p class="lead">Finds every device on your network, picks the best Wi-Fi channel, tests your speed, catches ISP outages and shows what is going on inside your MikroTik. No ads, no data collection, open source.</p>
     <div class="cta">
-      <a class="btn main" href="https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.4.2-universal.apk">⬇ СКАЧАТЬ APK</a>
-      <a class="btn alt" href="https://github.com/L1TTLEHE11/NetWatch">ИСХОДНЫЙ КОД</a>
+      <a class="btn main" href="https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.5-universal.apk">⬇ DOWNLOAD APK</a>
+      <a class="btn alt" href="https://github.com/L1TTLEHE11/NetWatch">SOURCE CODE</a>
     </div>
-    <div class="meta">Версия 2.4.2 · Android 8.0+ · один файл для всех устройств · обновляется из приложения</div>
-    <div class="tags"><span class="tag">GPL-3.0</span><span class="tag">без рекламы</span><span class="tag">без аналитики</span><span class="tag">работает офлайн в локальной сети</span></div>
+    <div class="meta">Version 2.5 · Android 8.0+ · one file for every device · updates from inside the app</div>
+    <div class="tags"><span class="tag">GPL-3.0</span><span class="tag">no ads</span><span class="tag">no analytics</span><span class="tag">works offline on your LAN</span><span class="tag">English · Русский</span></div>
   </div>
   <div class="phones" aria-hidden="true">
-    <img src="screenshots/1_home.png" alt="">
-    <img src="screenshots/3_scan.png" alt="">
+    <img src="screenshots/en/1_home.png" alt="">
+    <img src="screenshots/en/3_scan.png" alt="">
   </div>
 </header>
 
 <section>
-  <h2>ЧТО УМЕЕТ</h2>
+  <h2>FEATURES</h2>
   <div class="grid">
-    <div class="card"><span class="n">01</span><b>Сканер сети</b><p>Все устройства в подсети за 10–30 секунд: роутеры, MikroTik, IP-камеры, принтеры, Android TV и Smart TV, компьютеры, iPhone, NAS. Открытые порты, имена устройств, метка «новое».</p></div>
-    <div class="card"><span class="n">02</span><b>Wi-Fi анализатор</b><p>Все сети вокруг на графике каналов 2.4 / 5 / 6 ГГц и рекомендация самого свободного канала для вашей точки доступа.</p></div>
-    <div class="card"><span class="n">03</span><b>Скорость интернета</b><p>Многопоточный замер скачивания и отдачи с живыми шкалами, пинг и джиттер, история и итог за неделю: когда интернет медленнее всего.</p></div>
-    <div class="card"><span class="n">04</span><b>Мониторинг обрывов</b><p>Круглосуточная проверка роутера и интернета в фоне, уведомления об обрывах, статистика потерь и время без связи — для разговора с провайдером.</p></div>
-    <div class="card"><span class="n">05</span><b>Обход объекта</b><p>Замеры сигнала и пинга по точкам здания («номер 204», «ресепшн»), проблемные места подсвечиваются, отчёт в Excel и PDF.</p></div>
-    <div class="card"><span class="n">06</span><b>Диагностика</b><p>Traceroute, сравнение DNS-серверов, сканер портов с расшифровкой служб, live-пинг любого узла, TCP-тест скорости в локальной сети, Wake-on-LAN.</p></div>
-    <div class="card"><span class="n">07</span><b>MikroTik</b><p>Подключение по RouterOS API: нагрузка, трафик по портам в реальном времени, точки CAPsMAN, Wi-Fi клиенты с уровнем сигнала, DHCP-аренды.</p></div>
-    <div class="card"><span class="n">08</span><b>История и отчёты</b><p>Все замеры сохраняются на телефоне, фильтры по сети и периоду, PDF-отчёт одной кнопкой, виджет на рабочий стол.</p></div>
+    <div class="card"><span class="n">01</span><b>LAN scanner</b><p>Every device on the subnet in 10–30 seconds: routers, MikroTik, IP cameras, printers, Android TV and Smart TV, PCs, iPhones, NAS. Open ports, device names, a “new” tag.</p></div>
+    <div class="card"><span class="n">02</span><b>Wi-Fi analyzer</b><p>All nearby networks on a 2.4 / 5 / 6 GHz channel graph and the least crowded channel for your access point.</p></div>
+    <div class="card"><span class="n">03</span><b>Speed test</b><p>Multi-threaded download and upload test with live bars, ping and jitter, history and a weekly summary: when your internet is slowest.</p></div>
+    <div class="card"><span class="n">04</span><b>Outage monitor</b><p>24/7 background checks of the router and the internet, outage notifications, loss statistics and downtime — evidence for your ISP.</p></div>
+    <div class="card"><span class="n">05</span><b>Site survey</b><p>Signal and ping measurements per location (“room 204”, “reception”), weak spots highlighted, Excel and PDF report.</p></div>
+    <div class="card"><span class="n">06</span><b>Diagnostics</b><p>Traceroute, DNS benchmark, port scanner with service names, live ping of any host, LAN TCP throughput test, Wake-on-LAN.</p></div>
+    <div class="card"><span class="n">07</span><b>MikroTik</b><p>RouterOS API client: load, real-time traffic per port, CAPsMAN access points, Wi-Fi clients with signal, DHCP leases.</p></div>
+    <div class="card"><span class="n">08</span><b>History and reports</b><p>Every test is saved on the phone, filters by network and period, one-tap PDF report, home-screen widget.</p></div>
   </div>
 </section>
 
 <section>
-  <h2>СКРИНШОТЫ</h2>
+  <h2>SCREENSHOTS</h2>
   <div class="gallery">
-    <figure><img src="screenshots/1_home.png" alt="Главная: сигнал Wi-Fi, пинги, последний замер скорости" loading="lazy"><figcaption>Главная</figcaption></figure>
-    <figure><img src="screenshots/3_scan.png" alt="Сканер сети: список устройств с типами и портами" loading="lazy"><figcaption>Сканер сети</figcaption></figure>
-    <figure><img src="screenshots/4_wifi.png" alt="Wi-Fi анализатор: график каналов и рекомендованный канал" loading="lazy"><figcaption>Wi-Fi эфир</figcaption></figure>
-    <figure><img src="screenshots/2_speed.png" alt="Замер скорости интернета" loading="lazy"><figcaption>Скорость</figcaption></figure>
-    <figure><img src="screenshots/5_monitor.png" alt="Мониторинг обрывов связи" loading="lazy"><figcaption>Мониторинг</figcaption></figure>
-    <figure><img src="screenshots/6_mikrotik.png" alt="MikroTik: интерфейсы, CAPsMAN, клиенты Wi-Fi" loading="lazy"><figcaption>MikroTik</figcaption></figure>
-    <figure><img src="screenshots/7_history.png" alt="История замеров со сводкой скорости" loading="lazy"><figcaption>История</figcaption></figure>
-    <figure><img src="screenshots/8_more.png" alt="Раздел «Ещё»" loading="lazy"><figcaption>Ещё</figcaption></figure>
+    <figure><img src="screenshots/en/1_home.png" alt="Home: Wi-Fi signal, pings, last speed test" loading="lazy"><figcaption>Home</figcaption></figure>
+    <figure><img src="screenshots/en/3_scan.png" alt="LAN scanner: devices with types and ports" loading="lazy"><figcaption>LAN scanner</figcaption></figure>
+    <figure><img src="screenshots/en/4_wifi.png" alt="Wi-Fi analyzer: channel graph and recommended channel" loading="lazy"><figcaption>Wi-Fi air</figcaption></figure>
+    <figure><img src="screenshots/en/2_speed.png" alt="Internet speed test" loading="lazy"><figcaption>Speed</figcaption></figure>
+    <figure><img src="screenshots/en/5_monitor.png" alt="Outage monitor" loading="lazy"><figcaption>Monitor</figcaption></figure>
+    <figure><img src="screenshots/en/6_mikrotik.png" alt="MikroTik: interfaces, CAPsMAN, Wi-Fi clients" loading="lazy"><figcaption>MikroTik</figcaption></figure>
+    <figure><img src="screenshots/en/7_history.png" alt="Measurement history with speed summary" loading="lazy"><figcaption>History</figcaption></figure>
+    <figure><img src="screenshots/en/8_more.png" alt="More section" loading="lazy"><figcaption>More</figcaption></figure>
   </div>
 </section>
 
 <section>
-  <h2>КАК УСТАНОВИТЬ</h2>
+  <h2>HOW TO INSTALL</h2>
   <ol class="steps">
-    <li>Скачайте <a href="https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.4.2-universal.apk">NetWatch-2.4.2-universal.apk</a> на телефон.</li>
-    <li>Откройте файл и разрешите установку из этого источника.</li>
-    <li>Разрешите доступ к геолокации — без него Android скрывает имя Wi-Fi сети.</li>
+    <li>Download <a href="https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.5-universal.apk">NetWatch-2.5-universal.apk</a> to your phone.</li>
+    <li>Open the file and allow installs from this source.</li>
+    <li>Allow location access — without it Android hides the Wi-Fi network name.</li>
   </ol>
-  <p class="meta">Новые версии приходят прямо в приложение: «Ещё → Настройки → Обновления». Каждый файл проверяется по SHA-256.</p>
+  <p class="meta">New versions arrive right in the app: “More → Settings → Updates”. Every file is verified by SHA-256.</p>
 </section>
 
 <section>
-  <h2>ПРИВАТНОСТЬ</h2>
+  <h2>PRIVACY</h2>
   <div class="privacy">
-    <p><b>NetWatch ничего не собирает и никуда не отправляет.</b> Нет аналитики, рекламы, учётных записей и собственных серверов. Все замеры хранятся только на вашем телефоне.</p>
-    <p style="margin-bottom:0">Геолокация нужна лишь потому, что Android без неё не показывает имя сети и результаты сканирования Wi-Fi. <a href="privacy.html">Политика конфиденциальности</a>.</p>
+    <p><b>NetWatch collects nothing and sends nothing anywhere.</b> No analytics, no ads, no accounts, no servers of its own. All measurements stay on your phone.</p>
+    <p style="margin-bottom:0">Location is needed only because Android won’t reveal the network name and Wi-Fi scan results without it. <a href="privacy.html">Privacy policy</a>.</p>
   </div>
 </section>
 
-<section class="en" id="en" lang="en">
-  <h2>IN ENGLISH</h2>
-  <p><b>NetWatch</b> is a free, open-source network scanner and Wi-Fi analyzer for Android: LAN device discovery (with mDNS and UPnP), Wi-Fi channel analyzer with best-channel advice, multi-threaded speed test, 24/7 outage monitor, site survey with CSV/PDF export, traceroute, DNS benchmark, port scanner, Wake-on-LAN and a MikroTik RouterOS API client. No ads, no tracking. Interface language: Russian.</p>
-  <div class="cta"><a class="btn main" href="https://github.com/L1TTLEHE11/NetWatch/raw/main/apk/NetWatch-2.4.2-universal.apk">⬇ DOWNLOAD APK</a><a class="btn alt" href="https://github.com/L1TTLEHE11/NetWatch">SOURCE CODE</a></div>
+<section>
+  <h2>LANGUAGES</h2>
+  <p>The app speaks English and Russian and follows your system language; switch it in “More → Settings → Language”. Want to add yours? <a href="https://github.com/L1TTLEHE11/NetWatch/blob/main/CONTRIBUTING.md#translating">Help translate NetWatch</a>.</p>
 </section>
 
 <footer>
   <span>NetWatch · Created by <a href="https://github.com/L1TTLEHE11">L1TTLEHE11</a></span>
-  <span>Свободное ПО под лицензией <a href="https://github.com/L1TTLEHE11/NetWatch/blob/main/LICENSE">GNU GPL v3</a></span>
-  <span><a href="https://github.com/L1TTLEHE11/NetWatch/issues">Сообщить об ошибке</a></span>
-  <span><a href="privacy.html">Конфиденциальность</a></span>
+  <span>Free software under the <a href="https://github.com/L1TTLEHE11/NetWatch/blob/main/LICENSE">GNU GPL v3</a></span>
+  <span><a href="https://github.com/L1TTLEHE11/NetWatch/issues">Report a bug</a></span>
+  <span><a href="privacy.html">Privacy</a></span>
 </footer>
 
 </div>
+<script>
+document.addEventListener('click',function(e){var a=e.target.closest('a[data-lang]');if(a){try{localStorage.setItem('nw_lang',a.dataset.lang)}catch(_){}}});
+</script>
 </body>
 </html>

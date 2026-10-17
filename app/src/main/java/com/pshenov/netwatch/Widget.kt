@@ -33,8 +33,8 @@ class NetWatchWidget : AppWidgetProvider() {
                 v.setTextViewText(R.id.w_sig, d?.toString() ?: "—")
                 v.setTextColor(R.id.w_sig, when { d == null -> 0xFF7A5260.toInt(); d >= -60 -> GREEN; d >= -75 -> YELLOW; else -> RED })
                 v.setTextViewText(R.id.w_ssid, when (radio.status) {
-                    RadioStatus.CELLULAR -> radio.operator ?: "Мобильная сеть"
-                    RadioStatus.ETHERNET -> "Ethernet"; RadioStatus.OFFLINE -> "Нет сети"
+                    RadioStatus.CELLULAR -> radio.operator ?: tr(R.string.mobile_network)
+                    RadioStatus.ETHERNET -> "Ethernet"; RadioStatus.OFFLINE -> tr(R.string.no_network)
                     else -> radio.ssid ?: "Wi-Fi"
                 })
             }
@@ -53,7 +53,7 @@ class NetWatchWidget : AppWidgetProvider() {
                 val a = thread { g = if (gwHost.isNotEmpty()) Pinger.ping(gwHost) else null }
                 val b = thread { i = Pinger.ping("8.8.8.8") }
                 a.join(3000); b.join(3000)
-                push(ctx, g, i, NetInfo.readRadio(ctx), "обновлено")
+                push(ctx, g, i, NetInfo.readRadio(ctx), tr(R.string.updated_2))
             } catch (_: Exception) { } finally { done() }
         }
     }

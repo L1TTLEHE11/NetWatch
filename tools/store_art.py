@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# Использование: python3 tools/store_art.py .   (после ./gradlew testDebugUnitTest --tests "*DemoShots*")
-"""Иконка 512, баннер 1024x500 и уменьшенные скриншоты для README / сайта / каталогов."""
+# Usage: python3 tools/store_art.py .   (after ./gradlew testDebugUnitTest --tests "*DemoShots*")
+"""Icon 512, 1024x500 banners and downsized screenshots (docs/screenshots/{en,ru}) for README / site / catalogs."""
 import sys, pathlib
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
@@ -11,7 +11,7 @@ BG = (6, 2, 4); RED = (255, 0, 60); CYAN = (0, 240, 255); YEL = (252, 238, 10); 
 MONO_B = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"; MONO = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
 
 # --- скриншоты: 720 px по ширине, палитра 256 цветов (для тёмного UI без потерь на глаз) ---
-for f in sorted(shots.glob("*.png")):
+for f in sorted(shots.glob("*/*.png")):
     im = Image.open(f).convert("RGB")
     if im.width > 720:
         im = im.resize((720, round(im.height * 720 / im.width)), Image.LANCZOS)
@@ -34,7 +34,7 @@ icon(512).save(root / "docs/icon.png", optimize=True)
 icon(64).save(root / "docs/favicon.png", optimize=True)
 
 # --- баннер 1024x500 ---
-def banner(tagline, sub):
+def banner(tagline, sub, lang):
     W, H = 1024, 500
     im = Image.new("RGB", (W, H), BG); d = ImageDraw.Draw(im)
     for x in range(0, W, 32): d.line([(x, 0), (x, H)], fill=(20, 8, 14))
@@ -42,7 +42,7 @@ def banner(tagline, sub):
     # экраны справа: сначала мягкое неоновое свечение, потом сами картинки
     h = 440; pos = []
     for i, name in enumerate(["1_home.png", "3_scan.png"]):
-        s_ = Image.open(shots / name).convert("RGB")
+        s_ = Image.open(shots / lang / name).convert("RGB")
         w = round(s_.width * h / s_.height)
         x = W - 34 - (2 - i) * (w + 22); yy = 30 if i else 44
         pos.append((s_.resize((w, h), Image.LANCZOS), x, yy, w, RED if i == 0 else CYAN))
@@ -67,11 +67,12 @@ def banner(tagline, sub):
     d.text((46, H - 50), "FREE · OPEN SOURCE · GPL-3.0", font=f3, fill=CYAN)
     return im
 
-banner(["Сетевой сканер", "и Wi-Fi анализатор", "для Android"], ["сканер сети · пинг · скорость", "Wi-Fi эфир · мониторинг · MikroTik"]).save(fl / "ru-RU/images/featureGraphic.png", optimize=True)
-banner(["Network scanner", "& Wi-Fi analyzer", "for Android"], ["LAN scan · ping · speed test", "Wi-Fi channels · monitor · MikroTik"]).save(fl / "en-US/images/featureGraphic.png", optimize=True)
-banner(["Сетевой сканер", "и Wi-Fi анализатор", "для Android"], ["бесплатно · без рекламы", "без сбора данных"]).save(root / "docs/og.png", optimize=True)
+banner(["Сетевой сканер", "и Wi-Fi анализатор", "для Android"], ["сканер сети · пинг · скорость", "Wi-Fi эфир · мониторинг · MikroTik"], "ru").save(fl / "ru-RU/images/featureGraphic.png", optimize=True)
+banner(["Network scanner", "& Wi-Fi analyzer", "for Android"], ["LAN scan · ping · speed test", "Wi-Fi channels · monitor · MikroTik"], "en").save(fl / "en-US/images/featureGraphic.png", optimize=True)
+banner(["Network scanner", "& Wi-Fi analyzer", "for Android"], ["free · no ads", "no data collection"], "en").save(root / "docs/og.png", optimize=True)
+banner(["Сетевой сканер", "и Wi-Fi анализатор", "для Android"], ["бесплатно · без рекламы", "без сбора данных"], "ru").save(root / "docs/og-ru.png", optimize=True)
 
-for loc in ("ru-RU", "en-US"):
-    for i, f in enumerate(sorted(shots.glob("*.png")), 1):
+for loc, lang in (("ru-RU", "ru"), ("en-US", "en")):
+    for i, f in enumerate(sorted((shots / lang).glob("*.png")), 1):
         Image.open(f).save(fl / loc / f"images/phoneScreenshots/{i}.png", optimize=True)
 print("ok")

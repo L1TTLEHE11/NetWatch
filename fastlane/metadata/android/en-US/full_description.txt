@@ -1,6 +1,6 @@
 <b>NetWatch</b> is a free cyberpunk-styled network diagnostic toolkit for Android. No ads, no analytics, no data collection. Open source under GPL-3.0.
 
-<i>Interface language: Russian.</i>
+<i>Languages: English and Russian — follows your system language, switchable in settings.</i>
 
 <b>Home</b> — everything on one screen: Wi-Fi signal in dBm, ping to the router and the internet, last speed test, devices on the network and monitoring status.
 

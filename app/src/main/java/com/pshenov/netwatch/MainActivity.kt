@@ -14,6 +14,8 @@ import androidx.core.view.WindowInsetsControllerCompat
 class MainActivity : ComponentActivity() {
     private val vm: NetVm by viewModels()
 
+    override fun attachBaseContext(newBase: android.content.Context) { super.attachBaseContext(Lang.wrap(newBase)) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -37,6 +39,6 @@ class MainActivity : ComponentActivity() {
     }
 
     // в фоне все замеры замирают — не жрём батарею и трафик
-    override fun onStart() { super.onStart(); vm.onAppVisible(true); vm.refreshReport() }
+    override fun onStart() { super.onStart(); Lang.refresh(this); vm.onAppVisible(true); vm.refreshReport() }
     override fun onStop() { super.onStop(); vm.onAppVisible(false) }
 }

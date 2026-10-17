@@ -22,9 +22,11 @@ data class UpdateInfo(
     val size: Long, val date: String, val notes: List<String>,
 ) {
     companion object {
-        fun parse(json: String): UpdateInfo {
+        fun parse(json: String, lang: String = try { Lang.locale.language } catch (_: Exception) { "en" }): UpdateInfo {
             val o = JSONObject(json)
-            val notes = o.optJSONArray("notes")?.let { a -> (0 until a.length()).map { a.getString(it) } } ?: emptyList()
+            // notes_<язык> → notes_en → notes (в старом формате там русский текст)
+            fun list(k: String) = o.optJSONArray(k)?.let { a -> (0 until a.length()).map { a.getString(it) } }
+            val notes = list("notes_" + lang) ?: list("notes_en") ?: list("notes") ?: emptyList()
             return UpdateInfo(o.getLong("versionCode"), o.getString("versionName"), o.getString("apk"),
                 o.getString("sha256").lowercase(), o.optLong("size", 0), o.optString("date"), notes)
         }
@@ -71,7 +73,7 @@ object Updater {
         }
         ts.forEach { it.join(8000) }
         return results.maxByOrNull { it.versionCode }
-            ?: throw UpdateException("Сервер обновлений недоступен" + (errors.firstOrNull()?.let { ": $it" } ?: ""))
+            ?: throw UpdateException(tr(R.string.update_server_unavailable) + (errors.firstOrNull()?.let { ": ${it}" } ?: ""))
     }
 
     fun currentVersionCode(ctx: Context): Long {
@@ -106,7 +108,7 @@ object Updater {
                         part.outputStream().use { o ->
                             val buf = ByteArray(65536)
                             while (true) {
-                                if (!running()) throw UpdateException("Загрузка отменена")
+                                if (!running()) throw UpdateException(tr(R.string.download_cancelled))
                                 val n = inp.read(buf); if (n < 0) break
                                 o.write(buf, 0, n); got += n
                                 if (total > 0) onProgress((got.toFloat() / total).coerceIn(0f, 1f))
@@ -115,16 +117,16 @@ object Updater {
                     }
                 } finally { c.disconnect() }
                 val sum = sha256(part)
-                if (sum != info.sha256) { part.delete(); throw UpdateException("Контрольная сумма не совпала — файл повреждён") }
+                if (sum != info.sha256) { part.delete(); throw UpdateException(tr(R.string.checksum_mismatch_the_file_is_corrupted)) }
                 part.renameTo(out)
                 onProgress(1f)
                 return out
             } catch (e: UpdateException) {
-                if (e.message == "Загрузка отменена") throw e
+                if (e.message == tr(R.string.download_cancelled)) throw e
                 last = e
             } catch (e: Exception) { last = e }
         }
-        throw UpdateException("Не удалось скачать обновление" + (last?.message?.let { ": $it" } ?: ""))
+        throw UpdateException(tr(R.string.could_not_download_the_update) + (last?.message?.let { ": ${it}" } ?: ""))
     }
 
     /** Может ли приложение предложить установку (Android 8+: «Установка неизвестных приложений»). */

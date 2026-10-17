@@ -1,33 +1,40 @@
-# Изменения
+# Changelog
+
+**English** | [Русский](CHANGELOG.ru.md)
+
+## 2.5
+- English interface. The language follows the system or can be chosen in “More → Settings → Language”.
+- Update notes are shown in the app language.
+- Website and README in English and Russian.
 
 ## 2.4.2
-- Лицензия GNU GPL v3; в «Настройках → О приложении» — ссылки на исходный код и сообщение об ошибке.
+- GNU GPL v3 license; links to the source code and bug reports in “Settings → About”.
 
 ## 2.4.1
-- Сканер находит устройства с энергосбережением Wi-Fi (телевизоры): 3 пакета ping вместо одного.
-- Порты Smart TV Samsung, LG, Philips, Xiaomi, Sony, Roku с определением марки.
+- The scanner finds devices with Wi-Fi power saving (TVs): 3 ping packets instead of one.
+- Smart TV ports for Samsung, LG, Philips, Xiaomi, Sony and Roku with brand detection.
 
 ## 2.4
-- Обнаружение устройств по mDNS и UPnP/SSDP: Android TV, Chromecast, Smart TV, принтеры, NAS — с именами и моделями.
-- Параллельная проверка портов, добавлены порты Android TV и Chromecast.
-- Повтор загрузки обновления по свежим данным при ошибке.
+- Device discovery via mDNS and UPnP/SSDP: Android TV, Chromecast, Smart TV, printers, NAS — with names and models.
+- Parallel port checks, Android TV and Chromecast ports added.
+- Update download retries with fresh data on error.
 
 ## 2.3 – 2.3.2
-- Обновление прямо из приложения: проверка, загрузка с прогрессом, проверка SHA-256, установка.
-- Выбор самой новой версии со всех зеркал (GitHub, jsDelivr).
-- Исправлена подложка таймлайна на экране «Ещё».
+- In-app updates: check, download with progress, SHA-256 verification, install.
+- The newest version is picked across all mirrors (GitHub, jsDelivr).
+- Fixed the timeline background on the “More” screen.
 
 ## 2.2
-- Новая навигация: нижнее HUD-меню из пяти разделов, переключатели внутри «Сети» и «Wi-Fi».
-- Главная — сводка всего приложения; кнопка фонового мониторинга в шапке; экран «Настройки»; крупный шрифт.
+- New navigation: a five-section HUD bottom bar, switchers inside “Network” and “Wi-Fi”.
+- Home is a summary of the whole app; background monitor button in the header; Settings screen; large font.
 
 ## 2.1 – 2.1.1
-- История замеров с фильтрами, сводкой скорости и выгрузкой в Excel; сканер запоминает устройства и отмечает новые.
-- Упрощены шапка и подвал.
+- Measurement history with filters, speed summary and Excel export; the scanner remembers devices and marks new ones.
+- Simplified header and footer.
 
 ## 2.0 – 2.0.2
-- Сканер сети, Wi-Fi эфир, обход объекта, traceroute, тест DNS, сканер портов, Wake-on-LAN, фоновый мониторинг, MikroTik, PDF-отчёт, виджет.
-- Исправлены ложные устройства в сканере; кнопка «Разрешить работу в фоне» скрывается, если разрешено.
+- LAN scanner, Wi-Fi air, site survey, traceroute, DNS test, port scanner, Wake-on-LAN, background monitor, MikroTik, PDF report, widget.
+- Fixed phantom devices in the scanner; the “Allow background work” button hides when already allowed.
 
 ## 1.0 – 1.2
-- Android-версия NetWatch: дашборд Wi-Fi и пингов, интернетометр с живыми шкалами, локальная сеть; полноэкранный режим.
+- Android version of NetWatch: Wi-Fi and ping dashboard, speed test with live bars, local network; fullscreen mode.

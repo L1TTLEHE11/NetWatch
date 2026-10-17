@@ -1,0 +1,3 @@
+• English interface: follows the system language, or choose it in More → Settings → Language
+• Update notes are shown in the app language
+• Website and README in English and Russian

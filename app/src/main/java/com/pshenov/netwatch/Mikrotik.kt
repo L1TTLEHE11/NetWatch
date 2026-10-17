@@ -55,7 +55,7 @@ class RouterOs(private val host: String, private val port: Int, private val tls:
         }
 
         fun decodeLen(i: InputStream): Int {
-            fun rd(): Int { val b = i.read(); if (b < 0) throw RouterOsException("Соединение закрыто роутером"); return b }
+            fun rd(): Int { val b = i.read(); if (b < 0) throw RouterOsException(tr(R.string.connection_closed_by_the_router)); return b }
             val b = rd()
             return when {
                 b and 0x80 == 0 -> b
@@ -63,7 +63,7 @@ class RouterOs(private val host: String, private val port: Int, private val tls:
                 b and 0xE0 == 0xC0 -> ((b and 0x1F) shl 16) or (rd() shl 8) or rd()
                 b and 0xF0 == 0xE0 -> ((b and 0x0F) shl 24) or (rd() shl 16) or (rd() shl 8) or rd()
                 b and 0xF8 == 0xF0 -> (rd() shl 24) or (rd() shl 16) or (rd() shl 8) or rd()
-                else -> throw RouterOsException("Неверный префикс длины")
+                else -> throw RouterOsException(tr(R.string.invalid_length_prefix))
             }
         }
 
@@ -102,7 +102,7 @@ class RouterOs(private val host: String, private val port: Int, private val tls:
             }
             when (s[0]) {
                 "!re" -> rows += attrs
-                "!trap" -> trap = attrs["message"] ?: "ошибка"
+                "!trap" -> trap = attrs["message"] ?: tr(R.string.error_4)
                 "!fatal" -> throw RouterOsException(s.drop(1).joinToString(" "))
                 "!done" -> { trap?.let { throw RouterOsException(it) }; if (attrs.isNotEmpty()) rows += attrs; return rows }
             }
@@ -110,12 +110,12 @@ class RouterOs(private val host: String, private val port: Int, private val tls:
     }
 
     fun login(user: String, pass: String) {
-        val r = talk("/login", "=name=$user", "=password=$pass")
+        val r = talk("/login", "=name=${user}", "=password=${pass}")
         val challenge = r.firstOrNull()?.get("ret") ?: return   // RouterOS 6.43+: вошли сразу
         // Старый способ (до 6.43): MD5(0x00 + пароль + challenge)
         val ch = challenge.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
         val md = MessageDigest.getInstance("MD5").apply { update(0); update(pass.toByteArray()); update(ch) }.digest()
-        talk("/login", "=name=$user", "=response=00" + md.joinToString("") { "%02x".format(it) })
+        talk("/login", "=name=${user}", "=response=00" + md.joinToString("") { "%02x".format(it) })
     }
 
     /** Команда, которой может не быть на этой версии RouterOS — тогда null. */
@@ -176,7 +176,7 @@ object MtFetch {
             val rows = try { api.tryTalk(p) } catch (_: Exception) { null } ?: continue
             if (rows.isNotEmpty()) { all += rows; src += name }
         }
-        return (src.joinToString(" + ").ifEmpty { "нет данных" }) to all
+        return (src.joinToString(" + ").ifEmpty { tr(R.string.no_data) }) to all
     }
 
     fun caps(api: RouterOs): List<MtCap> {

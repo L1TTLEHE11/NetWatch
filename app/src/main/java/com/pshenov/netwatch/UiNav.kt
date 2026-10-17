@@ -162,10 +162,10 @@ fun MonitorToggle(vm: NetVm) {
     val ctx = LocalContext.current
     val m by Monitor.state.collectAsState()
     val notif = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { Monitor.start(ctx, vm.gw.host.trim(), vm.inet.host.trim()) }
-    Box(Modifier.semantics { stateDescription = if (m.running) "включён" else "выключен" }) {
+    Box(Modifier.semantics { stateDescription = if (m.running) tr(R.string.on) else tr(R.string.off_2) }) {
         HeaderIconButton(
             Ic.pulse, if (m.running) Cp.green else Color(0xFFC09AA8),
-            if (m.running) "Фоновый мониторинг включён — выключить" else "Фоновый мониторинг выключен — включить",
+            if (m.running) tr(R.string.background_monitoring_is_on_turn_off) else tr(R.string.background_monitoring_is_off_turn_on),
             border = if (m.running) Cp.green else Cp.dim, bg = if (m.running) Color(0xFF062410) else Color(0xFF1F0810),
             led = if (m.running) Cp.green else null,
         ) {
@@ -184,7 +184,7 @@ fun Header(vm: NetVm, onReport: () -> Unit) {
         when {
             sec == Section.HOME -> Box(Modifier.background(Cp.red).padding(horizontal = 9.dp, vertical = 4.dp)) { T("NETWATCH // TOOL", Cp.dark, 16.sp, bold = true, fixed = true, maxLines = 1) }
             inner -> {
-                HeaderIconButton(Ic.back, Cp.text, "Назад в «Ещё»") { vm.selectTab(TAB_MORE) }
+                HeaderIconButton(Ic.back, Cp.text, tr(R.string.back_to_more)) { vm.selectTab(TAB_MORE) }
                 T(innerTitle(vm.tab), Cp.text, 20.sp, bold = true, maxLines = 1)
             }
             else -> T(sec.title, Cp.text, 22.sp, bold = true, maxLines = 1)
@@ -192,13 +192,13 @@ fun Header(vm: NetVm, onReport: () -> Unit) {
         Spacer(Modifier.weight(1f))
         if (sec != Section.MORE || inner) {
             MonitorToggle(vm)
-            HeaderIconButton(Ic.history, Cp.yellow, "История", border = if (vm.tab == TAB_HISTORY) Cp.yellow else Cp.dim) { vm.selectTab(TAB_HISTORY) }
-            HeaderIconButton(Ic.share, Cp.cyan, "Отчёт") { onReport() }
+            HeaderIconButton(Ic.history, Cp.yellow, tr(R.string.history), border = if (vm.tab == TAB_HISTORY) Cp.yellow else Cp.dim) { vm.selectTab(TAB_HISTORY) }
+            HeaderIconButton(Ic.share, Cp.cyan, tr(R.string.report)) { onReport() }
         }
     }
 }
 
-private fun innerTitle(tab: Int) = when (tab) { TAB_MONITOR -> "Мониторинг"; TAB_MIKROTIK -> "MikroTik"; TAB_HISTORY -> "История"; TAB_SETTINGS -> "Настройки"; else -> "Ещё" }
+private fun innerTitle(tab: Int) = when (tab) { TAB_MONITOR -> tr(R.string.monitoring); TAB_MIKROTIK -> "MikroTik"; TAB_HISTORY -> tr(R.string.history); TAB_SETTINGS -> tr(R.string.settings); else -> tr(R.string.more_2) }
 
 /* ============================ переключатель внутри раздела ============================ */
 
@@ -230,7 +230,7 @@ fun Tile(modifier: Modifier = Modifier.fillMaxWidth(), border: Color = Cp.dim, o
 }
 
 @Composable
-fun SectionLabel(s: String) = T("/// $s", Cp.yellow, 12.sp, bold = true, modifier = Modifier.padding(top = 2.dp))
+fun SectionLabel(s: String) = T("/// ${s}", Cp.yellow, 12.sp, bold = true, modifier = Modifier.padding(top = 2.dp))
 
 @Composable
 fun MenuRow(icon: String, tint: Color, title: String, sub: String, subColor: Color = Cp.muted2, border: Color = Cp.dim, onClick: () -> Unit) {

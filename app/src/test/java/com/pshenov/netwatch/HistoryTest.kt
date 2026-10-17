@@ -5,7 +5,12 @@ import org.junit.Test
 import java.io.File
 import java.nio.file.Files
 
+// Robolectric — чтобы были ресурсы строк; язык фиксируем русский, на нём написаны проверки
+@org.junit.runner.RunWith(org.robolectric.RobolectricTestRunner::class)
+@org.robolectric.annotation.Config(sdk = [34])
 class HistoryTest {
+    @org.junit.Before fun pinLang() { Lang.pin(androidx.test.core.app.ApplicationProvider.getApplicationContext(), "ru") }
+
     private fun fresh(): File = Files.createTempDirectory("nwhist").toFile()
 
     private fun item(t: Long, k: HKind = HKind.SPEED, id: Long = t) =

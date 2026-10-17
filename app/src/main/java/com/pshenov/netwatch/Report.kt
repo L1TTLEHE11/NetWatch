@@ -44,10 +44,10 @@ object Report {
                 text.isFakeBoldText = l.startsWith("■") || l.startsWith("==")
                 c.drawText(l, margin, y, text); y += lh
             }
-            c.drawText("NetWatch: Network Scanner · Created by L1TTLEHE11 · стр. ${i + 1}/${pages.size}", margin, h - margin / 2, foot)
+            c.drawText(tr(R.string.netwatch_network_scanner_created_by_l1ttlehe11, i + 1, pages.size), margin, h - margin / 2, foot)
             doc.finishPage(page)
         }
-        val f = File(dir(ctx), "NetWatch_отчёт_${stamp()}.pdf")
+        val f = File(dir(ctx), tr(R.string.netwatch_report_pdf, stamp()))
         f.outputStream().use { doc.writeTo(it) }
         doc.close()
         return f
@@ -56,7 +56,7 @@ object Report {
     fun sharePdf(ctx: Context, title: String, body: String) = share(ctx, pdf(ctx, title, body), "application/pdf", title)
 
     fun shareText(ctx: Context, title: String, body: String) {
-        val f = File(dir(ctx), "NetWatch_отчёт_${stamp()}.txt").apply { writeText(title + "\n\n" + body) }
+        val f = File(dir(ctx), tr(R.string.netwatch_report_txt, stamp())).apply { writeText(title + "\n\n" + body) }
         share(ctx, f, "text/plain", title)
     }
 

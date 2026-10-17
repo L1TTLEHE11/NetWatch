@@ -9,7 +9,12 @@ import java.net.InetAddress
 import java.net.ServerSocket
 import kotlin.concurrent.thread
 
+// Robolectric — чтобы были ресурсы строк; язык фиксируем русский, на нём написаны проверки
+@org.junit.runner.RunWith(org.robolectric.RobolectricTestRunner::class)
+@org.robolectric.annotation.Config(sdk = [34])
 class DiscoveryTest {
+    @org.junit.Before fun pinLang() { Lang.pin(androidx.test.core.app.ApplicationProvider.getApplicationContext(), "ru") }
+
     /** Ответ mDNS, как его шлёт Android TV: PTR со сжатием имени + TXT (fn, md) + A. */
     private fun tvResponse(): ByteArray {
         val o = ByteArrayOutputStream()
