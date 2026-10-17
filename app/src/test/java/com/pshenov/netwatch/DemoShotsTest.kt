@@ -80,7 +80,7 @@ class DemoShotsTest(private val lang: String) {
             host("192.168.88.10", 3.0, listOf(80, 631, 9100), "Printer-2F", "Printer Web", null, tr(R.string.printer)),
             cam,
             host("192.168.88.31", 4.0, listOf(8008, 8009, 8443), L("Living Room TV", "Гостиная TV"), "Android TV", null, "Android TV"),
-            host("192.168.88.40", 3.0, listOf(139, 445, 3389), "RECEPTION-PC", null, "02:1a:2b:3c:4d:5e", tr(R.string.windows_computer)),
+            host("192.168.88.40", 3.0, listOf(139, 445, 3389), "OFFICE-PC", null, "02:1a:2b:3c:4d:5e", tr(R.string.windows_computer)),
             host("192.168.88.57", 0.0, emptyList(), null, null, null, tr(R.string.this_phone), self = true),
             host("192.168.88.63", 7.0, listOf(62078), "iPhone", null, null, "iPhone / iPad"),
         )
@@ -92,7 +92,7 @@ class DemoShotsTest(private val lang: String) {
                 if (band == 24) 2407 + ch * 5 else 5000 + ch * 5, ch, band, w, sec, conn)
         vm.wifi.band = 24
         vm.wifi.aps = listOf(
-            ap("Office", 1, -41, "WPA2", conn = true), ap("Neighbor_2G", 3, -63, "WPA2"), ap("Cafe-Guest", 6, -68, tr(R.string.open_3)),
+            ap("Office", 1, -41, "WPA2", conn = true), ap("Neighbor_2G", 3, -63, "WPA2"), ap("Cafe-Free", 6, -68, tr(R.string.open_3)),
             ap("TP-Link_7A", 6, -74, "WPA2"), ap("HomeNet", 11, -82, "WPA3"), ap("Office-5G", 44, -54, "WPA2", w = 80, band = 5),
         ).sortedByDescending { it.dbm }
         vm.wifi.lastScan = now - min
@@ -110,7 +110,7 @@ class DemoShotsTest(private val lang: String) {
         }
 
         vm.mt.host = "192.168.88.1"; vm.mt.connected = true
-        vm.mt.info = MtInfo("Core-Router", "RB1100AHx4", "7.16.1", "21d04h13m", 7, 31, "41")
+        vm.mt.info = MtInfo("Core-Router", "hAP ax3", "7.16.1", "21d04h13m", 7, 31, "41")
         vm.mt.ifaces = listOf(
             MtIface("ether1-WAN", "ether", true, false, 84.2e6, 12.1e6, 0, 0),
             MtIface("bridge-LAN", "bridge", true, false, 11.6e6, 79.4e6, 0, 0),
@@ -121,13 +121,13 @@ class DemoShotsTest(private val lang: String) {
         vm.mt.caps = listOf(MtCap("AP-1F", "192.168.88.11", "cAP ax", "Run"), MtCap("AP-2F", "192.168.88.12", "cAP ax", "Run"))
         vm.mt.wifiSrc = "CAPsMAN"
         vm.mt.wifi = listOf(
-            MtWifiClient("02:AA:00:00:00:01", "AP-1F-5G", "-52", "3h12m", "866Mbps", "Laptop-Reception", "192.168.88.70"),
-            MtWifiClient("02:AA:00:00:00:02", "AP-2F-5G", "-61", "1h40m", "433Mbps", "Phone-Staff", "192.168.88.71"),
+            MtWifiClient("02:AA:00:00:00:01", "AP-1F-5G", "-52", "3h12m", "866Mbps", "Laptop-Anna", "192.168.88.70"),
+            MtWifiClient("02:AA:00:00:00:02", "AP-2F-5G", "-61", "1h40m", "433Mbps", "Phone-Max", "192.168.88.71"),
             MtWifiClient("02:AA:00:00:00:03", "AP-2F-2G", "-77", "22m", "65Mbps", "Tablet", "192.168.88.72"),
         )
         vm.mt.leases = listOf(
-            MtLease("192.168.88.40", "02:1A:2B:3C:4D:5E", "RECEPTION-PC", "bound", ""),
-            MtLease("192.168.88.70", "02:AA:00:00:00:01", "Laptop-Reception", "bound", ""),
+            MtLease("192.168.88.40", "02:1A:2B:3C:4D:5E", "OFFICE-PC", "bound", ""),
+            MtLease("192.168.88.70", "02:AA:00:00:00:01", "Laptop-Anna", "bound", ""),
             MtLease("192.168.88.24", "02:1C:27:5A:00:24", "", "bound", L("entrance camera", "камера вход")),
         )
         return vm

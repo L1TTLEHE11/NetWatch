@@ -184,7 +184,7 @@
     <string name="time_point_network_ssid_access_point" formatted="false">"Time;Point;Network (SSID);Access point (BSSID);Signal, dBm;Frequency, MHz;Channel;Link, Mbit/s;Router ping, ms;Router loss, %;Internet ping, ms;Internet loss, %;Download, Mbit/s;Verdict"</string>
     <string name="all">"All"</string>
     <string name="all_networks">"All networks"</string>
-    <string name="stand_at_a_spot_room_corridor">"Stand at a spot (room, corridor, reception), enter a name and tap “Measure”. Signal, access point, ping and loss will be recorded."</string>
+    <string name="stand_at_a_spot_room_corridor">"Stand at a spot (room, corridor, floor), enter a name and tap “Measure”. Signal, access point, ping and loss will be recorded."</string>
     <string name="all_2">"All"</string>
     <string name="everything_is_stored_only_on_this">"Everything is stored only on this phone. Old records are removed automatically."</string>
     <string name="yesterday">"Yesterday"</string>

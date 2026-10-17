@@ -14,7 +14,7 @@ class HistoryTest {
     private fun fresh(): File = Files.createTempDirectory("nwhist").toFile()
 
     private fun item(t: Long, k: HKind = HKind.SPEED, id: Long = t) =
-        HItem(id, t, k, "BeregMorya", "↓ 50 ↑ 20", "пинг 12", "детали\nстрока 2 с ; и \"кавычками\"", 50.0, 20.0, 12.0)
+        HItem(id, t, k, "HomeWiFi", "↓ 50 ↑ 20", "пинг 12", "детали\nстрока 2 с ; и \"кавычками\"", 50.0, 20.0, 12.0)
 
     @Test fun persistAndReload() {
         val d = fresh()
@@ -66,6 +66,6 @@ class HistoryTest {
         val now = System.currentTimeMillis()
         val csv = History.speedCsv(listOf(item(now), item(now - 1, HKind.SCAN)))
         assertEquals(2, csv.lines().size)
-        assertTrue(csv.lines()[1].contains("BeregMorya;12;50,0;20,0") || csv.lines()[1].contains("BeregMorya;12;50.0;20.0"))
+        assertTrue(csv.lines()[1].contains("HomeWiFi;12;50,0;20,0") || csv.lines()[1].contains("HomeWiFi;12;50.0;20.0"))
     }
 }

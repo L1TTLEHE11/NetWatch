@@ -184,7 +184,7 @@
     <string name="time_point_network_ssid_access_point" formatted="false">"Время;Точка;Сеть (SSID);Точка доступа (BSSID);Сигнал, dBm;Частота, МГц;Канал;Линк, Мбит/с;Пинг роутера, мс;Потери роутер, %;Пинг интернет, мс;Потери интернет, %;Скачивание, Мбит/с;Оценка"</string>
     <string name="all">"Все"</string>
     <string name="all_networks">"Все сети"</string>
-    <string name="stand_at_a_spot_room_corridor">"Встаньте в точку (номер, коридор, ресепшн), введите название и нажмите «Замерить». Запишутся сигнал, точка доступа, пинг и потери."</string>
+    <string name="stand_at_a_spot_room_corridor">"Встаньте в точку (комната, коридор, этаж), введите название и нажмите «Замерить». Запишутся сигнал, точка доступа, пинг и потери."</string>
     <string name="all_2">"Всё"</string>
     <string name="everything_is_stored_only_on_this">"Всё хранится только на этом телефоне. Старые записи удаляются автоматически."</string>
     <string name="yesterday">"Вчера"</string>

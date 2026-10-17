@@ -31,20 +31,20 @@ class ProtoTest {
                 fun send(vararg w: String) { val bo = ByteArrayOutputStream(); w.forEach { bo.write(RouterOs.encodeLen(it.toByteArray().size)); bo.write(it.toByteArray()) }; bo.write(0); o.write(bo.toByteArray()); o.flush() }
                 val login = read(); assertEquals("/login", login[0]); assertTrue(login.contains("=name=admin")); assertTrue(login.contains("=password=secret"))
                 send("!done")
-                assertEquals("/system/identity/print", read()[0]); send("!re", "=name=Bereg-Morya-Core"); send("!done")
+                assertEquals("/system/identity/print", read()[0]); send("!re", "=name=Core-Router"); send("!done")
                 read(); send("!trap", "=message=no such command prefix"); send("!done")
                 val lp = read(); assertEquals("/ip/dhcp-server/lease/print", lp[0])
-                send("!re", "=address=192.168.88.10", "=mac-address=AA:BB:CC:DD:EE:01", "=host-name=reception-pc", "=status=bound")
+                send("!re", "=address=192.168.88.10", "=mac-address=AA:BB:CC:DD:EE:01", "=host-name=office-pc", "=status=bound")
                 send("!re", "=address=192.168.88.11", "=mac-address=AA:BB:CC:DD:EE:02", "=host-name=", "=status=waiting")
                 send("!done")
             }
         }
         RouterOs("127.0.0.1", srv.localPort, false).connect().use { api ->
             api.login("admin", "secret")
-            assertEquals("Bereg-Morya-Core", api.talk("/system/identity/print").first()["name"])
+            assertEquals("Core-Router", api.talk("/system/identity/print").first()["name"])
             assertNull(api.tryTalk("/interface/wifi/registration-table/print"))
             val l = MtFetch.leases(api)
-            assertEquals(2, l.size); assertEquals("reception-pc", l[0].host); assertEquals("AA:BB:CC:DD:EE:02", l[1].mac)
+            assertEquals(2, l.size); assertEquals("office-pc", l[0].host); assertEquals("AA:BB:CC:DD:EE:02", l[1].mac)
         }
         println("RouterOS API: login, print, trap, leases — OK")
     }
@@ -64,11 +64,11 @@ class ProtoTest {
     @Test fun netbiosParse() {
         val b = ByteArray(57 + 2 * 18 + 6)
         b[56] = 2
-        "BEREG-PC       ".toByteArray().copyInto(b, 57); b[57 + 15] = 0; b[57 + 16] = 0x04
+        "OFFICE-PC      ".toByteArray().copyInto(b, 57); b[57 + 15] = 0; b[57 + 16] = 0x04
         "WORKGROUP      ".toByteArray().copyInto(b, 75); b[75 + 15] = 0; b[75 + 16] = 0x84.toByte()
         byteArrayOf(0x00, 0x1A, 0x2B, 0x3C, 0x4D, 0x5E).copyInto(b, 93)
         val (name, mac) = NetBios.parse(b, b.size)!!
-        assertEquals("BEREG-PC", name); assertEquals("00:1A:2B:3C:4D:5E", mac)
+        assertEquals("OFFICE-PC", name); assertEquals("00:1A:2B:3C:4D:5E", mac)
     }
 
     @Test fun wol() {

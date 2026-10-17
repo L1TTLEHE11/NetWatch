@@ -175,7 +175,7 @@
  "Время;Точка;Сеть (SSID);Точка доступа (BSSID);Сигнал, dBm;Частота, МГц;Канал;Линк, Мбит/с;Пинг роутера, мс;Потери роутер, %;Пинг интернет, мс;Потери интернет, %;Скачивание, Мбит/с;Оценка": "Time;Point;Network (SSID);Access point (BSSID);Signal, dBm;Frequency, MHz;Channel;Link, Mbit/s;Router ping, ms;Router loss, %;Internet ping, ms;Internet loss, %;Download, Mbit/s;Verdict",
  "Все": "All",
  "Все сети": "All networks",
- "Встаньте в точку (номер, коридор, ресепшн), введите название и нажмите «Замерить». Запишутся сигнал, точка доступа, пинг и потери.": "Stand at a spot (room, corridor, reception), enter a name and tap “Measure”. Signal, access point, ping and loss will be recorded.",
+ "Встаньте в точку (комната, коридор, этаж), введите название и нажмите «Замерить». Запишутся сигнал, точка доступа, пинг и потери.": "Stand at a spot (room, corridor, floor), enter a name and tap “Measure”. Signal, access point, ping and loss will be recorded.",
  "Всё": "All",
  "Всё хранится только на этом телефоне. Старые записи удаляются автоматически.": "Everything is stored only on this phone. Old records are removed automatically.",
  "Вчера": "Yesterday",

@@ -33,7 +33,7 @@ LAN scanner · Wi-Fi channels · ping · speed test · outage monitor · tracero
 </tr>
 </table>
 
-NetWatch is a toolkit for people who set up and fix networks — from a home router to a hotel with a dozen access points. Everything in one app, free, with no ads and no data collection. It started as the Android port of the NetWatch desktop utility (Python / Tkinter).
+NetWatch is a toolkit for people who set up and fix networks — from a home router to an office or a building with a dozen access points. Everything in one app, free, with no ads and no data collection. It started as the Android port of the NetWatch desktop utility (Python / Tkinter).
 
 ## Features
 
@@ -45,7 +45,7 @@ NetWatch is a toolkit for people who set up and fix networks — from a home rou
 | **03 Network → Ping · TCP** | Live ping of any host with loss statistics, TCP throughput test to a LAN device, Wake-on-LAN |
 | **03 Network → Diagnostics** | Traceroute, DNS benchmark (ISP, Google, Cloudflare, Yandex, Quad9, AdGuard), port scanner with service names, interfaces and routes |
 | **04 Wi-Fi → Air** | All nearby networks, 2.4 / 5 / 6 GHz channel load graph, best channel recommendation |
-| **04 Wi-Fi → Survey** | Measurements per location (“room 204”, “reception”): signal, access point, ping, loss, speed; weak spots are highlighted; export to Excel and PDF |
+| **04 Wi-Fi → Survey** | Measurements per location (“kitchen”, “2nd floor”): signal, access point, ping, loss, speed; weak spots are highlighted; export to Excel and PDF |
 | **05 More → Monitor** | Background router and internet checks every 2 s, outage notifications, loss, downtime, event log |
 | **05 More → MikroTik** | RouterOS API (v6 and v7): CPU, memory, temperature, interface traffic, CAPsMAN access points, Wi-Fi clients with signal, DHCP leases |
 | **05 More → History** | Every test, scan and session is saved automatically; filters by type, network and period; speed summary with Excel export |
