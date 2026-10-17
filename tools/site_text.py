@@ -53,7 +53,7 @@ T = {
     h_faq="QUESTIONS",
     faq=[
         ("Is it safe to install an APK from outside Google Play?",
-         "NetWatch is open source: anyone can read the code it is built from. Every version is signed with the same key, and its SHA-256 checksum is published on GitHub. The app has no ads, no trackers and needs no account. An F-Droid version, built by F-Droid from the source code, is on its way."),
+         "NetWatch is open source: anyone can read the code it is built from. Every version is signed with the same key, and its SHA-256 checksum is published on GitHub. The app has no ads, no trackers and needs no account."),
         ("Why does it ask for location access?",
          "Android hides the Wi-Fi network name and scan results from apps without it. NetWatch never reads or stores your coordinates."),
         ("Does it work without internet?",
@@ -126,7 +126,7 @@ T = {
     h_faq="ВОПРОСЫ",
     faq=[
         ("Безопасно ли ставить APK не из Google Play?",
-         "У NetWatch открытый код: любой может посмотреть, из чего собрано приложение. Каждая версия подписана одним и тем же ключом, а её контрольная сумма SHA-256 опубликована на GitHub. В приложении нет рекламы, трекеров и регистрации. Скоро появится версия в F-Droid — её собирает сам F-Droid из исходного кода."),
+         "У NetWatch открытый код: любой может посмотреть, из чего собрано приложение. Каждая версия подписана одним и тем же ключом, а её контрольная сумма SHA-256 опубликована на GitHub. В приложении нет рекламы, трекеров и регистрации."),
         ("Зачем приложению доступ к геолокации?",
          "Без него Android не показывает приложениям имя Wi-Fi сети и результаты сканирования эфира. Координаты NetWatch не читает и не сохраняет."),
         ("Работает ли без интернета?",
@@ -457,7 +457,7 @@ P = {
 <ul>
 <li>devices on your local network and hosts you choose — ping, scanning, traceroute, ports, MikroTik;</li>
 <li>public servers for the speed test (mirror.yandex.ru, mirror.selectel.ru, speed.cloudflare.com, speed.hetzner.de) and DNS servers for the DNS test;</li>
-<li>GitHub and jsDelivr — to check for and download updates (automatic checks can be turned off in settings). The F-Droid version has no built-in updater and never contacts them.</li>
+<li>GitHub and jsDelivr — to check for and download updates (automatic checks can be turned off in settings).</li>
 </ul>
 <p>These servers see your IP address, as with any website. The app sends them no device or user identifiers.</p>
 
@@ -497,7 +497,7 @@ P = {
 <ul>
 <li>устройствам вашей локальной сети и выбранным вами узлам — пинг, сканирование, traceroute, порты, MikroTik;</li>
 <li>публичным серверам для замера скорости (mirror.yandex.ru, mirror.selectel.ru, speed.cloudflare.com, speed.hetzner.de) и DNS-серверам для теста DNS;</li>
-<li>GitHub и jsDelivr — для проверки и загрузки обновлений (автопроверку можно отключить в настройках). В версии из F-Droid встроенного обновления нет, и она к ним не обращается.</li>
+<li>GitHub и jsDelivr — для проверки и загрузки обновлений (автопроверку можно отключить в настройках).</li>
 </ul>
 <p>Эти серверы видят ваш IP-адрес, как при открытии любого сайта. Никаких идентификаторов устройства или пользователя приложение им не передаёт.</p>
 
