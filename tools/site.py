@@ -213,6 +213,13 @@ if(s==='ru'||(!s&&/^ru\\b/i.test(l))){location.replace('ru/'+location.pathname.s
 </script>"""
 
 
+# Search engine ownership codes (Google Search Console, Yandex Webmaster, Bing): docs/verify.json
+#   {"google": "<content of google-site-verification>", "yandex": "...", "bing": "..."}
+VERIFY = json.loads((docs / "verify.json").read_text(encoding="utf-8")) if (docs / "verify.json").exists() else {}
+VMETA = "".join(f'<meta name="{n}" content="{html.escape(VERIFY[k])}">\n' for k, n in
+                (("google", "google-site-verification"), ("yandex", "yandex-verification"), ("bing", "msvalidate.01")) if VERIFY.get(k))
+
+
 def head(lang, page, title, desc, extra=""):
     d = dict((c, f) for c, f, _, _ in LANGS)[lang]
     up = "../" if d else ""
@@ -228,7 +235,7 @@ def head(lang, page, title, desc, extra=""):
 <link rel="icon" type="image/png" href="{up}favicon.png">
 <link rel="apple-touch-icon" href="{up}icon.png">
 <meta name="theme-color" content="#060204">
-{extra}<link rel="stylesheet" href="{up}site.css">
+{VMETA if not d and not page else ""}{extra}<link rel="stylesheet" href="{up}site.css">
 </head>"""
 
 
