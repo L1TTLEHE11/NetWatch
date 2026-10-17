@@ -1,0 +1,1 @@
+Fixes and improvements. Full list (in Russian): CHANGELOG.md

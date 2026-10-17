@@ -1,0 +1,27 @@
+<b>NetWatch</b> is a free cyberpunk-styled network diagnostic toolkit for Android. No ads, no analytics, no data collection. Open source under GPL-3.0.
+
+<i>Interface language: Russian.</i>
+
+<b>Home</b> — everything on one screen: Wi-Fi signal in dBm, ping to the router and the internet, last speed test, devices on the network and monitoring status.
+
+<b>LAN scanner</b>
+• finds every device on the subnet in 10–30 seconds;
+• detects device type: router, MikroTik, IP camera, printer, Android TV, Smart TV, PC, iPhone, NAS;
+• discovers "silent" devices via mDNS and UPnP — TVs, Chromecast, printers — with their names and models;
+• remembers devices per network and highlights new ones.
+
+<b>Wi-Fi analyzer</b> — all networks nearby, 2.4 / 5 / 6 GHz channel graph and best-channel recommendation.
+
+<b>Site survey</b> — signal, ping and loss measured point by point, exported to Excel (CSV) and PDF.
+
+<b>Speed test</b> — multi-threaded download and upload with live gauges, ping and jitter, history and weekly summary.
+
+<b>Diagnostics</b> — traceroute, DNS server benchmark, port scanner with service names, interfaces and routes.
+
+<b>24/7 monitor</b> — background router and internet checks with outage notifications, packet loss statistics and total downtime.
+
+<b>MikroTik</b> — RouterOS API client: CPU and memory, live interface traffic, CAPsMAN access points, Wi-Fi clients with signal, DHCP leases.
+
+Also: live ping to any host, LAN TCP throughput test, Wake-on-LAN, measurement history, one-tap PDF report, home-screen widget, large font mode.
+
+Location permission is required only because Android hides the Wi-Fi network name and scan results without it. Location is never used or sent anywhere.

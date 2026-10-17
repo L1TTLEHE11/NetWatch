@@ -241,6 +241,10 @@ private fun SmallMenu(icon: String, tint: Color, title: String, sub: String, mod
     }
 }
 
+fun openUrl(ctx: android.content.Context, url: String) {
+    try { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url)).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) } catch (_: Exception) { }
+}
+
 object BuildConfigCompat {
     fun version(ctx: android.content.Context): String = try { ctx.packageManager.getPackageInfo(ctx.packageName, 0).versionName ?: "" } catch (_: Exception) { "" }
 }
@@ -351,7 +355,13 @@ fun SettingsTab(vm: NetVm) {
         Tile {
             T("О ПРИЛОЖЕНИИ", Cp.yellow, 12.sp, bold = true)
             T("NetWatch: Network Scanner ${BuildConfigCompat.version(ctx)}", Cp.text, 12.sp)
-            T("Created by L1TTLEHE11 · github.com/L1TTLEHE11/NetWatch", Cp.muted2, 11.sp)
+            T("Created by L1TTLEHE11", Cp.muted2, 11.sp)
+            T("Свободное ПО под лицензией GNU GPL v3: бесплатно, без рекламы, без сбора данных. Код открыт — его можно изучать, менять и распространять на тех же условиях.", Cp.muted2, 11.sp, modifier = Modifier.padding(top = 4.dp))
+            Row(Modifier.padding(top = 6.dp)) {
+                CpButton("ИСХОДНЫЙ КОД", Color(0xFF240B15), Cp.cyan) { openUrl(ctx, "https://github.com/L1TTLEHE11/NetWatch") }
+                Spacer(Modifier.width(8.dp))
+                CpButton("СООБЩИТЬ ОБ ОШИБКЕ", Color(0xFF240B15), Cp.text) { openUrl(ctx, "https://github.com/L1TTLEHE11/NetWatch/issues") }
+            }
         }
     }
 }

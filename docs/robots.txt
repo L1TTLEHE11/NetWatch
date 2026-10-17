@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://l1ttlehe11.github.io/NetWatch/sitemap.xml

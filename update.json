@@ -1,12 +1,12 @@
 {
-  "versionCode": 14,
-  "versionName": "2.4.1",
-  "apk": "apk/NetWatch-2.4.1-universal.apk",
-  "sha256": "aa07607403b7c9299544f27fc3823cb7e7ed692e187c838d5ce67b869e011fb1",
-  "size": 1163716,
-  "date": "16.10.2026",
+  "versionCode": 15,
+  "versionName": "2.4.2",
+  "apk": "apk/NetWatch-2.4.2-universal.apk",
+  "sha256": "5d242123f6df6489a7579eeacd444875bd24103ba388686792ac2a15dbe18ec8",
+  "size": 1163712,
+  "date": "17.10.2026",
   "notes": [
-    "Сканер находит устройства с энергосбережением Wi-Fi (телевизоры): 3 пакета ping вместо одного",
-    "Добавлены порты Smart TV: Samsung, LG, Philips, Xiaomi, Sony, Roku — с определением марки"
+    "Свободное ПО под лицензией GNU GPL v3",
+    "В «Настройках → О приложении» — ссылки на исходный код и на сообщение об ошибке"
   ]
 }

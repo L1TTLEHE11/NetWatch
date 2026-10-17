@@ -49,7 +49,27 @@ txt = re.sub(r"NetWatch-[\d.]+-universal\.apk", dst.name, txt)
 txt = re.sub(r"(SHA-256: `)[0-9a-f]{64}(`)", rf"\g<1>{sha}\g<2>", txt)
 readme.write_text(txt, encoding="utf-8")
 
-print(f"✓ {dst.name}  ({len(data) / 1048576:.2f} МБ)\n  versionCode {code}, SHA-256 {sha}\n  update.json и README обновлены")
+# сайт (GitHub Pages): ссылки на APK, номер версии, дата в sitemap
+site = root / "docs/index.html"
+if site.exists():
+    t = site.read_text(encoding="utf-8")
+    t = re.sub(r"NetWatch-[\d.]+-universal\.apk", dst.name, t)
+    t = re.sub(r'("softwareVersion": ")[^"]+(")', rf"\g<1>{name}\g<2>", t)
+    t = re.sub(r"Версия [\d.]+ ·", f"Версия {name} ·", t)
+    site.write_text(t, encoding="utf-8")
+smap = root / "docs/sitemap.xml"
+if smap.exists():
+    today = datetime.date.today().isoformat()
+    smap.write_text(re.sub(r"(<loc>[^<]*/NetWatch/</loc><lastmod>)[^<]+", rf"\g<1>{today}", smap.read_text(encoding="utf-8")), encoding="utf-8")
+
+# списки изменений для каталогов приложений (F-Droid / IzzyOnDroid читают fastlane/metadata)
+fl = root / "fastlane/metadata/android"
+if fl.exists():
+    for loc, body in (("ru-RU", "\n".join("• " + n for n in notes)), ("en-US", "Fixes and improvements. Full list (in Russian): CHANGELOG.md")):
+        d = fl / loc / "changelogs"; d.mkdir(parents=True, exist_ok=True)
+        (d / f"{code}.txt").write_text(body[:500] + "\n", encoding="utf-8")
+
+print(f"✓ {dst.name}  ({len(data) / 1048576:.2f} МБ)\n  versionCode {code}, SHA-256 {sha}\n  update.json, README, сайт и списки изменений обновлены")
 
 print("После git push сбросьте кэш зеркала jsDelivr (иначе оно отдаёт старый update.json до 12 часов):")
 print("  curl -s https://purge.jsdelivr.net/gh/L1TTLEHE11/NetWatch@main/update.json")
